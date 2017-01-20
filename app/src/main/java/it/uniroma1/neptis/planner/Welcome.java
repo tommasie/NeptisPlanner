@@ -98,6 +98,8 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
             // can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
+
+            //GPS coordinates of my home
             gps.showSettingsAlert();
             lat = 42.100335;
             lon = 12.159988;
@@ -109,8 +111,8 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
         Intent intent;
         switch(view.getId()) {
             case R.id.button_planning:
-                //intent = new Intent(this, Planning_choice.class);
-                intent = new Intent(this, PlanningActivity.class);
+                intent = new Intent(this, Planning_choice.class);
+                //intent = new Intent(this, PlanningActivity.class);
                 startActivity(intent);
                 break;
             case R.id.button2_report:
