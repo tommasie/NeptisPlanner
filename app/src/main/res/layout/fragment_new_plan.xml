@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="it.uniroma1.neptis.planner.test_planning.NewPlanFragment">
+    tools:context="it.uniroma1.neptis.planner.planning.NewPlanFragment">
 
     <include
         android:layout_width="match_parent"

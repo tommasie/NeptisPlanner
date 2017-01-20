@@ -1,4 +1,4 @@
-package it.uniroma1.neptis.planner.test_planning;
+package it.uniroma1.neptis.planner.planning;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,11 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,7 +34,6 @@ import java.util.List;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.must_visit;
-import it.uniroma1.neptis.planner.planning.Your_Plan;
 
 public class BestTimeFragment extends Fragment implements View.OnClickListener{
 

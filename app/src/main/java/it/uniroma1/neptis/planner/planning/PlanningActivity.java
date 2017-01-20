@@ -1,8 +1,6 @@
-package it.uniroma1.neptis.planner.test_planning;
+package it.uniroma1.neptis.planner.planning;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,12 +9,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import java.util.ArrayList;
-
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
-import it.uniroma1.neptis.planner.planning.Best_Time_Plan;
-import it.uniroma1.neptis.planner.planning.Your_Plan;
 
 public class PlanningActivity extends AppCompatActivity implements PlanningFragments{
 

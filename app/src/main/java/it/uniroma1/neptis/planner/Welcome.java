@@ -14,14 +14,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import it.uniroma1.neptis.planner.planning.MyPlans;
-import it.uniroma1.neptis.planner.planning.Planning_choice;
 import it.uniroma1.neptis.planner.report.Report;
-import it.uniroma1.neptis.planner.test_planning.PlanningActivity;
+import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
 public class Welcome extends AppCompatActivity implements View.OnClickListener{
 
@@ -111,8 +109,8 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
         Intent intent;
         switch(view.getId()) {
             case R.id.button_planning:
-                intent = new Intent(this, Planning_choice.class);
-                //intent = new Intent(this, PlanningActivity.class);
+                //intent = new Intent(this, Planning_choice.class);
+                intent = new Intent(this, PlanningActivity.class);
                 startActivity(intent);
                 break;
             case R.id.button2_report:

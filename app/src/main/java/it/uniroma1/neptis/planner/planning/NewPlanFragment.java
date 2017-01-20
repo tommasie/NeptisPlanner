@@ -1,4 +1,4 @@
-package it.uniroma1.neptis.planner.test_planning;
+package it.uniroma1.neptis.planner.planning;
 
 
 import android.app.AlertDialog;
@@ -7,10 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -30,24 +27,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
-import it.uniroma1.neptis.planner.planning.Best_Rate_Plan;
-import it.uniroma1.neptis.planner.planning.Best_Time_Plan;
 
 public class NewPlanFragment extends Fragment implements View.OnClickListener{
 

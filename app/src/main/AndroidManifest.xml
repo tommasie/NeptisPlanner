@@ -85,7 +85,7 @@
             android:name=".services.tracking.FINDService"
             android:exported="false" />
 
-        <activity android:name=".test_planning.PlanningActivity"></activity>
+        <activity android:name=".planning.PlanningActivity"></activity>
     </application>
 
 </manifest>

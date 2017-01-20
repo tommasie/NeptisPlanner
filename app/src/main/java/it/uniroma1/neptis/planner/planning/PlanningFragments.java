@@ -1,4 +1,4 @@
-package it.uniroma1.neptis.planner.test_planning;
+package it.uniroma1.neptis.planner.planning;
 
 import android.os.Bundle;
 
