@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_text">La destinazione è stata raggiunta</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+    <string name="open_gps">Vorresti aprire la app di navigazione?</string>
+    <string name="activity_report">Segnala</string>
+    <string name="activity_settings">Impostazioni</string>
+    <string name="activity_planning">Pianifica</string>
+    <string name="activity_my_plans">Percorsi</string>
+    <string name="toast_close">Premi Indietro nuovamente per uscire</string>
+    <string name="alert_welcome">Seleziona la modalità di trasporto nelle Impostazioni.\n(predefinito: \'a piedi\')\n\n La tua posizione: %1$s</string>
+    <string name="alert_information_title">Attenzione</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="action_register_user">Registra un nuovo utente</string>
+    <string name="action_remember_login">Ricordami</string>
+    <string name="planning_choice_tour">Personalizza il tuo percorso</string>
+    <string name="planning_choice_hint">Digita</string>
+    <string name="planning_choice_structure_selection">Seleziona la struttura</string>
+</resources>

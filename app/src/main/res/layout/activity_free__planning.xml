@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.uniroma1.neptis.planner.it.uniroma1.neptis.planner.planning.Free_Planning">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Free Planning"
+        android:id="@+id/textView1_fp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Available Time: (optional)"
+        android:id="@+id/textView2_fp"
+        android:layout_below="@+id/textView1_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText_hh_fp"
+        android:layout_below="@+id/textView2_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="3dp"
+        android:hint="hours"
+        android:layout_alignRight="@+id/textView2_fp"
+        android:layout_alignEnd="@+id/textView1_fp"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText_mm_fp"
+        android:layout_alignTop="@+id/editText_hh_fp"
+        android:layout_toEndOf="@+id/textView1_fp"
+        android:layout_toRightOf="@+id/textView1_fp"
+        android:hint="minutes"
+        android:singleLine="true"
+        android:layout_marginLeft="30dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="20dp"
+        android:text="Must visit: (optional)"
+        android:id="@+id/textView_must_fp"
+        android:layout_below="@+id/editText_hh_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Exclude visit: (optional)"
+        android:id="@+id/textView_exclude_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/multiAutoCompleteTextView_must_fp"
+        android:layout_marginTop="10dp"
+        android:layout_centerVertical="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:id="@+id/btn_next2_fp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="next2"
+        />
+
+    <MultiAutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/multiAutoCompleteTextView_exclude_fp"
+        android:layout_below="@+id/textView_exclude_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="undefined"
+        android:singleLine="true" />
+
+    <MultiAutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/multiAutoCompleteTextView_must_fp"
+        android:layout_below="@+id/textView_must_fp"
+        android:layout_alignRight="@+id/multiAutoCompleteTextView_exclude_fp"
+        android:layout_alignEnd="@+id/multiAutoCompleteTextView_exclude_fp"
+        android:hint="undefined"
+        android:singleLine="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Rating: (optional)"
+        android:id="@+id/textView6_fp"
+        android:layout_below="@+id/multiAutoCompleteTextView_exclude_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp" />
+
+    <AutoCompleteTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/autoCompleteTextView_rate_fp"
+        android:layout_below="@+id/textView6_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Tap or digit to select"
+        android:singleLine="true" />
+
+    <RatingBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ratingBar_fp"
+        android:layout_below="@+id/autoCompleteTextView_rate_fp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:numStars="5"
+        android:stepSize="1" />
+
+
+</RelativeLayout>

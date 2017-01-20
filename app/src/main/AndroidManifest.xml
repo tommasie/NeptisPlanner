@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="it.uniroma1.neptis.planner">
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Registration"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Planning_choice"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Best_Time_Plan"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Your_Plan"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Welcome"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.MyPlans"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".report.Report"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Best_Rate_Plan"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Selected_Plan"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".planning.Free_Planning"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".must_visit"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".rating_visit"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".services.tracking.GeofencingService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".QueueChecker" />
+
+        <service
+            android:name=".services.queue.QueueRecognitionService"
+            android:exported="false" />
+
+        <activity android:name=".TrackingActivity" />
+
+        <service
+            android:name=".services.tracking.FINDService"
+            android:exported="false" />
+
+        <activity android:name=".test_planning.PlanningActivity"></activity>
+    </application>
+
+</manifest>
