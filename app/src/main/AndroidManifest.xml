@@ -32,13 +32,7 @@
             android:name=".Registration"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".planning.Planning_choice"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".planning.Best_Time_Plan"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".planning.Your_Plan"
+            android:name=".plans.Your_Plan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Welcome"
@@ -47,16 +41,10 @@
             android:name=".Settings"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".planning.MyPlans"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".report.Report"
             android:screenOrientation="portrait" />
         <activity
             android:name=".planning.Best_Rate_Plan"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".planning.Selected_Plan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".planning.Free_Planning"
@@ -85,7 +73,8 @@
             android:name=".services.tracking.FINDService"
             android:exported="false" />
 
-        <activity android:name=".planning.PlanningActivity"></activity>
+        <activity android:name=".planning.PlanningActivity" />
+        <activity android:name=".plans.PlansActivity"/>
     </application>
 
 </manifest>

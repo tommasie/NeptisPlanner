@@ -1,4 +1,4 @@
-package it.uniroma1.neptis.planner.planning;
+package it.uniroma1.neptis.planner.plans;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -40,6 +40,12 @@ import java.util.Locale;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
+import it.uniroma1.neptis.planner.planning.BestTimeFragment;
+import it.uniroma1.neptis.planner.planning.Best_Rate_Plan;
+import it.uniroma1.neptis.planner.planning.PlanningActivity;
+
+import static it.uniroma1.neptis.planner.planning.PlanningActivity.EXCLUDE;
+import static it.uniroma1.neptis.planner.planning.PlanningActivity.MUST;
 
 public class Your_Plan extends AppCompatActivity {
 
@@ -96,11 +102,11 @@ public class Your_Plan extends AppCompatActivity {
         int callingActivity = b.getInt("calling-activity");
         switch (callingActivity) {
 
-            case Best_Time_Plan.ACTIVITY_1:
+            case BestTimeFragment.ACTIVITY_1:
 
-                message = b.getStringArrayList(Best_Time_Plan.EXTRA_MESSAGE);
-                lmust = b.getStringArrayList(Best_Time_Plan.MUST);
-                lexclude = b.getStringArrayList(Best_Time_Plan.EXCLUDE);
+                message = b.getStringArrayList(PlanningActivity.EXTRA_MESSAGE);
+                lmust = b.getStringArrayList(MUST);
+                lexclude = b.getStringArrayList(EXCLUDE);
                 Toast.makeText(getApplicationContext(), "Best time Planning", Toast.LENGTH_LONG).show();
                 break;
 

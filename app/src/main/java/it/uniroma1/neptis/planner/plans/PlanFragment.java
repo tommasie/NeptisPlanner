@@ -1,15 +1,17 @@
-package it.uniroma1.neptis.planner.planning;
+package it.uniroma1.neptis.planner.plans;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -19,90 +21,37 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
-public class Selected_Plan extends AppCompatActivity {
+public abstract class PlanFragment extends Fragment {
 
-    private TextView title;
-    private ListView list;
 
-    private String plan;
+    protected TextView title;
+    protected ListView listView;
 
-    private AlertDialog.Builder builder;
+    protected String plan;
+
+    protected List<String> routes, coords, ids;
+    protected ArrayAdapter<String> adapter;
+
+    protected AlertDialog.Builder builder;
+
+    public PlanFragment() {}
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_selected__plan);
-
-        ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
-        Intent intent = getIntent();
-        initActivity(intent);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        initActivity(intent);
-    }
-
-    private void initActivity(Intent intent) {
-        plan = intent.getStringExtra(MyPlans.EXTRA_MESSAGE);
-        if(plan != null)
-            Log.d("plan_name",plan);
-        title = (TextView) findViewById(R.id.textView_selectedPlan);
-        list = (ListView) findViewById(R.id.listView_selectedPlan);
-
-        builder = new AlertDialog.Builder(this);
-
-        //READ FILE FROM INTERNAL STORAGE
-        FileInputStream fis = null;
-        try {
-            fis = openFileInput(plan);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        InputStreamReader isr = new InputStreamReader(fis);
-        BufferedReader bufferedReader = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-
-
-        // CONVERT FILE IN JSON OBJECT
-        String jsonStr = sb.toString();
-
-        ArrayList<String> routes  = new ArrayList<>();
-        final ArrayList<String> coords = new ArrayList<>();
-        final ArrayList<String> ids = new ArrayList<>();
+        routes  = new ArrayList<>();
+        coords = new ArrayList<>();
+        ids = new ArrayList<>();
 
         JSONArray jsonarray = null;
         try {
-            jsonarray = new JSONArray(jsonStr);
+            jsonarray = new JSONArray(plan);
             Log.d("JSON",jsonarray.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -129,14 +78,25 @@ public class Selected_Plan extends AppCompatActivity {
             routes.add("GO TO " + route);
             coords.add(coord);
             ids.add(id);
-
         }
+    }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, routes);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_plan, container, false);
+    }
 
-        list.setAdapter(adapter);
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        builder = new AlertDialog.Builder(getContext());
+        title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
+        listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
+        adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1, routes);
+        listView.setAdapter(adapter);
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
@@ -146,30 +106,17 @@ public class Selected_Plan extends AppCompatActivity {
                 initAlertDialog(coords.get(position));
                 AlertDialog dialog = builder.create();
                 dialog.show();
-                Intent geofencingService = new Intent(getApplicationContext(), GeofencingService.class);
+                Intent geofencingService = new Intent(getContext(), GeofencingService.class);
                 geofencingService.putExtra("coordinates",coords.get(position));
                 geofencingService.putExtra("id",ids.get(position));
                 geofencingService.putExtra("name",dest_address);
-                geofencingService.putExtra("current_plan",plan);
-                startService(geofencingService);
+                //geofencingService.putExtra("current_plan", planFileName);
+                //TODO start service from activity and update notification pendingintent class
+                //startService(geofencingService);
             }
 
         });
     }
-
-    // Add the buttons
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == android.R.id.home) {
-            onBackPressed();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
 
     private void initAlertDialog(String dest_address) {
         final Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
@@ -189,4 +136,7 @@ public class Selected_Plan extends AppCompatActivity {
 
 
     }
+
+    //protected void
+
 }

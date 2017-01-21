@@ -1,44 +1,59 @@
-package it.uniroma1.neptis.planner.planning;
+package it.uniroma1.neptis.planner.plans;
+
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.Settings;
-import it.uniroma1.neptis.planner.report.Report;
 
-public class MyPlans extends AppCompatActivity {
+public class PlansFragment extends Fragment {
 
     public final static String EXTRA_MESSAGE = "key message";
 
+    private TextView title;
     private ListView listView;
     ArrayAdapter<String> adapter;
 
+    private PlansFragmentsInterface activity;
+    public PlansFragment() {
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_plans);
+    }
 
-        ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_plan, container, false);
+    }
 
-        listView = (ListView) findViewById(R.id.listView_myplans);
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
+        title.setText("My plans");
+        listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
         ArrayList<String> filesList = new ArrayList<>();
         //Get the list of plans in the folder and display them in the ListView
-        File fileDirectory = getFilesDir();
+        File fileDirectory = getContext().getFilesDir();
         File[] dirFiles = fileDirectory.listFiles();
         for (File f : dirFiles) {
             String fileName = f.getName();
@@ -47,7 +62,7 @@ public class MyPlans extends AppCompatActivity {
             if(!fileName.equals("instant-run"))
                 filesList.add(f.getName());
         }
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, filesList);
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, filesList);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -56,10 +71,13 @@ public class MyPlans extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
                 String item = (String) parent.getItemAtPosition(position);
-                Intent intent = new Intent(getApplicationContext(), Selected_Plan.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(EXTRA_MESSAGE, item);
+                activity.selectPlan(bundle);
+                /*Intent intent = new Intent(getContext(), Selected_Plan.class);
                 intent.putExtra(EXTRA_MESSAGE, item);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
+                startActivity(intent);*/
             }
 
         });
@@ -69,10 +87,10 @@ public class MyPlans extends AppCompatActivity {
             public boolean onItemLongClick(final AdapterView parent, View view, final int position, long id) {
                 final String item = (String) parent.getItemAtPosition(position);
                 // DELETE FILES
-                File dir = getFilesDir();
+                File dir = getContext().getFilesDir();
                 final File file = new File(dir, item);
 
-                AlertDialog alertDialog = new AlertDialog.Builder(MyPlans.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
                 alertDialog.setTitle("Delete");
                 alertDialog.setMessage("Are you sure you want to remove it?");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
@@ -97,31 +115,21 @@ public class MyPlans extends AppCompatActivity {
 
     }
 
-
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == android.R.id.home) {
-            onBackPressed();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof PlansFragmentsInterface) {
+            activity = (PlansFragmentsInterface) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
         }
-        if (id == R.id.report) {
-            Intent intent = new Intent(this, Report.class);
-            startActivity(intent);
-        }
-        if (id == R.id.myplans) {
-            Intent intent = new Intent(this, MyPlans.class);
-            startActivity(intent);
-        }
-        if (id == R.id.settings) {
-            Intent intent = new Intent(this, Settings.class);
-            startActivity(intent);
-        }
-
-
-        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        activity = null;
+    }
 
 }
-

@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import it.uniroma1.neptis.planner.planning.MyPlans;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
 import it.uniroma1.neptis.planner.report.Report;
 import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
@@ -109,7 +109,6 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
         Intent intent;
         switch(view.getId()) {
             case R.id.button_planning:
-                //intent = new Intent(this, Planning_choice.class);
                 intent = new Intent(this, PlanningActivity.class);
                 startActivity(intent);
                 break;
@@ -118,7 +117,8 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
                 startActivity(intent);
                 break;
             case R.id.button_myPlan:
-                intent = new Intent(this, MyPlans.class);
+//                intent = new Intent(this, MyPlans.class);
+                intent = new Intent(this, PlansActivity.class);
                 startActivity(intent);
                 break;
             case R.id.button3_settings:

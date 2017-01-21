@@ -38,6 +38,8 @@ import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Settings;
 import it.uniroma1.neptis.planner.must_visit;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
+import it.uniroma1.neptis.planner.plans.Your_Plan;
 import it.uniroma1.neptis.planner.rating_visit;
 import it.uniroma1.neptis.planner.report.Report;
 
@@ -90,7 +92,7 @@ public class Best_Rate_Plan extends AppCompatActivity {
 
 
             Intent intent = getIntent();
-            message = intent.getStringArrayListExtra(Planning_choice.EXTRA_MESSAGE);
+            message = intent.getStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE);
 
             lmust = new ArrayList<>();
             lexclude = new ArrayList<>();
@@ -151,7 +153,7 @@ public class Best_Rate_Plan extends AppCompatActivity {
             startActivity(intent);
         }
         else if (id == R.id.myplans) {
-            Intent intent = new Intent(this, MyPlans.class);
+            Intent intent = new Intent(this, PlansActivity.class);
             startActivity(intent);
         }
         else if (id == R.id.settings) {

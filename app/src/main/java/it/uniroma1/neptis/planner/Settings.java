@@ -17,7 +17,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.uniroma1.neptis.planner.planning.MyPlans;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
 import it.uniroma1.neptis.planner.report.Report;
 
 public class Settings extends AppCompatActivity {
@@ -137,7 +137,7 @@ public class Settings extends AppCompatActivity {
             startActivity(intent);
         }
         else if (id == R.id.myplans) {
-            Intent intent = new Intent(this, MyPlans.class);
+            Intent intent = new Intent(this, PlansActivity.class);
             startActivity(intent);
         }
         else if (id == R.id.settings) {

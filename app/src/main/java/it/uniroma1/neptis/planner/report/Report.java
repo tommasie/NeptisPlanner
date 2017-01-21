@@ -40,7 +40,7 @@ import java.util.List;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Settings;
-import it.uniroma1.neptis.planner.planning.MyPlans;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
 
 public class Report extends AppCompatActivity {
 
@@ -174,12 +174,8 @@ public class Report extends AppCompatActivity {
         if (id == android.R.id.home) {
             onBackPressed();
         }
-        else if (id == R.id.report) {
-            Intent intent = new Intent(this, Report.class);
-            startActivity(intent);
-        }
         else if (id == R.id.myplans) {
-            Intent intent = new Intent(this, MyPlans.class);
+            Intent intent = new Intent(this, PlansActivity.class);
             startActivity(intent);
         }
         else if (id == R.id.settings) {

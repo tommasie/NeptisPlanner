@@ -14,7 +14,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.uniroma1.neptis.planner.planning.Planning_choice;
+import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
 public class must_visit extends Activity {
     //public final static String MUST_MESSAGE = "key message2";
@@ -34,7 +34,7 @@ public class must_visit extends Activity {
         setContentView(R.layout.activity_must_visit);
 
         Intent intent = getIntent();
-        message = intent.getStringArrayListExtra(Planning_choice.EXTRA_MESSAGE);
+        message = intent.getStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE);
 
         calling = intent.getStringExtra("calling");
 

@@ -34,8 +34,8 @@
         android:layout_marginRight="5dp"
         android:focusableInTouchMode="true"
         android:elegantTextHeight="true"
-        android:maxLines="1"
-        android:imeOptions="actionNext"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
         android:textSize="20sp"
         android:id="@+id/autoCompleteTextView_f" />
 

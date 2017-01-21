@@ -29,7 +29,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
@@ -38,9 +40,6 @@ import it.uniroma1.neptis.planner.must_visit;
 public class BestTimeFragment extends Fragment implements View.OnClickListener{
 
     public static final int ACTIVITY_1 = 1001;
-    public final static String EXTRA_MESSAGE = "key message";
-    public final static String MUST = "must message";
-    public final static String EXCLUDE = "exclude message";
 
     private final static String attraction_c_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_attraction";
 
@@ -54,21 +53,15 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
 
     private Button next;
 
-    private List<String> message;
-
-    private ArrayList<String> lmust;
-    private ArrayList<String> lexclude;
-
-
+    private List<String> lmust;
+    private List<String> lexclude;
 
     private List<String> areaList;
 
-    private String category = "";
-    private String type = "";
-    private String id = "";
-    private String idMail = "";
+    private String category;
+    private String id;
 
-    private PlanningFragments activity;
+    private PlanningFragmentsInterface activity;
 
     public BestTimeFragment() {
     }
@@ -76,7 +69,8 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        message = getArguments().getStringArrayList(EXTRA_MESSAGE);
+        category = getArguments().getString("category");
+        id = getArguments().getString("id");
         lmust = new ArrayList<>();
         lexclude = new ArrayList<>();
     }
@@ -113,12 +107,6 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
         progress.setIndeterminate(true);
         progress.setMessage(" ");
 
-        //Passing Parameters
-        idMail = message.get(0);
-        category = message.get(1); //{city,museum,oam}
-        type =  message.get(2); // {rome, lecce, ..}
-        id = message.get(3); // id of the city or museom or oam
-
         new GetAreasAsyncTask().execute(attraction_c_URL);
     }
 
@@ -145,33 +133,29 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .show();
         } else {
-            String hh = ""+hours.getValue();
-            String mm = ""+minutes.getValue();
+            String hh = String.valueOf(hours.getValue());
+            String mm = String.valueOf(minutes.getValue());
 
-            Intent intent = new Intent(getContext(), Your_Plan.class);
-            ArrayList<String> l = new ArrayList<>();
-
-            l.add(idMail); //id-mail user
-            l.add(category);
-            l.add(type);
-            l.add(id); // id of city or museuom or oam
-            l.add(hh);
-            l.add(mm);
+            Map<String,String> parameters = new HashMap<>();
+            parameters.put("hh",hh);
+            parameters.put("mm",mm);
 
             Bundle b = new Bundle();
+            //FIXME remember best rate planning
             b.putInt("calling-activity", ACTIVITY_1);
-            b.putStringArrayList(EXTRA_MESSAGE, l);
-            b.putStringArrayList(MUST, lmust);
-            b.putStringArrayList(EXCLUDE, lexclude);
-            activity.computePlan(b);
+
+            Map<String,List<String>> extraParams = new HashMap<>();
+            extraParams.put(PlanningActivity.MUST, lmust);
+            extraParams.put(PlanningActivity.EXCLUDE, lexclude);
+            activity.computePlan(b, parameters, extraParams);
         }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlanningFragments) {
-            activity = (PlanningFragments) context;
+        if (context instanceof PlanningFragmentsInterface) {
+            activity = (PlanningFragmentsInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement IBestTime");
@@ -274,7 +258,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
                         //multi_must.showDropDown();
                         multi_must.setEnabled(false);
                         Intent i = new Intent(getContext(), must_visit.class);
-                        i.putStringArrayListExtra(EXTRA_MESSAGE, (ArrayList<String>) areaList);
+                        i.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, (ArrayList<String>) areaList);
                         i.putExtra("calling","must");
                         // must_visit.title_t10.setText("What you don't want to  visit");
                         startActivityForResult(i, 1);
@@ -291,7 +275,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
                         //   multi_exclude.showDropDown();
                         multi_exclude.setEnabled(false);
                         Intent i = new Intent(getContext(), must_visit.class);
-                        i.putStringArrayListExtra(EXTRA_MESSAGE, (ArrayList<String>) areaList);
+                        i.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, (ArrayList<String>) areaList);
                         i.putExtra("calling","exclude");
                         // must_visit.title_t10.setText("What you don't want to  visit");
                         startActivityForResult(i, 2);

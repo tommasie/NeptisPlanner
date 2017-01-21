@@ -32,14 +32,15 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 
 public class ChoiceFragment extends Fragment implements View.OnClickListener{
 
-    public final static String EXTRA_MESSAGE = "key message";
     private final static String url_city = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_city";
     private final static String url_museum = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_museum";
     private final static String url_opened = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_oam";
@@ -53,7 +54,7 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
     private List<Element> queryResults;
     private int position;
 
-    private PlanningFragments activity;
+    private PlanningFragmentsInterface activity;
 
     public ChoiceFragment() {}
 
@@ -139,20 +140,15 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
             Toast.makeText(getContext(), "Please select one modality", Toast.LENGTH_LONG).show();
         else if (rg.getCheckedRadioButtonId() == R.id.radioButton_best_time_f) { //best time planning
 
-            //TODO perhaps set variables in the hosting activity rather than sending bundles of data between fragments?
-            ArrayList<String> l = new ArrayList<>();
-            l.add(mymail); // add id-mail user
-
+            Map<String,String> planningParameters = new HashMap<>();
             //pass structureSpinner selection {city, museum, opened air museum}
-            l.add(structureSpinner.getSelectedItem().toString());
+            planningParameters.put("category",structureSpinner.getSelectedItem().toString());
             Element c = queryResults.get(position);
-            l.add(c.name);
-            l.add(c.id);
+            planningParameters.put("type",c.name);
+            planningParameters.put("id",c.id);
 
             position = -1;
-            Bundle bundle = new Bundle();
-            bundle.putStringArrayList(EXTRA_MESSAGE,l);
-            activity.requestTime(bundle);
+            activity.requestTime(planningParameters);
         }
 
 
@@ -173,7 +169,7 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
 
 
             position = -1;
-            intent.putStringArrayListExtra(EXTRA_MESSAGE, l);
+            intent.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, l);
             startActivity(intent);
         }
 
@@ -196,8 +192,8 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlanningFragments) {
-            activity = (PlanningFragments) context;
+        if (context instanceof PlanningFragmentsInterface) {
+            activity = (PlanningFragmentsInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
