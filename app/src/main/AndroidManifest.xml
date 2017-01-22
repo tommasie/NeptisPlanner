@@ -32,9 +32,6 @@
             android:name=".Registration"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".plans.Your_Plan"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".Welcome"
             android:screenOrientation="portrait" />
         <activity
@@ -42,9 +39,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".report.Report"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".planning.Best_Rate_Plan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".planning.Free_Planning"
