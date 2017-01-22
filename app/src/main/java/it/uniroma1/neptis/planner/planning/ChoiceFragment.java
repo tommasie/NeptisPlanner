@@ -136,10 +136,7 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         if(position == -1)
             Toast.makeText(getContext(), "Invalid selection for " + structureSpinner.getSelectedItem().toString(), Toast.LENGTH_LONG).show();
 
-        else if (rg.getCheckedRadioButtonId() == -1)
-            Toast.makeText(getContext(), "Please select one modality", Toast.LENGTH_LONG).show();
-        else if (rg.getCheckedRadioButtonId() == R.id.radioButton_best_time_f) { //best time planning
-
+        else {
             Map<String,String> planningParameters = new HashMap<>();
             //pass structureSpinner selection {city, museum, opened air museum}
             planningParameters.put("category",structureSpinner.getSelectedItem().toString());
@@ -147,32 +144,21 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
             planningParameters.put("type",c.name);
             planningParameters.put("id",c.id);
 
-            position = -1;
-            activity.requestTime(planningParameters);
+            switch (rg.getCheckedRadioButtonId()) {
+                case R.id.radioButton_best_time_f:
+                    position = -1;
+                    activity.requestTime(planningParameters, BestTimeFragment.class);
+                    break;
+
+                case R.id.radioButton_best_rate_f:
+                    position = -1;
+                    activity.requestTime(planningParameters, BestRateFragment.class);
+                    break;
+
+                default: //if -1
+                    Toast.makeText(getContext(), "Please select one modality", Toast.LENGTH_LONG).show();
+            }
         }
-
-
-        else if(rg.getCheckedRadioButtonId() == R.id.radioButton_best_rate_f) { //best rate planning
-            //TODO best rate implementation
-            Intent intent = new Intent(getContext(), Best_Rate_Plan.class);
-            ArrayList<String> l = new ArrayList<>();
-
-            l.add(mymail); // add id-mail user
-
-            //pass structureSpinner selection {city, museum, opened air museum}
-            l.add(structureSpinner.getSelectedItem().toString());
-
-            Element c = queryResults.get(position);
-
-            l.add(c.name);
-            l.add(c.id);
-
-
-            position = -1;
-            intent.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, l);
-            startActivity(intent);
-        }
-
     }
 
     public void guide(View v){

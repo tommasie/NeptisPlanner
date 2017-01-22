@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 import it.uniroma1.neptis.planner.R;
 
-public class PlansFragment extends Fragment {
+public class PlansListFragment extends Fragment {
 
     public final static String EXTRA_MESSAGE = "key message";
 
@@ -30,7 +30,7 @@ public class PlansFragment extends Fragment {
     ArrayAdapter<String> adapter;
 
     private PlansFragmentsInterface activity;
-    public PlansFragment() {
+    public PlansListFragment() {
     }
 
     @Override

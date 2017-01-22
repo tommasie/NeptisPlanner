@@ -2,9 +2,6 @@ package it.uniroma1.neptis.planner.plans;
 
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -19,7 +16,7 @@ import java.io.InputStreamReader;
 
 import it.uniroma1.neptis.planner.R;
 
-public class SelectedPlanFragment extends PlanFragment {
+public class SelectedPlanFragment extends AbstractPlanFragment {
 
     private String planFileName;
 
@@ -29,7 +26,7 @@ public class SelectedPlanFragment extends PlanFragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        planFileName = getArguments().getString(PlansFragment.EXTRA_MESSAGE);
+        planFileName = getArguments().getString(PlansListFragment.EXTRA_MESSAGE);
 
         FileInputStream fis = null;
         try {

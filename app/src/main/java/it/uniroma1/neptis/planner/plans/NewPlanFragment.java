@@ -13,7 +13,7 @@ import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.planning.PlanningActivity;
 import it.uniroma1.neptis.planner.planning.PlanningFragmentsInterface;
 
-public class NewPlanFragment extends PlanFragment implements View.OnClickListener{
+public class NewPlanFragment extends AbstractPlanFragment implements View.OnClickListener{
 
     private Button button;
     private PlanningFragmentsInterface activity;

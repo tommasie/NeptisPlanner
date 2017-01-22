@@ -18,7 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.uniroma1.neptis.planner.planning.Best_Rate_Plan;
+import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
 public class rating_visit extends AppCompatActivity {
 
@@ -41,7 +41,7 @@ public class rating_visit extends AppCompatActivity {
         lresult = new ArrayList<>();
 
         Intent intent = getIntent();
-        message = intent.getStringArrayListExtra(Best_Rate_Plan.EXTRA_MESSAGE);
+        message = intent.getStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE);
 
         title =  (TextView) findViewById(R.id.textView10_rating);
 

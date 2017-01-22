@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,12 +14,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -34,28 +30,24 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.prefs.Preferences;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
 import it.uniroma1.neptis.planner.plans.NewPlanFragment;
-import it.uniroma1.neptis.planner.plans.PlansFragment;
-import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
 
 public class PlanningActivity extends AppCompatActivity implements PlanningFragmentsInterface {
 
     public final static String EXTRA_MESSAGE = "key message";
     public static final String MUST = "must";
     public static final String EXCLUDE = "exclude";
+    public static final String RATING = "rating";
 
     private final static String apiURL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/compute-plan-";
 
     private FragmentManager fragmentManager;
     private FragmentTransaction transaction;
     private ChoiceFragment choiceFragment;
-    private BestTimeFragment bestTimeFragment;
-
     private ProgressDialog progress;
 
     private Map<String,String> planningParameters;
@@ -97,13 +89,19 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     }
 
     @Override
-    public void requestTime(Map<String,String> parameters) {
+    public void requestTime(Map<String,String> parameters, Class fragmentClass) {
         planningParameters.putAll(parameters);
-        bestTimeFragment = new BestTimeFragment();
+        //Use Java Reflection API to determine which fragment to call
+        Fragment bestTimeFragment = null;
+        try {
+            bestTimeFragment = (Fragment) Class.forName(fragmentClass.getName()).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Bundle b = new Bundle();
         //Parameters needed to make the call in the AsyncTask
-        b.putString("category",planningParameters.get("category"));
-        b.putString("id",planningParameters.get("id"));
+        b.putString("category", planningParameters.get("category"));
+        b.putString("id", planningParameters.get("id"));
         bestTimeFragment.setArguments(b);
         transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.activity_planning, bestTimeFragment);
@@ -112,11 +110,11 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     }
 
     @Override
-    public void computePlan(Bundle bundle, Map<String,String> map, Map<String,List<String>> map2) {
+    public void computePlan(Bundle bundle, Map<String,String> parameters, Map<String,List<String>> extraParams) {
         //FIXME bundle needed currently for type of planning (best rate/best time)
-        planningParameters.putAll(map);
-        mustVisit = map2.get(MUST);
-        excludeVisit = map2.get(EXCLUDE);
+        planningParameters.putAll(parameters);
+        mustVisit = extraParams.get(MUST);
+        excludeVisit = extraParams.get(EXCLUDE);
 
         new ComputePlanAsyncTask().execute(apiURL + planningParameters.get("category"));
     }
@@ -187,14 +185,20 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
 
                 // Object json to send
                 JSONObject json = new JSONObject();
-                json.put("mail", planningParameters.get("mail"));
+                for(String param : planningParameters.keySet()) {
+                    if(param.equals("category"))
+                        json.put(param,planningParameters.get(param).toLowerCase());
+                    else
+                        json.put(param,planningParameters.get(param));
+                }
+                /*json.put("mail", planningParameters.get("mail"));
                 json.put("category", planningParameters.get("category").toLowerCase());
                 json.put("type", planningParameters.get("type")); //
                 json.put("id", planningParameters.get("id"));
                 json.put("hh", planningParameters.get("hh"));
                 json.put("mm", planningParameters.get("mm"));
                 json.put("travel_mode", planningParameters.get("travel_mode"));
-                json.put("data_mode", planningParameters.get("data_mode"));
+                json.put("data_mode", planningParameters.get("data_mode"));*/
 
                 //Add the list of must-see places
                 JSONObject jo;

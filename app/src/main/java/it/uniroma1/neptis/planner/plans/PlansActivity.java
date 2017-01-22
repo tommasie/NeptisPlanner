@@ -31,7 +31,7 @@ public class PlansActivity extends AppCompatActivity implements PlansFragmentsIn
 
         fragmentManager = getSupportFragmentManager();
         transaction = fragmentManager.beginTransaction();
-        plansFragment = new PlansFragment();
+        plansFragment = new PlansListFragment();
         transaction.add(R.id.activity_plans, plansFragment);
         transaction.commit();
     }

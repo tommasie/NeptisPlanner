@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -45,6 +46,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
 
     private ProgressDialog progress;
 
+    protected TextView title;
     private NumberPicker hours;
     private NumberPicker minutes;
 
@@ -61,7 +63,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
     private String category;
     private String id;
 
-    private PlanningFragmentsInterface activity;
+    protected PlanningFragmentsInterface activity;
 
     public BestTimeFragment() {
     }
@@ -84,6 +86,9 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        title = (TextView)view.findViewById(R.id.textView1_f);
+        title.setText("Best Time Planning");
 
         hours = (NumberPicker) view.findViewById(R.id.hh_picker_f);
         hours.setMaxValue(24);
@@ -168,7 +173,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
         activity = null;
     }
 
-    private class GetAreasAsyncTask extends JSONAsyncTask {
+    protected class GetAreasAsyncTask extends JSONAsyncTask {
 
         @Override
         protected void onPreExecute() {
@@ -310,6 +315,14 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
                 //Write your code if there's no result
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        multi_must.setEnabled(true);
+        multi_exclude.setEnabled(true);
     }
 
 }

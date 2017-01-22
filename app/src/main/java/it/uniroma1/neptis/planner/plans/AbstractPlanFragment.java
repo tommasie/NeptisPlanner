@@ -27,7 +27,7 @@ import java.util.List;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
-public abstract class PlanFragment extends Fragment {
+public abstract class AbstractPlanFragment extends Fragment {
 
 
     protected TextView title;
@@ -40,7 +40,7 @@ public abstract class PlanFragment extends Fragment {
 
     protected AlertDialog.Builder builder;
 
-    public PlanFragment() {}
+    public AbstractPlanFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
