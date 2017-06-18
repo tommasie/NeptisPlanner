@@ -67,6 +67,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
     protected PlanningFragmentsInterface activity;
 
+    private String x;
+
     public VisitsFragment() {
     }
 
