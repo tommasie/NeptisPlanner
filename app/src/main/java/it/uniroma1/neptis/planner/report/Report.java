@@ -40,13 +40,14 @@ import java.util.List;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Settings;
+import it.uniroma1.neptis.planner.planning.JSONAsyncTask;
 import it.uniroma1.neptis.planner.plans.PlansActivity;
 
 public class Report extends AppCompatActivity {
 
     private ProgressDialog progress;
 
-    private final static String url_city = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_city_Android";
+    private final static String url_city = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_city";
     private final static String url_museum = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_museum";
     private final static String url_opened = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_oam";
 
@@ -69,7 +70,7 @@ public class Report extends AppCompatActivity {
     private Spinner categorySpinner;
     private Button reportButton;
 
-    private List<Element> mresult;
+    private List<Element> queryResults;
     private List<Element> mlist2;
 
     private  AutoCompleteTextView structureAutoComplete;
@@ -120,9 +121,9 @@ public class Report extends AppCompatActivity {
                 //structureAutoComplete.setKeyListener(true);
 
                 String selected = (String) adapter.getItemAtPosition(pos);
-                for (int i = 0; i < mresult.size(); i++)
-                    if (mresult.get(i).getName().equals(selected)) {
-                        nameId = mresult.get(i).getId();
+                for (int i = 0; i < queryResults.size(); i++)
+                    if (queryResults.get(i).getName().equals(selected)) {
+                        nameId = queryResults.get(i).getId();
                         Log.d("NameId",nameId);
                         //structureAutoComplete.setKeyListener(null);
                         if(ucategory.equals("City"))
@@ -364,14 +365,14 @@ public class Report extends AppCompatActivity {
 
 
     // call to get items of selected category
-    private class CallAPI extends AsyncTask<String, String, String> {
+    private class CallAPI extends JSONAsyncTask {
 
         protected void onPreExecute() {
             progress.show();
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             InputStream in = null;
             int code = -1;
             String charset = "UTF-8";
@@ -391,7 +392,7 @@ public class Report extends AppCompatActivity {
 
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                return e.getMessage();
+                return -1;
             }
 
             //****  CHECK the ResponseCode FIRST! ****
@@ -399,23 +400,32 @@ public class Report extends AppCompatActivity {
                 //Log.d("LOG", "code: " + code);
 
                 if (category.equals("City")) {
-                    mresult = new ArrayList<>();
+                    queryResults = new ArrayList<>();
 
-                    // Parse XML -------------------------------------------------------
-                    XmlPullParserFactory pullParserFactory;
+                    String jsonResponse = readResponse(in);
+                    JSONObject o = null;
+                    JSONArray b = null;
                     try {
-                        pullParserFactory = XmlPullParserFactory.newInstance();
-                        XmlPullParser parser = pullParserFactory.newPullParser();
-
-                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-                        parser.setInput(in, null);
-                        mresult = parseXML(parser);
-                    } catch (XmlPullParserException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
+                        b = new JSONArray(jsonResponse);
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    // -----------------------------------------------------------------
+
+                    int arrSize = b.length();
+                    queryResults = new ArrayList<Element>(arrSize);
+                    for (int i = 0; i < arrSize; ++i) {
+                        try {
+                            o = b.getJSONObject(i);
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+
+                        try {
+                            queryResults.add(new Element(o.getString("name"), o.getString("id")));
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
 
                 } else if (category.equals("Museum")) {
                     String jsonResponse = readResponse(in);
@@ -428,7 +438,7 @@ public class Report extends AppCompatActivity {
                     }
 
                     int arrSize = b.length();
-                    mresult = new ArrayList<Element>(arrSize);
+                    queryResults = new ArrayList<Element>(arrSize);
                     for (int i = 0; i < arrSize; ++i) {
                         try {
                             o = b.getJSONObject(i);
@@ -437,7 +447,7 @@ public class Report extends AppCompatActivity {
                         }
 
                         try {
-                            mresult.add(new Element(o.getString("name"), o.getString("id")));
+                            queryResults.add(new Element(o.getString("name"), o.getString("id")));
                         } catch (JSONException e1) {
                             e1.printStackTrace();
                         }
@@ -459,7 +469,7 @@ public class Report extends AppCompatActivity {
 
 
                     int arrSize = b.length();
-                    mresult = new ArrayList<Element>(arrSize);
+                    queryResults = new ArrayList<Element>(arrSize);
 
                     for (int i = 0; i < arrSize; ++i) {
 
@@ -470,27 +480,27 @@ public class Report extends AppCompatActivity {
                         }
 
                         try {
-                            mresult.add(new Element(o.getString("name"), o.getString("id")));
+                            queryResults.add(new Element(o.getString("name"), o.getString("id")));
                         } catch (JSONException e1) {
                             e1.printStackTrace();
                         }
                     }
 
                 }
-            return "ok";
+            return 200;
 
             }else
-                return code+"";
+                return code;
 
         }
 
 
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(Integer result) {
 
-            if (result.equals("ok")){
-                if(mresult.size()>0) {
+            if (result == 200) {
+                if (queryResults.size() > 0) {
                     List<String> list2 = new ArrayList<String>();
-                    for (Element c : mresult) {
+                    for (Element c : queryResults) {
                         list2.add(c.name);
 
                     }
@@ -502,7 +512,7 @@ public class Report extends AppCompatActivity {
                     );
                     structureAutoComplete.setAdapter(adapter);
                     structureAutoComplete.setVisibility(View.VISIBLE);
-                    if(ucategory.equals("Museum"))
+                    if (ucategory.equals("Museum"))
                         areaAutoComplete.setHint("Digit the area");
 
                     /*
@@ -522,60 +532,15 @@ public class Report extends AppCompatActivity {
                     //autocomplete.setVisibility(View.VISIBLE);
 
 
-                }else Toast.makeText(getApplicationContext(), "No items available now. \nPlease try later", Toast.LENGTH_LONG).show();
-        }else
-            Toast.makeText(getApplicationContext(), result+"There is a problem. \nPlease try later", Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(getApplicationContext(), "No items available now. \nPlease try later", Toast.LENGTH_LONG).show();
+            } else
+                Toast.makeText(getApplicationContext(), result + "There is a problem. \nPlease try later", Toast.LENGTH_LONG).show();
 
             progress.dismiss();
             return;
 
 
-        }
-
-
-        // START OF PARSER SECTION - - - - -
-        private List<Element> parseXML(XmlPullParser parser) throws XmlPullParserException, IOException {
-
-            int eventType = parser.getEventType();
-            List<Element> res = new ArrayList<Element>();
-            Element c = new Element();
-            String id = null;
-            String name = null;
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                String tag = null;
-
-                switch (eventType) {
-                    case XmlPullParser.START_TAG:
-                        tag = parser.getName();
-
-                        if (tag.equals("id")) {
-
-                            id = parser.nextText();
-
-                            break;
-                        }
-
-                        if (tag.equals("name")) {
-                            name = parser.nextText();
-
-                            c = new Element(name, id);
-                            res.add(c);
-
-                            id = null;
-                            name = null;
-                            c = new Element();
-
-                            break;
-                        }
-
-                    case XmlPullParser.END_TAG:
-                        break;
-                } // end switch
-
-                eventType = parser.next();
-            } // end while
-
-            return res;
         }
 
 

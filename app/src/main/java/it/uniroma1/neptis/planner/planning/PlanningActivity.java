@@ -65,7 +65,7 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
 
         progress = new ProgressDialog(this);
         progress.setIndeterminate(true);
-        progress.setMessage("I am thinking..");
+        progress.setMessage("Computing plan...");
 
         fragmentManager = getSupportFragmentManager();
         transaction = fragmentManager.beginTransaction();
@@ -94,7 +94,8 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
         //Use Java Reflection API to determine which fragment to call
         Fragment bestTimeFragment = null;
         try {
-            bestTimeFragment = (Fragment) Class.forName(fragmentClass.getName()).newInstance();
+            //bestTimeFragment = (Fragment) Class.forName(fragmentClass.getName()).newInstance();
+            bestTimeFragment = new VisitsFragment();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -191,14 +192,6 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
                     else
                         json.put(param,planningParameters.get(param));
                 }
-                /*json.put("mail", planningParameters.get("mail"));
-                json.put("category", planningParameters.get("category").toLowerCase());
-                json.put("type", planningParameters.get("type")); //
-                json.put("id", planningParameters.get("id"));
-                json.put("hh", planningParameters.get("hh"));
-                json.put("mm", planningParameters.get("mm"));
-                json.put("travel_mode", planningParameters.get("travel_mode"));
-                json.put("data_mode", planningParameters.get("data_mode"));*/
 
                 //Add the list of must-see places
                 JSONObject jo;
@@ -247,6 +240,7 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
 
                 //lat = Welcome.gps.getLatitude();
                 //lon = Welcome.gps.getLongitude();
+                //FIXME
                 Welcome.lat = 42.100335;
                 Welcome.lon = 12.159988;
                 json.put("lat", Welcome.lat);

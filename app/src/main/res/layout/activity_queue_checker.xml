@@ -21,23 +21,43 @@
         android:textAlignment="center" />
 
     <TextView
-        android:text="TextView"
+        android:text="Insert an estimate of how long\nthe queue will be"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:id="@+id/text_queue"
         android:textAlignment="center" />
 
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/edit_queue_time" />
+        android:gravity="center"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="25dp"
+            android:layout_weight="0"
+            android:inputType="number"
+            android:ems="3"
+
+            android:id="@+id/edit_queue_time" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="minutes"/>
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp">
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +77,8 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp">
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

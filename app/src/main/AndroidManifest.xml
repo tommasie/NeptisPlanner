@@ -41,9 +41,6 @@
             android:name=".report.Report"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".planning.Free_Planning"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".must_visit"
             android:screenOrientation="portrait" />
         <activity

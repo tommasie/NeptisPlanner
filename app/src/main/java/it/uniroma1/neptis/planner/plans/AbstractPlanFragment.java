@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.planning.PlanningFragmentsInterface;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
 public abstract class AbstractPlanFragment extends Fragment {
-
 
     protected TextView title;
     protected ListView listView;
@@ -93,7 +93,8 @@ public abstract class AbstractPlanFragment extends Fragment {
         builder = new AlertDialog.Builder(getContext());
         title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
         listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
-        adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1, routes);
+        //adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1, routes);
+        adapter = new ArrayAdapter<>(getContext(),R.layout.plans_list_item,R.id.textest, routes);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -112,7 +113,7 @@ public abstract class AbstractPlanFragment extends Fragment {
                 geofencingService.putExtra("name",dest_address);
                 //geofencingService.putExtra("current_plan", planFileName);
                 //TODO start service from activity and update notification pendingintent class
-                //startService(geofencingService);
+                getActivity().startService(geofencingService);
             }
 
         });
@@ -133,10 +134,5 @@ public abstract class AbstractPlanFragment extends Fragment {
                 dialog.dismiss();
             }
         });
-
-
     }
-
-    //protected void
-
 }

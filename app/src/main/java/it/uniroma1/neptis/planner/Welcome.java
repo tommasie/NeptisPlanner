@@ -74,7 +74,6 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
                 address = "";
             }
 
-            // ---SIMPLE ALERT FOR DEBUG---
             String dialogMessage = String.format(getString(R.string.alert_welcome), address);
             new AlertDialog.Builder(Welcome.this)
                     .setTitle(getString(R.string.alert_information_title))
@@ -82,17 +81,13 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int which) {
-                            // continue with saving
-                            //Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG).show();
-
+                            return;
                         }
                     })
                     .setIcon(R.drawable.ic_info)
                     .show();
 
-            //--- END ----
-
-        }else{
+        } else {
             // can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
@@ -117,7 +112,6 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
                 startActivity(intent);
                 break;
             case R.id.button_myPlan:
-//                intent = new Intent(this, MyPlans.class);
                 intent = new Intent(this, PlansActivity.class);
                 startActivity(intent);
                 break;

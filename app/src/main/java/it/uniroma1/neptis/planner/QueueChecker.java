@@ -1,14 +1,27 @@
 package it.uniroma1.neptis.planner;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Calendar;
 
 import it.uniroma1.neptis.planner.services.queue.QueueRecognitionService;
+import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 
 public class QueueChecker extends AppCompatActivity implements View.OnClickListener{
 
@@ -43,7 +56,7 @@ public class QueueChecker extends AppCompatActivity implements View.OnClickListe
             startService(i);
         }
         else {
-
+            new ReportAsyncTask(getApplicationContext()).execute(report_URL, destinationId, "1");
         }
     }
 }

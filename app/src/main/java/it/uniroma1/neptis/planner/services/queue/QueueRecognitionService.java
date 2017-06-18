@@ -198,7 +198,9 @@ public class QueueRecognitionService extends IntentService {
                             Log.d("QUEUE","start report");
                             long queueTime = System.currentTimeMillis() - serviceStartTime;
                             int minutes = (int)((queueTime / 1000)/60);
-                            new ReportAsyncTask().execute(report_URL,String.valueOf(minutes));
+                            new ReportAsyncTask(getApplicationContext()).execute(report_URL,
+                                                                                attractionId,
+                                                                                String.valueOf(minutes));
                             sensorManager.unregisterListener(sensorLstr);
                         }
                         queueRecognition.removeFirst();
@@ -243,7 +245,8 @@ public class QueueRecognitionService extends IntentService {
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Neptis: queue detection")
                 .setContentText("")
-                .setContentIntent(pi);
+                .setContentIntent(pi)
+                .setAutoCancel(true);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
         notificationManager.notify(NOTIFICATION_ID, notification);
@@ -296,7 +299,7 @@ public class QueueRecognitionService extends IntentService {
             }
             else if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
                 Log.i(TAG,"Step counted");
-                //TODO: compute n of steps in a time frame a detect a walk
+                //TODO: compute n of steps in a time frame to detect a walk
                     receiveStepCounterData(event.values[0]);
                 return;
             }
@@ -305,68 +308,5 @@ public class QueueRecognitionService extends IntentService {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-    }
-
-    private class ReportAsyncTask extends AsyncTask<String, String, Integer> {
-
-//        protected void onPreExecute() {
-//            progress.show();
-//        }
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            InputStream in = null;
-            int code = -1;
-            String charset = "UTF-8";
-            String urlURL = params[0]; // URL to call
-            String sminutes = params[1];
-            try {
-                URL url = new URL(urlURL);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                // set like post request
-                urlConnection.setDoOutput(true);
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setRequestProperty("Accept-Charset", charset);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-                // JSON object to send
-                JSONObject json = new JSONObject();
-                json.put("type", "Queue");
-                json.put("category", "City");
-                json.put("nameId", ""); //parameter not used server-side
-                json.put("attractionId", attractionId);
-                json.put("minutes", sminutes);
-
-                // get current date
-                Calendar calendar = Calendar.getInstance();
-                java.sql.Timestamp ourJavaTimestampObject = new java.sql.Timestamp(calendar.getTime().getTime());
-                String ts = ourJavaTimestampObject.toString().replace(' ','T');
-                Log.d("timestamp: ",ts);
-                json.put("data",ts);
-                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
-                String s = json.toString();
-                byte[] data = s.getBytes("UTF-8");
-                printout.write(data);
-                printout.flush();
-                printout.close();
-                in = new BufferedInputStream(urlConnection.getInputStream());
-                code = urlConnection.getResponseCode();
-                Log.d("code report",code+"");
-                //urlConnection.disconnect();
-
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return -1;
-            }
-            return code;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (result== 204)
-                Toast.makeText(getApplicationContext(), "Report succesful! \nThank you!", Toast.LENGTH_LONG).show();
-            else Toast.makeText(getApplicationContext(), result+"Error on reporting..", Toast.LENGTH_LONG).show();
-//            progress.dismiss();
-            stopSelf();
-        }
     }
 }
