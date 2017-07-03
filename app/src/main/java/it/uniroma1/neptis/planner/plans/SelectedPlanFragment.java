@@ -52,7 +52,7 @@ public class SelectedPlanFragment extends AbstractPlanFragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        plan = sb.toString();
+        planString = sb.toString();
         super.onCreate(savedInstanceState);
     }
 
@@ -64,7 +64,7 @@ public class SelectedPlanFragment extends AbstractPlanFragment {
 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        title.setText("Selected plan");
+        title.setText("Selected planString");
 
     }
 

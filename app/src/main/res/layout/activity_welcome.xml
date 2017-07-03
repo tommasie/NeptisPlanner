@@ -7,22 +7,23 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.uniroma1.neptis.planner.it.uniroma1.neptis.planner.Welcome"
+    tools:context="it.uniroma1.neptis.planner.Welcome"
     >
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/textView_user"
         android:text=""
-
         android:layout_marginTop="38dp"
         android:layout_below="@+id/textView_menu"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textSize="24dp" />
+        android:textSize="24sp" />
 
     <Button
         android:background="@drawable/planning"

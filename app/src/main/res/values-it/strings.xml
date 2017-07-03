@@ -17,4 +17,7 @@
     <string name="planning_choice_tour">Personalizza il tuo percorso</string>
     <string name="planning_choice_hint">Digita</string>
     <string name="planning_choice_structure_selection">Seleziona la struttura</string>
+    <string name="app_exit">Esci</string>
+    <string name="city">Città</string>
+    <string name="museum">Museo</string>
 </resources>

@@ -89,30 +89,23 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     }
 
     @Override
-    public void requestTime(Map<String,String> parameters, Class fragmentClass) {
+    public void requestTime(Map<String,String> parameters) {
         planningParameters.putAll(parameters);
-        //Use Java Reflection API to determine which fragment to call
-        Fragment bestTimeFragment = null;
-        try {
-            //bestTimeFragment = (Fragment) Class.forName(fragmentClass.getName()).newInstance();
-            bestTimeFragment = new VisitsFragment();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Fragment visitsFragment = new VisitsFragment();
+
         Bundle b = new Bundle();
         //Parameters needed to make the call in the AsyncTask
         b.putString("category", planningParameters.get("category"));
         b.putString("id", planningParameters.get("id"));
-        bestTimeFragment.setArguments(b);
+        visitsFragment.setArguments(b);
         transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.activity_planning, bestTimeFragment);
+        transaction.replace(R.id.activity_planning, visitsFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
     @Override
-    public void computePlan(Bundle bundle, Map<String,String> parameters, Map<String,List<String>> extraParams) {
-        //FIXME bundle needed currently for type of planning (best rate/best time)
+    public void computePlan(Map<String,String> parameters, Map<String,List<String>> extraParams) {
         planningParameters.putAll(parameters);
         mustVisit = extraParams.get(MUST);
         excludeVisit = extraParams.get(EXCLUDE);
@@ -164,8 +157,6 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
         @Override
         protected void onPreExecute() {
             progress.show();
-            Toast.makeText(getApplicationContext(), "lmust intent: "+ mustVisit.toString(), Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(), "lexclude intent: "+ excludeVisit.toString(), Toast.LENGTH_LONG).show();
         }
 
         @Override
@@ -173,11 +164,11 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
             InputStream in;
             int code;
             String charset = "UTF-8";
-            String urlURL = params[0]; // URL to call
+            String urlString = params[0]; // URL to call
 
             // HTTP post
             try {
-                URL url = new URL(urlURL);
+                URL url = new URL(urlString);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setChunkedStreamingMode(0);
@@ -284,5 +275,7 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
                 askSavePlan(ts);
             }
         }
+
+
     }
 }

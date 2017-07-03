@@ -31,11 +31,12 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
         InputStream in;
         int code;
         String charset = "UTF-8";
-        String urlURL = params[0]; // URL to call
+        String urlString = params[0]; // URL to call
         String attractionId = params[1];
-        String sminutes = params[2];
+        String minutes = params[2];
+        String type = params[3];
         try {
-            URL url = new URL(urlURL);
+            URL url = new URL(urlString);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             // set like post request
             urlConnection.setDoOutput(true);
@@ -44,11 +45,11 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             urlConnection.setRequestProperty("Content-Type", "application/json");
             // JSON object to send
             JSONObject json = new JSONObject();
-            json.put("type", "Queue");
+            json.put("type", type);
             json.put("category", "City");
             json.put("nameId", ""); //parameter not used server-side
             json.put("attractionId", attractionId);
-            json.put("minutes", sminutes);
+            json.put("minutes", minutes);
 
             // get current date
             Calendar calendar = Calendar.getInstance();
@@ -65,7 +66,6 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             in = new BufferedInputStream(urlConnection.getInputStream());
             code = urlConnection.getResponseCode();
             Log.d("code report",code+"");
-            //urlConnection.disconnect();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -77,7 +77,7 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
     @Override
     protected void onPostExecute(Integer result) {
         if (result== 204)
-            Toast.makeText(context, "Report succesful! \nThank you!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Report successful!\nThank you!", Toast.LENGTH_LONG).show();
         else Toast.makeText(context, result+"Error on reporting..", Toast.LENGTH_LONG).show();
     }
 }

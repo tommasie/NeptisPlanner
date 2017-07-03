@@ -17,10 +17,14 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.QueueChecker;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 
 public class GeofencingService extends IntentService {
+
+    private final static String report_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/report_queue";
 
     private static final String NAME = GeofencingService.class.getName();
     private IBinder binder = new LocalBinder();
@@ -31,6 +35,10 @@ public class GeofencingService extends IntentService {
     private String currentPlan;
     private String destinationId;
     private String destinationName;
+
+    private long fenceEnterTime;
+    private long fenceExitTime;
+    private boolean fenceEntered;
 
     private NotificationManager notificationManager;
     private static final int NOTIFICATION_ID = 123;
@@ -48,12 +56,11 @@ public class GeofencingService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String coordinates = intent.getStringExtra("coordinates");
         currentPlan = intent.getStringExtra("current_plan");
-        destinationLat = Double.parseDouble(coordinates.split(",")[0]);
-        destinationLng = Double.parseDouble(coordinates.split(",")[1]);
         destinationId = intent.getStringExtra("id");
         destinationName = intent.getStringExtra("name");
+        destinationLat = Double.parseDouble(intent.getStringExtra("latitude"));
+        destinationLng = Double.parseDouble(intent.getStringExtra("longitude"));
 
         locManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -66,7 +73,9 @@ public class GeofencingService extends IntentService {
         lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "GeofencingWakeLock");
         lock.acquire();
-        launchNotification();
+
+        fenceEntered = false;
+        //launchNotification();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -124,8 +133,20 @@ public class GeofencingService extends IntentService {
             lat = location.getLatitude();
             lng = location.getLongitude();
             double distance = getDistance(destinationLat,destinationLng);
-            if(distance <= 10.0) {
+            if(distance <= 50.0) {
                 launchNotification();
+                if(!fenceEntered) {
+                    fenceEntered = true;
+                    fenceEnterTime = System.currentTimeMillis();
+                }
+            }
+             else {
+                if(fenceEntered) {
+                    fenceEntered = false;
+                    fenceExitTime = System.currentTimeMillis();
+                    int minutes = (int) Math.ceil((fenceExitTime - fenceEnterTime) / 60000);
+                    new ReportAsyncTask(getApplicationContext()).execute(report_URL,destinationId,String.valueOf(minutes),"Visit");
+                }
             }
         }
 
@@ -144,7 +165,7 @@ public class GeofencingService extends IntentService {
 
         }
 
-        public double getDistance(double lat, double lng) {
+        private double getDistance(double lat, double lng) {
             double earthRadius = 6371000; //meters
             double dLat = Math.toRadians(this.lat - lat);
             double dLng = Math.toRadians(this.lng - lng);

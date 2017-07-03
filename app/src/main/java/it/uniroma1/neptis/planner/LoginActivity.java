@@ -31,9 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A login screen that offers login via email/password.
- */
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
 
     public static final String EMAIL = "mail";

@@ -200,7 +200,8 @@ public class QueueRecognitionService extends IntentService {
                             int minutes = (int)((queueTime / 1000)/60);
                             new ReportAsyncTask(getApplicationContext()).execute(report_URL,
                                                                                 attractionId,
-                                                                                String.valueOf(minutes));
+                                                                                String.valueOf(minutes),
+                                                                                    "Queue");
                             sensorManager.unregisterListener(sensorLstr);
                         }
                         queueRecognition.removeFirst();

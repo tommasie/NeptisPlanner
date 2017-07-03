@@ -74,10 +74,6 @@ public class PlansListFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString(EXTRA_MESSAGE, item);
                 activity.selectPlan(bundle);
-                /*Intent intent = new Intent(getContext(), Selected_Plan.class);
-                intent.putExtra(EXTRA_MESSAGE, item);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);*/
             }
 
         });

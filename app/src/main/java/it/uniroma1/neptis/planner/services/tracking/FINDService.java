@@ -70,7 +70,7 @@ public class FINDService extends Service {
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"Find");
         wakeLock.acquire();
-        wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,"FindWifiLock");
         wifiLock.acquire();
     }

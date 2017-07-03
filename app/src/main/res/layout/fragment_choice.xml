@@ -18,12 +18,34 @@
         android:id="@+id/textView_select_f"
         android:textSize="24sp" />
 
+    <TextView
+        android:id="@+id/textView_desc1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="Select 'City' to compute a tour in the open air or 'Museum' for a tour in a museum"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="18sp" />
+
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:spinnerMode="dialog"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="10dp"
         android:id="@+id/spinner_f" />
+
+    <TextView
+        android:id="@+id/textView_desc2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="Select the name of the city or museum"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="18sp" />
 
     <AutoCompleteTextView
         android:hint="@string/planning_choice_hint"
@@ -38,42 +60,6 @@
         android:imeOptions="actionDone"
         android:textSize="20sp"
         android:id="@+id/autoCompleteTextView_f" />
-
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/radioGroup_f"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="10dp">
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Best Time Planning"
-            android:id="@+id/radioButton_best_time_f"
-            android:checked="false"
-            android:textSize="20sp" />
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Best Rate Planning"
-            android:id="@+id/radioButton_best_rate_f"
-            android:checked="false"
-            android:textSize="20sp"
-            android:layout_marginTop="10dp" />
-
-    </RadioGroup>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Which one should I use?"
-        android:id="@+id/textView_which_f"
-        android:textStyle="italic"
-        android:onClick="guide"
-        android:clickable="true" />
 
     <LinearLayout
         android:layout_width="match_parent"

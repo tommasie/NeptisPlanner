@@ -1,19 +1,16 @@
 package it.uniroma1.neptis.planner.plans;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,11 +18,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.planning.PlanningFragmentsInterface;
+import it.uniroma1.neptis.planner.custom.CityAttractionArrayAdapter;
+import it.uniroma1.neptis.planner.custom.MuseumAttractionArrayAdapter;
+import it.uniroma1.neptis.planner.model.Attraction;
+import it.uniroma1.neptis.planner.model.Plan;
+import it.uniroma1.neptis.planner.model.city.CityAttraction;
+import it.uniroma1.neptis.planner.model.city.CityPlan;
+import it.uniroma1.neptis.planner.model.museum.Area;
+import it.uniroma1.neptis.planner.model.museum.MuseumPlan;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
 public abstract class AbstractPlanFragment extends Fragment {
@@ -33,10 +34,13 @@ public abstract class AbstractPlanFragment extends Fragment {
     protected TextView title;
     protected ListView listView;
 
-    protected String plan;
+    protected String planString;
+    protected Plan plan;
 
-    protected List<String> routes, coords, ids;
-    protected ArrayAdapter<String> adapter;
+    private String type;
+
+    protected CityAttractionArrayAdapter cityAdapter;
+    protected MuseumAttractionArrayAdapter museumAdapter;
 
     protected AlertDialog.Builder builder;
 
@@ -45,40 +49,7 @@ public abstract class AbstractPlanFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        routes  = new ArrayList<>();
-        coords = new ArrayList<>();
-        ids = new ArrayList<>();
-
-        JSONArray jsonarray = null;
-        try {
-            jsonarray = new JSONArray(plan);
-            Log.d("JSON",jsonarray.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        for (int i = 0; i < jsonarray.length(); i++) {
-            JSONObject jsonobject = null;
-            try {
-                jsonobject = jsonarray.getJSONObject(i);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            String route = null;
-            String coord = null;
-            String id = null;
-            try {
-                route = jsonobject.getString("route");
-                String lat = jsonobject.getJSONObject("coordinates").getString("lat");
-                String lng = jsonobject.getJSONObject("coordinates").getString("lng");
-                id = jsonobject.getString("id");
-                coord = lat + "," + lng;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            routes.add("GO TO " + route);
-            coords.add(coord);
-            ids.add(id);
-        }
+        plan = parsePlan(planString);
     }
 
     @Override
@@ -92,36 +63,59 @@ public abstract class AbstractPlanFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         builder = new AlertDialog.Builder(getContext());
         title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
+
         listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
-        //adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1, routes);
-        adapter = new ArrayAdapter<>(getContext(),R.layout.plans_list_item,R.id.textest, routes);
-        listView.setAdapter(adapter);
+        if(type.equals("city")) {
+            CityPlan cPlan = (CityPlan)plan;
+            cityAdapter = new CityAttractionArrayAdapter(getContext(), R.layout.plans_list_item, cPlan.getAttractions());
+            listView.setAdapter(cityAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                String item = (String) parent.getItemAtPosition(position);
-                String dest_address = item.substring(6);
-                initAlertDialog(coords.get(position));
-                AlertDialog dialog = builder.create();
-                dialog.show();
-                Intent geofencingService = new Intent(getContext(), GeofencingService.class);
-                geofencingService.putExtra("coordinates",coords.get(position));
-                geofencingService.putExtra("id",ids.get(position));
-                geofencingService.putExtra("name",dest_address);
-                //geofencingService.putExtra("current_plan", planFileName);
-                //TODO start service from activity and update notification pendingintent class
-                getActivity().startService(geofencingService);
-            }
+                @Override
+                public void onItemClick(AdapterView<?> parent, final View view,
+                                        int position, long id) {
+                    CityAttraction attraction = (CityAttraction) parent.getItemAtPosition(position);
+                    initAlertDialog(attraction.getLatitude(), attraction.getLongitude());
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    Intent geofencingService = new Intent(getContext(), GeofencingService.class);
+                    geofencingService.putExtra("id", attraction.getId());
+                    geofencingService.putExtra("name", attraction.getName());
+                    geofencingService.putExtra("latitude", attraction.getLatitude());
+                    geofencingService.putExtra("longitude", attraction.getLongitude());
+                    //geofencingService.putExtra("current_plan", planFileName);
+                    //TODO start service from activity and update notification pendingintent class
+                    getActivity().startService(geofencingService);
+                }
 
-        });
+            });
+        } else if(type.equals("museum")) {
+            MuseumPlan mPlan = (MuseumPlan)plan;
+            museumAdapter = new MuseumAttractionArrayAdapter(getContext(), R.layout.plans_list_item, mPlan.getAttractions());
+            listView.setAdapter(museumAdapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, final View view,
+                                        int position, long id) {
+                    Attraction attraction = (Attraction) parent.getItemAtPosition(position);
+                    Intent geofencingService = new Intent(getContext(), GeofencingService.class);
+                    geofencingService.putExtra("id", attraction.getId());
+                    geofencingService.putExtra("name", attraction.getName());
+                    //geofencingService.putExtra("current_plan", planFileName);
+                    //TODO start service from activity and update notification pendingintent class
+                    getActivity().startService(geofencingService);
+                }
+            });
+        }
+
     }
 
-    private void initAlertDialog(String dest_address) {
+    private void initAlertDialog(String latitude, String longitude) {
         final Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                Uri.parse("google.navigation:q=" + dest_address + "&mode=w"));
+                Uri.parse("google.navigation:q=" + latitude + "," + longitude + "&mode=w"));
         builder.setMessage(R.string.open_gps);
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -134,5 +128,56 @@ public abstract class AbstractPlanFragment extends Fragment {
                 dialog.dismiss();
             }
         });
+    }
+
+    private Plan parsePlan(String planString) {
+        //Plan plan = null;
+        JSONObject obj;
+        try {
+            obj = new JSONObject(planString);
+            type = obj.getString("type");
+            if(type.equals("city")) {
+                //FIXME
+                CityPlan plan = new CityPlan("name");
+                JSONArray route = obj.getJSONArray("route");
+                for (int i = 0; i < route.length(); i++) {
+                    JSONObject attraction = route.getJSONObject(i);
+                    String name = attraction.getString("name");
+                    String id = attraction.getString("id");
+                    String lat = attraction.getJSONObject("coordinates").getString("latitude");
+                    String lng = attraction.getJSONObject("coordinates").getString("longitude");
+                    CityAttraction a = new CityAttraction(id, name, (byte)50, lat, lng);
+                    plan.addAttraction(a);
+                }
+                return plan;
+            } else if(type.equals("museum")) {
+                MuseumPlan plan = new MuseumPlan("name");
+                JSONArray route = obj.getJSONArray("route");
+                for (int i = 0; i < route.length(); i++) {
+                    //Lista delle stanze
+                    JSONObject area = route.getJSONObject(i);
+                    String areaName = area.getString("name");
+                    String areaId = area.getString("id");
+                    Area a = new Area(areaId, areaName);
+                    //Lista delle attrazioni
+                    JSONArray attractions = area.getJSONArray("attractions");
+                    for(int j = 0; j < attractions.length(); j++) {
+                        JSONObject att = attractions.getJSONObject(j);
+                        String attractionName = att.getString("name");
+                        String attractionId = att.getString("id");
+                        byte attractionRating = (byte)att.getInt("rating");
+                        Attraction at = new Attraction(attractionId,attractionName,attractionRating);
+                        a.addAttraction(at);
+                    }
+                    plan.addArea(a);
+                }
+                return plan;
+            }
+
+        } catch (JSONException e) {
+            plan = null;
+        }
+
+        return plan;
     }
 }

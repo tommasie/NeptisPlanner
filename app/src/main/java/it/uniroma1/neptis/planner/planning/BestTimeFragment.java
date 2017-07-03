@@ -152,7 +152,7 @@ public class BestTimeFragment extends Fragment implements View.OnClickListener{
             Map<String,List<String>> extraParams = new HashMap<>();
             extraParams.put(PlanningActivity.MUST, lmust);
             extraParams.put(PlanningActivity.EXCLUDE, lexclude);
-            activity.computePlan(b, parameters, extraParams);
+            //activity.computePlan(b, parameters, extraParams);
         }
     }
 

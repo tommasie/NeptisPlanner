@@ -22,7 +22,7 @@ public class NewPlanFragment extends AbstractPlanFragment implements View.OnClic
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        plan = getArguments().getString(PlanningActivity.EXTRA_MESSAGE);
+        planString = getArguments().getString(PlanningActivity.EXTRA_MESSAGE);
         super.onCreate(savedInstanceState);
     }
 

@@ -43,14 +43,12 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
 
     private final static String url_city = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_city";
     private final static String url_museum = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_museum";
-    private final static String url_opened = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_oam";
 
     private ProgressDialog progress;
     private Button nextButton;
     private String mymail;
     private Spinner structureSpinner;
     private AutoCompleteTextView autocomplete;
-    private RadioGroup rg;
     private List<Element> queryResults;
     private int position;
 
@@ -84,7 +82,7 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         structureSpinner = (Spinner) view.findViewById(R.id.spinner_f);
         structureSpinner.setPrompt(getString(R.string.planning_choice_structure_selection));
         //TODO i18n
-        String[] structures = new String[]{"City","Museum","Opened Air Museum"};
+        String[] structures = new String[]{getString(R.string.city),getString(R.string.museum)};
         ArrayAdapter<String> structuresAdapter = new ArrayAdapter<>(getContext(), android.R.layout.select_dialog_item, structures);
         structuresAdapter.setDropDownViewResource(android.R.layout.select_dialog_item);
         structureSpinner.setAdapter(structuresAdapter);
@@ -112,7 +110,6 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         nextButton.setVisibility(View.INVISIBLE);
         nextButton.setOnClickListener(this);
 
-        rg = (RadioGroup) view.findViewById(R.id.radioGroup_f);
     }
 
     @Override
@@ -139,25 +136,17 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         else {
             Map<String,String> planningParameters = new HashMap<>();
             //pass structureSpinner selection {city, museum, opened air museum}
-            planningParameters.put("category",structureSpinner.getSelectedItem().toString());
+            int categoryIndex = structureSpinner.getSelectedItemPosition();
+            String category;
+            if(categoryIndex == 0)
+                category = "City";
+            else category = "Museum";
+            planningParameters.put("category", category.toLowerCase());
             Element c = queryResults.get(position);
             planningParameters.put("type",c.name);
             planningParameters.put("id",c.id);
-
-            switch (rg.getCheckedRadioButtonId()) {
-                case R.id.radioButton_best_time_f:
-                    position = -1;
-                    activity.requestTime(planningParameters, BestTimeFragment.class);
-                    break;
-
-                case R.id.radioButton_best_rate_f:
-                    position = -1;
-                    activity.requestTime(planningParameters, BestRateFragment.class);
-                    break;
-
-                default: //if -1
-                    Toast.makeText(getContext(), "Please select one modality", Toast.LENGTH_LONG).show();
-            }
+            position = -1;
+            activity.requestTime(planningParameters);
         }
     }
 
@@ -204,17 +193,11 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
             autocomplete.setVisibility(View.INVISIBLE);
             nextButton.setVisibility(View.INVISIBLE);
 
-            switch(structureSpinner.getSelectedItem().toString()) {
-                case "City":
-                    url = url_city;
-                    break;
-                case "Museum":
-                    url = url_museum;
-                    break;
-                case "Opened Air Museum":
-                    url = url_opened;
-                    break;
-            }
+            String selected = structureSpinner.getSelectedItem().toString();
+            if(selected.equals(getString(R.string.city)))
+                url = url_city;
+            else url = url_museum;
+
             new SpinnerAsyncTask().execute(url);
         }
 
@@ -340,4 +323,5 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
             return name;
         }
     }
+
 }

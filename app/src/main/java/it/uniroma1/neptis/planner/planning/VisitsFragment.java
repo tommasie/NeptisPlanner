@@ -116,6 +116,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         if(visits.getText().toString().equals(""))
             visits.setText("1");
         int value = Integer.parseInt(visits.getText().toString());
+
         switch(v.getId()) {
             case R.id.btn_next2_f:
                 next2();
@@ -135,7 +136,6 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     public void next2() {
 
         if(!lmust.isEmpty() && !lexclude.isEmpty() && lexclude.containsAll(lmust)) {
-
             new AlertDialog.Builder(getContext())
                     .setTitle("Alert")
                     .setMessage("Your MustList and ExcludeList are incompatible!")
@@ -153,14 +153,10 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             Map<String,String> parameters = new HashMap<>();
             parameters.put("number_visits",numVisits);
 
-            Bundle b = new Bundle();
-            //FIXME remember best rate planning
-            b.putInt("calling-activity", ACTIVITY_1);
-
             Map<String,List<String>> extraParams = new HashMap<>();
             extraParams.put(PlanningActivity.MUST, lmust);
             extraParams.put(PlanningActivity.EXCLUDE, lexclude);
-            activity.computePlan(b, parameters, extraParams);
+            activity.computePlan(parameters, extraParams);
         }
     }
 
