@@ -7,18 +7,16 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -37,6 +35,7 @@ import java.util.Map;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.must_visit;
 
 public class VisitsFragment extends Fragment implements View.OnClickListener{
@@ -44,7 +43,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
     public static final int ACTIVITY_1 = 1001;
 
-    private final static String attraction_c_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_attraction";
+    private static final String attraction_c_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/cities/";
+    private final static String attraction_m_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/museums/";
 
     private ProgressDialog progress;
 
@@ -57,8 +57,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
     private Button next;
 
-    private List<String> lmust;
-    private List<String> lexclude;
+    private List<Attraction> attMust;
+    private List<Attraction> attExclude;
 
     private List<String> areaList;
 
@@ -77,8 +77,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         category = getArguments().getString("category");
         id = getArguments().getString("id");
-        lmust = new ArrayList<>();
-        lexclude = new ArrayList<>();
+        attMust = new ArrayList<>();
+        attExclude = new ArrayList<>();
     }
 
     @Override
@@ -107,8 +107,11 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         progress = new ProgressDialog(getContext());
         progress.setIndeterminate(true);
         progress.setMessage(" ");
-
-        new VisitsFragment.GetAreasAsyncTask().execute(attraction_c_URL);
+        String url;
+        if(category.equals("city"))
+            url = attraction_c_URL + id;
+        else url = attraction_m_URL + id;
+        new GetAttractionsAsyncTask().execute(url);
     }
 
     @Override
@@ -135,7 +138,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
     public void next2() {
 
-        if(!lmust.isEmpty() && !lexclude.isEmpty() && lexclude.containsAll(lmust)) {
+        if(!attMust.isEmpty() && !attExclude.isEmpty() && attExclude.containsAll(attMust)) {
             new AlertDialog.Builder(getContext())
                     .setTitle("Alert")
                     .setMessage("Your MustList and ExcludeList are incompatible!")
@@ -153,9 +156,9 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             Map<String,String> parameters = new HashMap<>();
             parameters.put("number_visits",numVisits);
 
-            Map<String,List<String>> extraParams = new HashMap<>();
-            extraParams.put(PlanningActivity.MUST, lmust);
-            extraParams.put(PlanningActivity.EXCLUDE, lexclude);
+            Map<String,List<Attraction>> extraParams = new HashMap<>();
+            extraParams.put(PlanningActivity.MUST, attMust);
+            extraParams.put(PlanningActivity.EXCLUDE, attExclude);
             activity.computePlan(parameters, extraParams);
         }
     }
@@ -177,7 +180,9 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         activity = null;
     }
 
-    protected class GetAreasAsyncTask extends JSONAsyncTask {
+    protected class GetAttractionsAsyncTask extends JSONAsyncTask {
+
+        private ArrayList<Attraction> attractionsList;
 
         @Override
         protected void onPreExecute() {
@@ -188,33 +193,12 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         protected Integer doInBackground(String... params) {
             InputStream in;
             int code;
-            String charset = "UTF-8";
+            String urlString = params[0]; // URL to call
 
-            String urlURL = params[0]; // URL to call
-
-            // HTTP post
+            // HTTP GET
             try {
-                //TODO change to GET
-                URL url = new URL(urlURL);
+                URL url = new URL(urlString);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                // set like post request
-                urlConnection.setDoOutput(true);
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setRequestProperty("Accept-Charset", charset);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-
-                // Object json to send
-                JSONObject json = new JSONObject();
-                json.put("category", category);
-                json.put("id", id);
-
-                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
-                String s = json.toString();
-                byte[] data = s.getBytes("UTF-8");
-                printout.write(data);
-                printout.flush();
-                printout.close();
 
                 in = new BufferedInputStream(urlConnection.getInputStream());
                 code = urlConnection.getResponseCode();
@@ -227,30 +211,30 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             //****  CHECK the ResponseCode FIRST! ****
             if (code == 200) {
                 String jsonResponse = readResponse(in);
-                JSONObject area = null;
-                JSONArray areas = null;
+                JSONObject attraction = null;
+                JSONArray attractions = null;
                 try {
-                    areas = new JSONArray(jsonResponse);
+                    attractions = new JSONArray(jsonResponse);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                int arrSize = areas.length();
+                int arrSize = attractions.length();
                 areaList = new ArrayList<>(arrSize);
+
+                attractionsList = new ArrayList<>();
 
                 for (int i = 0; i < arrSize; ++i) {
 
                     try {
-                        area = areas.getJSONObject(i);
+                        attraction = attractions.getJSONObject(i);
+                        areaList.add(attraction.getString("name"));
+                        String id = attraction.getString("id");
+                        String name = attraction.getString("name");
+                        byte rating = (byte) attraction.getInt("rating");
+                        attractionsList.add(new Attraction(id, name, rating));
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
-
-                    try {
-                        areaList.add(area.getString("name"));
-                    } catch (JSONException e1) {
-                        e1.printStackTrace();
-                    }
-
                 }
                 return 200;
             } else return code;
@@ -259,6 +243,10 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         @Override
         protected void onPostExecute(Integer result) {
             if (result == 200) {
+                final JSONArray jarray = new JSONArray();
+                for(Attraction a : attractionsList)
+                    jarray.put(a.serialize());
+
                 multi_must.setOnTouchListener(new View.OnTouchListener() {
 
                     @SuppressLint("ClickableViewAccessibility")
@@ -267,9 +255,10 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
                         //multi_must.showDropDown();
                         multi_must.setEnabled(false);
                         Intent i = new Intent(getContext(), must_visit.class);
-                        i.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, (ArrayList<String>) areaList);
+                        Bundle b = new Bundle();
+                        b.putSerializable("list",attractionsList);
+                        i.putExtra("list",b);
                         i.putExtra("calling","must");
-                        // must_visit.title_t10.setText("What you don't want to  visit");
                         startActivityForResult(i, 1);
                         return false;
                     }
@@ -284,9 +273,10 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
                         //   multi_exclude.showDropDown();
                         multi_exclude.setEnabled(false);
                         Intent i = new Intent(getContext(), must_visit.class);
-                        i.putStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE, (ArrayList<String>) areaList);
+                        Bundle b = new Bundle();
+                        b.putSerializable("list",attractionsList);
+                        i.putExtra("list",b);
                         i.putExtra("calling","exclude");
-                        // must_visit.title_t10.setText("What you don't want to  visit");
                         startActivityForResult(i, 2);
                         return false;
                     }
@@ -303,8 +293,9 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
-                lmust = data.getStringArrayListExtra("result-must");
-                multi_must.setText(lmust.toString());
+                attMust = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
+                Log.d("MUST", attMust.toString());
+                multi_must.setText(attMust.toString());
 
             }
             if (resultCode == Activity.RESULT_CANCELED) {
@@ -312,8 +303,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             }
         }else if (requestCode == 2) {
             if(resultCode == Activity.RESULT_OK){
-                lexclude = data.getStringArrayListExtra("result-exclude");
-                multi_exclude.setText(lexclude.toString());
+                attExclude = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
+                multi_exclude.setText(attExclude.toString());
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 //Write your code if there's no result

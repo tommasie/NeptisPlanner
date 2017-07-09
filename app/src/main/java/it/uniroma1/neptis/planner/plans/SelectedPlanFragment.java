@@ -56,16 +56,8 @@ public class SelectedPlanFragment extends AbstractPlanFragment {
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_plan, container, false);
-    }
-
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        title.setText("Selected planString");
-
     }
 
     @Override

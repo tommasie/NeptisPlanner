@@ -1,10 +1,8 @@
 <resources>
-    <string name="app_name" translatable="false">Neptis</string>
+    <string name="app_name" translatable="false">Neptis Planner</string>
 
     <string name="title_activity_best_time__planning" translatable="false">BestTime_Planning</string>
     <string name="notification_text">The destination has been reached</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
     <string name="open_gps">Would you like to open the navigation app?</string>
     <string name="activity_report">Report</string>
     <string name="activity_settings">Settings</string>
@@ -21,10 +19,16 @@
     <string name="planning_choice_structure_selection">Select the structure</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_plan_list">Plans</string>
     <string name="title_plan_detail">Plan Detail</string>
     <string name="app_exit">Exit</string>
     <string name="city">City</string>
     <string name="museum">Museum</string>
+    <string name="fragment_choice_text2">Select \'City\' to compute a tour in the open air or \'Museum\' for a tour in a museum</string>
+    <string name="fragment_choice_text3">"Select the "</string>
+    <string name="next">Next</string>
+    <string name="fragment_visits_text1">Number of attractions that you want to visit:</string>
+    <string name="fragment_visits_text2">Attractions you want to include:</string>
+    <string name="fragment_visits_text3">Attractions you want to exclude:</string>
+    <string name="fragment_plans_list_title">My plans</string>
 </resources>

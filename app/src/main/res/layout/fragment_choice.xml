@@ -25,7 +25,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:text="Select 'City' to compute a tour in the open air or 'Museum' for a tour in a museum"
+        android:text="@string/fragment_choice_text2"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="18sp" />
 
@@ -43,7 +43,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:text="Select the name of the city or museum"
+        android:text="@string/fragment_choice_text3"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="18sp" />
 
@@ -52,11 +52,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="5dp"
         android:focusableInTouchMode="true"
         android:elegantTextHeight="true"
-        android:singleLine="true"
+        android:maxLines="1"
         android:imeOptions="actionDone"
         android:textSize="20sp"
         android:id="@+id/autoCompleteTextView_f" />
@@ -74,7 +74,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Next"
+            android:text="@string/next"
             android:id="@+id/next_f"
             android:background="#C42331"
             android:textColor="#ffffff" />

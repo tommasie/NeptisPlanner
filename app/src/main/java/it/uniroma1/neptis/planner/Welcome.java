@@ -10,8 +10,11 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,10 +30,11 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
     public static final String UNAME = "name";
 
     private TextView userView;
-    private Button planner;
-    private Button report;
-    private Button plans;
-    private Button settings;
+
+    private LinearLayout plannerL;
+    private LinearLayout plansL;
+    private LinearLayout settingsL;
+    private LinearLayout exitL;
 
     public static GPSTracker gps;
     public static double lat;
@@ -39,17 +43,18 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
-
+        setContentView(R.layout.activity_welcome2);
+        //getActionBar().setDisplayShowHomeEnabled(true);
         userView = (TextView) findViewById(R.id.textView_user);
-        planner = (Button)findViewById(R.id.button_planning);
-        planner.setOnClickListener(this);
-        report = (Button)findViewById(R.id.button2_report);
-        report.setOnClickListener(this);
-        plans = (Button)findViewById(R.id.button_myPlan);
-        plans.setOnClickListener(this);
-        settings = (Button)findViewById(R.id.button3_settings);
-        settings.setOnClickListener(this);
+        plannerL = (LinearLayout)findViewById(R.id.planning_layout);
+        plannerL.setOnClickListener(this);
+        plansL = (LinearLayout)findViewById(R.id.plans_list_layout);
+        plansL.setOnClickListener(this);
+        settingsL = (LinearLayout)findViewById(R.id.settings_layout);
+        settingsL.setOnClickListener(this);
+        exitL = (LinearLayout)findViewById(R.id.exit_layout);
+        exitL.setOnClickListener(this);
+
 
         Intent intent = getIntent();
         String name = intent.getStringExtra(UNAME);
@@ -103,21 +108,22 @@ public class Welcome extends AppCompatActivity implements View.OnClickListener{
     public void onClick(View view) {
         Intent intent;
         switch(view.getId()) {
-            case R.id.button_planning:
+            case R.id.planning_layout:
                 intent = new Intent(this, PlanningActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.button2_report:
-                intent = new Intent(this, Report.class);
-                startActivity(intent);
-                break;
-            case R.id.button_myPlan:
+            case R.id.plans_list_layout:
                 intent = new Intent(this, PlansActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.button3_settings:
+            case R.id.settings_layout:
                 intent = new Intent(this, Settings.class);
                 startActivity(intent);
+                break;
+            case R.id.exit_layout:
+                finish();
+                //intent = new Intent(this, Settings.class);
+                //startActivity(intent);
         }
     }
 

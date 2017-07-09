@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="it.uniroma1.neptis.planner.planning.BestTimeFragment">
+    tools:context="it.uniroma1.neptis.planner.planning.VisitsFragment">
 
     <TextView
         android:layout_width="wrap_content"
@@ -16,7 +16,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Number of attractions that you want to visit:"
+        android:text="@string/fragment_visits_text1"
         android:id="@+id/textView_number_attractions"/>
 
     <LinearLayout
@@ -50,7 +50,7 @@
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginTop="40dp"
-        android:text="Attractions you want to visit:"
+        android:text="@string/fragment_visits_text2"
         android:id="@+id/textView_must_f" />
 
     <EditText
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Attractions you want to exclude from the tour:"
+        android:text="@string/fragment_visits_text3"
         android:id="@+id/textView_exclude_f"
         android:layout_marginTop="40dp" />
 
@@ -88,7 +88,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Next"
+            android:text="@string/next"
             android:id="@+id/btn_next2_f"
             android:background="#C42331"
             android:textColor="#ffffff" />

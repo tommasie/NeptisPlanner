@@ -34,6 +34,7 @@ import java.util.Map;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
+import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.plans.NewPlanFragment;
 
 public class PlanningActivity extends AppCompatActivity implements PlanningFragmentsInterface {
@@ -51,8 +52,8 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     private ProgressDialog progress;
 
     private Map<String,String> planningParameters;
-    private List<String> mustVisit;
-    private List<String> excludeVisit;
+    private List<Attraction> mustVisit;
+    private List<Attraction> excludeVisit;
     private List<String> ratingList;
     private String plan;
 
@@ -105,7 +106,7 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     }
 
     @Override
-    public void computePlan(Map<String,String> parameters, Map<String,List<String>> extraParams) {
+    public void computePlan(Map<String,String> parameters, Map<String,List<Attraction>> extraParams) {
         planningParameters.putAll(parameters);
         mustVisit = extraParams.get(MUST);
         excludeVisit = extraParams.get(EXCLUDE);
@@ -187,26 +188,30 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
                 //Add the list of must-see places
                 JSONObject jo;
                 JSONArray ja = new JSONArray();
-                for (int i = 0; i < mustVisit.size(); i++) {
+                for(Attraction a : mustVisit)
+                    ja.put(a.getId());
+                /*for (int i = 0; i < mustVisit.size(); i++) {
                     jo = new JSONObject();
-                    jo.put("name", mustVisit.get(i));
+                    jo.put("id", mustVisit.get(i).getId());
+                    jo.put("name",mustVisit.get(i).getName());
                     ja.put(jo);
-                }
-                JSONObject mainObj = new JSONObject();
-                mainObj.put("must", ja);
-                json.put("must", mainObj);
+                }*/
+                json.put("must", ja);
 
                 //Add the list of excluded places
                 JSONObject oex;
                 JSONArray aex = new JSONArray();
-                for (int i = 0; i < excludeVisit.size(); i++) {
+                for(Attraction a : excludeVisit)
+                    aex.put(a.getId());
+                /*for (int i = 0; i < excludeVisit.size(); i++) {
                     oex = new JSONObject();
-                    oex.put("name", excludeVisit.get(i));
+                    oex.put("id", excludeVisit.get(i).getId());
                     aex.put(oex);
-                }
-                JSONObject moex = new JSONObject();
-                moex.put("exclude", aex);
-                json.put("exclude", moex);
+                }*/
+                //JSONObject moex = new JSONObject();
+                //moex.put("exclude", aex);
+                //json.put("exclude", moex);
+                json.put("exclude", aex);
 
                 JSONObject jor;
                 JSONArray jar = new JSONArray();

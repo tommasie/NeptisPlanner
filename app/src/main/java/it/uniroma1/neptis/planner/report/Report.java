@@ -47,8 +47,8 @@ public class Report extends AppCompatActivity {
 
     private ProgressDialog progress;
 
-    private final static String url_city = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_city";
-    private final static String url_museum = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_museum";
+    private final static String url_city = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/cities";
+    private final static String url_museum = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/museums";
     private final static String url_opened = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_oam";
 
     private final static String attraction_c_URL = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/get_attraction";

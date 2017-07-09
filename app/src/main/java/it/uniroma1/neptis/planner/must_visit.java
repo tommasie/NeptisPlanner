@@ -11,18 +11,22 @@ import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
 public class must_visit extends Activity {
-    //public final static String MUST_MESSAGE = "key message2";
 
     TextView title;
     ListView lv;
     SearchView sv;
-    private List<String> message;
+    private String message;
+    private List<Attraction> attractionsList;
     private String calling;
 
     ArrayAdapter<String> adapter;
@@ -34,11 +38,9 @@ public class must_visit extends Activity {
         setContentView(R.layout.activity_must_visit);
 
         Intent intent = getIntent();
-        message = intent.getStringArrayListExtra(PlanningActivity.EXTRA_MESSAGE);
-
+        message = intent.getStringExtra(PlanningActivity.EXTRA_MESSAGE);
+        attractionsList = (ArrayList<Attraction>) intent.getBundleExtra("list").getSerializable("list");
         calling = intent.getStringExtra("calling");
-
-
 
         title =  (TextView) findViewById(R.id.textView10);
         if(calling.equals("must"))
@@ -48,7 +50,11 @@ public class must_visit extends Activity {
         lv=(ListView) findViewById(R.id.listView);
         sv=(SearchView) findViewById(R.id.searchView);
 
-        adapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, message);
+        List<String> adapt = new ArrayList<>();
+        for(Attraction a : attractionsList)
+            adapt.add(a.getName());
+
+        adapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, adapt);
         lv.setAdapter(adapter);
         //lv.setOnItemClickListener();
 
@@ -70,28 +76,14 @@ public class must_visit extends Activity {
         });
     }
 
-
-
-
-    /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-*/
-
-
     public void done_must(View view) {
-        List<String> l = new ArrayList<>();
+        ArrayList<Attraction> l = new ArrayList<>();
         SparseBooleanArray checked = lv.getCheckedItemPositions();
 
         for (int i = 0; i < lv.getAdapter().getCount(); i++) {
             if (checked.get(i)) {
                 // Do something
-                l.add(message.get(i));
+                l.add(attractionsList.get(i));
             }
         }
 
@@ -99,7 +91,10 @@ public class must_visit extends Activity {
 
         Intent returnIntent = new Intent();
         //Intent returnIntent = getIntent();
-        returnIntent.putStringArrayListExtra("result-"+calling, (ArrayList<String>) l);
+        Bundle b = new Bundle();
+        b.putSerializable("list", l);
+        returnIntent.putExtra("list",b);
+        //returnIntent.putStringArrayListExtra("result-"+calling, (ArrayList<String>) l);
         setResult(Activity.RESULT_OK,returnIntent);
         finish();
 

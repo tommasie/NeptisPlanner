@@ -7,10 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,10 +31,11 @@ import it.uniroma1.neptis.planner.model.museum.Area;
 import it.uniroma1.neptis.planner.model.museum.MuseumPlan;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
-public abstract class AbstractPlanFragment extends Fragment {
+public abstract class AbstractPlanFragment extends Fragment implements View.OnClickListener{
 
     protected TextView title;
     protected ListView listView;
+    protected Button startButton;
 
     protected String planString;
     protected Plan plan;
@@ -49,6 +52,7 @@ public abstract class AbstractPlanFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("PlanString", planString);
         plan = parsePlan(planString);
     }
 
@@ -63,7 +67,7 @@ public abstract class AbstractPlanFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         builder = new AlertDialog.Builder(getContext());
         title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
-
+        title.setText(plan.getName());
         listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
         if(type.equals("city")) {
             CityPlan cPlan = (CityPlan)plan;
@@ -84,7 +88,6 @@ public abstract class AbstractPlanFragment extends Fragment {
                     geofencingService.putExtra("name", attraction.getName());
                     geofencingService.putExtra("latitude", attraction.getLatitude());
                     geofencingService.putExtra("longitude", attraction.getLongitude());
-                    //geofencingService.putExtra("current_plan", planFileName);
                     //TODO start service from activity and update notification pendingintent class
                     getActivity().startService(geofencingService);
                 }
@@ -111,19 +114,22 @@ public abstract class AbstractPlanFragment extends Fragment {
             });
         }
 
+        startButton = (Button)view.findViewById(R.id.button_plan_start);
+
+
     }
 
     private void initAlertDialog(String latitude, String longitude) {
         final Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                 Uri.parse("google.navigation:q=" + latitude + "," + longitude + "&mode=w"));
         builder.setMessage(R.string.open_gps);
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 startActivity(intent);
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(android.R.string.no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
             }
@@ -136,22 +142,22 @@ public abstract class AbstractPlanFragment extends Fragment {
         try {
             obj = new JSONObject(planString);
             type = obj.getString("type");
+            String name = obj.getString("name");
             if(type.equals("city")) {
-                //FIXME
-                CityPlan plan = new CityPlan("name");
+                CityPlan plan = new CityPlan(name);
                 JSONArray route = obj.getJSONArray("route");
                 for (int i = 0; i < route.length(); i++) {
                     JSONObject attraction = route.getJSONObject(i);
-                    String name = attraction.getString("name");
+                    String attrName = attraction.getString("name");
                     String id = attraction.getString("id");
                     String lat = attraction.getJSONObject("coordinates").getString("latitude");
                     String lng = attraction.getJSONObject("coordinates").getString("longitude");
-                    CityAttraction a = new CityAttraction(id, name, (byte)50, lat, lng);
+                    CityAttraction a = new CityAttraction(id, attrName, (byte)50, lat, lng);
                     plan.addAttraction(a);
                 }
                 return plan;
             } else if(type.equals("museum")) {
-                MuseumPlan plan = new MuseumPlan("name");
+                MuseumPlan plan = new MuseumPlan(name);
                 JSONArray route = obj.getJSONArray("route");
                 for (int i = 0; i < route.length(); i++) {
                     //Lista delle stanze
@@ -179,5 +185,10 @@ public abstract class AbstractPlanFragment extends Fragment {
         }
 
         return plan;
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }

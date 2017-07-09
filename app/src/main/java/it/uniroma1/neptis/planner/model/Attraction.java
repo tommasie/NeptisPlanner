@@ -1,10 +1,15 @@
 package it.uniroma1.neptis.planner.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+
 /**
  * Created by thomas on 30/06/17.
  */
 
-public class Attraction {
+public class Attraction implements Serializable {
 
     protected String id;
     protected String name;
@@ -14,6 +19,30 @@ public class Attraction {
         this.id = id;
         this.name = name;
         this.rating = rating;
+    }
+
+    public static Attraction parse(JSONObject attraction) {
+        try {
+            String id = attraction.getString("id");
+            String name = attraction.getString("name");
+            byte rating = (byte) attraction.getInt("rating");
+            return new Attraction(id,name,rating);
+        } catch (JSONException e) {
+            return null;
+        }
+
+    }
+
+    public JSONObject serialize() {
+        JSONObject out = new JSONObject();
+        try {
+            out.put("id",id);
+            out.put("name",name);
+            out.put("rating",rating);
+        } catch (JSONException e) {
+            return null;
+        }
+        return out;
     }
 
     public String getId() {
@@ -57,5 +86,10 @@ public class Attraction {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "{id:" + this.getId() + ", name:" + this.name + "}";
     }
 }

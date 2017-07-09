@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notification_text">La destinazione è stata raggiunta</string>
-    <string name="yes">Si</string>
-    <string name="no">No</string>
     <string name="open_gps">Vorresti aprire la app di navigazione?</string>
     <string name="activity_report">Segnala</string>
     <string name="activity_settings">Impostazioni</string>
@@ -20,4 +18,11 @@
     <string name="app_exit">Esci</string>
     <string name="city">Città</string>
     <string name="museum">Museo</string>
+    <string name="fragment_choice_text2">Seleziona \'Città\' per generare un percorso all\'aperto o \'Museo\' per il percorso in un museo</string>
+    <string name="fragment_choice_text3">"Seleziona "</string>
+    <string name="next">Avanti</string>
+    <string name="fragment_visits_text1">Numero di attrazioni che si vuole visitare:</string>
+    <string name="fragment_visits_text2">Attrazioni da includere nel percorso:</string>
+    <string name="fragment_visits_text3">Attrazioni da escludere nel percorso:</string>
+    <string name="fragment_plans_list_title">I miei percorsi</string>
 </resources>

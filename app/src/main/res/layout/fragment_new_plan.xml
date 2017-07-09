@@ -7,14 +7,14 @@
 
     <include
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         layout="@layout/fragment_plan"
         android:layout_weight="1"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EXIT"
+        android:text="@string/app_exit"
         android:id="@+id/button_exit_f"
         android:background="#C42331"
         android:textColor="#ffffff"

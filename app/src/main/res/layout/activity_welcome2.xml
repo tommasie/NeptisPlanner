@@ -22,10 +22,10 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/textView_user"
         android:text=""
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="20dp"
         android:textSize="24sp" />
 
-    <Button
+    <!-- <Button
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_marginTop="10dp"
@@ -60,6 +60,104 @@
         android:padding="16dp"
         android:text="@string/app_exit"
         android:drawableLeft="@drawable/ic_exit"
-        android:textSize="24sp"/>
+        android:textSize="24sp"/> -->
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:id="@+id/planning_layout"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/ic_map"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/activity_planning"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal"
+        android:id="@+id/plans_list_layout"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/ic_list"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/activity_my_plans"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal"
+        android:id="@+id/settings_layout"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/ic_settings"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/activity_settings"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal"
+        android:id="@+id/exit_layout"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/ic_exit"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/app_exit"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
 
 </LinearLayout>

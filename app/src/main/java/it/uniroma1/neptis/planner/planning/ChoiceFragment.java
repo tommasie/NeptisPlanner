@@ -21,6 +21,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -41,8 +42,8 @@ import it.uniroma1.neptis.planner.R;
 
 public class ChoiceFragment extends Fragment implements View.OnClickListener{
 
-    private final static String url_city = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_city";
-    private final static String url_museum = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/get_museum";
+    private final static String url_city = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/cities";
+    private final static String url_museum = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/museums";
 
     private ProgressDialog progress;
     private Button nextButton;
@@ -51,6 +52,8 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
     private AutoCompleteTextView autocomplete;
     private List<Element> queryResults;
     private int position;
+
+    private TextView text3;
 
     private PlanningFragmentsInterface activity;
 
@@ -87,6 +90,9 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         structuresAdapter.setDropDownViewResource(android.R.layout.select_dialog_item);
         structureSpinner.setAdapter(structuresAdapter);
         structureSpinner.setOnItemSelectedListener(new CategorySpinnerListener());
+
+        text3 = (TextView)view.findViewById(R.id.textView_desc2);
+        text3.setVisibility(View.INVISIBLE);
 
         autocomplete = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView_f);
         autocomplete.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -194,6 +200,9 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
             nextButton.setVisibility(View.INVISIBLE);
 
             String selected = structureSpinner.getSelectedItem().toString();
+            text3.setText(getString(R.string.fragment_choice_text3) + selected.toLowerCase() + ":");
+            text3.setVisibility(View.VISIBLE);
+
             if(selected.equals(getString(R.string.city)))
                 url = url_city;
             else url = url_museum;
