@@ -90,6 +90,6 @@ public class Attraction implements Serializable {
 
     @Override
     public String toString() {
-        return "{id:" + this.getId() + ", name:" + this.name + "}";
+        return this.name;
     }
 }

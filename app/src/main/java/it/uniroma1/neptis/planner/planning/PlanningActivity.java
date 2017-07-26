@@ -35,7 +35,7 @@ import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.Welcome;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.plans.NewPlanFragment;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
 
 public class PlanningActivity extends AppCompatActivity implements PlanningFragmentsInterface {
 
@@ -117,38 +117,25 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
     @Override
     public void exitToMenu() {
         Intent intent = new Intent(this, Welcome.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 
-    private void askSavePlan(final String ts) {
-        new AlertDialog.Builder(this)
-                .setTitle("Alert")
-                .setMessage("Do you want to save your plan?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // continue with saving
-                        String filename = planningParameters.get("type") + "_" + ts;
-                        FileOutputStream outputStream;
-                        try {
-                            outputStream = getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
-                            outputStream.write(plan.getBytes());
-                            outputStream.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();
+    private String savePlan() {
+        Calendar calendar = Calendar.getInstance();
+        long ts = calendar.getTimeInMillis();
+        String filename = planningParameters.get("type")  + "_" + ts;
+        FileOutputStream outputStream;
+        try {
+            outputStream = getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(plan.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_SHORT).show();
+        return filename;
     }
 
     private class ComputePlanAsyncTask extends JSONAsyncTask {
@@ -186,46 +173,16 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
                 }
 
                 //Add the list of must-see places
-                JSONObject jo;
-                JSONArray ja = new JSONArray();
+                JSONArray must = new JSONArray();
                 for(Attraction a : mustVisit)
-                    ja.put(a.getId());
-                /*for (int i = 0; i < mustVisit.size(); i++) {
-                    jo = new JSONObject();
-                    jo.put("id", mustVisit.get(i).getId());
-                    jo.put("name",mustVisit.get(i).getName());
-                    ja.put(jo);
-                }*/
-                json.put("must", ja);
+                    must.put(a.getId());
+                json.put("must", must);
 
                 //Add the list of excluded places
-                JSONObject oex;
-                JSONArray aex = new JSONArray();
+                JSONArray exclude = new JSONArray();
                 for(Attraction a : excludeVisit)
-                    aex.put(a.getId());
-                /*for (int i = 0; i < excludeVisit.size(); i++) {
-                    oex = new JSONObject();
-                    oex.put("id", excludeVisit.get(i).getId());
-                    aex.put(oex);
-                }*/
-                //JSONObject moex = new JSONObject();
-                //moex.put("exclude", aex);
-                //json.put("exclude", moex);
-                json.put("exclude", aex);
-
-                JSONObject jor;
-                JSONArray jar = new JSONArray();
-                for (int i = 0; i < ratingList.size(); i = i + 2) {
-                    jor = new JSONObject();
-                    jor.put("name", ratingList.get(i));
-                    jor.put("rating", ratingList.get(i + 1));
-
-                    jar.put(jor);
-                }
-                JSONObject mainJor = new JSONObject();
-                mainJor.put("rating", jar);
-                json.put("rating", mainJor); //invio al server
-                Log.d("json rating", mainJor.toString());
+                    exclude.put(a.getId());
+                json.put("exclude", exclude);
 
                 // get current date
                 Calendar calendar = Calendar.getInstance();
@@ -268,16 +225,12 @@ public class PlanningActivity extends AppCompatActivity implements PlanningFragm
         protected void onPostExecute(Integer result) {
             progress.dismiss();
             if (result == 200) {
-                Fragment planFragment = new NewPlanFragment();
-                Bundle b = new Bundle();
-                b.putString(EXTRA_MESSAGE, plan);
-                planFragment.setArguments(b);
-                transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.activity_planning, planFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                //Ask the user wether he wants to save the plan
-                askSavePlan(ts);
+                String filename = savePlan();
+                Intent intent = new Intent(getApplicationContext(), PlansActivity.class);
+                intent.putExtra("computed_plan_file", filename);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             }
         }
 

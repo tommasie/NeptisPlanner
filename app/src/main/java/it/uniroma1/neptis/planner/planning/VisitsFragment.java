@@ -22,6 +22,8 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
@@ -35,13 +37,14 @@ import java.util.Map;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.logging.LogEvent;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.must_visit;
 
 public class VisitsFragment extends Fragment implements View.OnClickListener{
 
-
-    public static final int ACTIVITY_1 = 1001;
+    private Logger eventLogger = LoggerFactory.getLogger("event_logger");
+    private LogEvent logEvent;
 
     private static final String attraction_c_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/cities/";
     private final static String attraction_m_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/museums/";
@@ -52,6 +55,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     private Button increaseVisits;
     private Button decreaseVisits;
 
+    private ArrayList<Attraction> attractionsList;
     private EditText multi_must;
     private EditText multi_exclude;
 
@@ -77,6 +81,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         category = getArguments().getString("category");
         id = getArguments().getString("id");
+        attractionsList = new ArrayList<>();
         attMust = new ArrayList<>();
         attExclude = new ArrayList<>();
     }
@@ -122,13 +127,21 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
         switch(v.getId()) {
             case R.id.btn_next2_f:
+                logEvent = new LogEvent(getActivity().getClass().getName(),"compute plan", "next_button", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 next2();
                 break;
             case R.id.button_increase_visits:
+                logEvent = new LogEvent(getActivity().getClass().getName(),"increase visits", "button_increase_visits", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
+                if(value == attractionsList.size())
+                    break;
                 value++;
                 visits.setText(String.valueOf(value));
                 break;
             case R.id.button_decrease_visits:
+                logEvent = new LogEvent(getActivity().getClass().getName(),"decrease visits", "button_decrease_visits", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 if(visits.getText().toString().equals("0"))
                     break;
                 value--;
@@ -182,8 +195,6 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
     protected class GetAttractionsAsyncTask extends JSONAsyncTask {
 
-        private ArrayList<Attraction> attractionsList;
-
         @Override
         protected void onPreExecute() {
             progress.show();
@@ -193,7 +204,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         protected Integer doInBackground(String... params) {
             InputStream in;
             int code;
-            String urlString = params[0]; // URL to call
+            String urlString = params[0];
 
             // HTTP GET
             try {
@@ -211,27 +222,17 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             //****  CHECK the ResponseCode FIRST! ****
             if (code == 200) {
                 String jsonResponse = readResponse(in);
-                JSONObject attraction = null;
                 JSONArray attractions = null;
                 try {
                     attractions = new JSONArray(jsonResponse);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                int arrSize = attractions.length();
-                areaList = new ArrayList<>(arrSize);
-
-                attractionsList = new ArrayList<>();
-
-                for (int i = 0; i < arrSize; ++i) {
-
+                JSONObject attraction;
+                for (int i = 0; i < attractions.length(); ++i) {
                     try {
                         attraction = attractions.getJSONObject(i);
-                        areaList.add(attraction.getString("name"));
-                        String id = attraction.getString("id");
-                        String name = attraction.getString("name");
-                        byte rating = (byte) attraction.getInt("rating");
-                        attractionsList.add(new Attraction(id, name, rating));
+                        attractionsList.add(Attraction.parse(attraction));
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
@@ -291,31 +292,32 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == 1) {
-            if(resultCode == Activity.RESULT_OK){
-                attMust = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
-                Log.d("MUST", attMust.toString());
-                multi_must.setText(attMust.toString());
+        switch(requestCode) {
+            case 1:
+                if(resultCode == Activity.RESULT_OK){
+                    attMust = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
+                    Log.d("MUST", attMust.toString());
+                    multi_must.setText(attMust.toString());
 
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
-        }else if (requestCode == 2) {
-            if(resultCode == Activity.RESULT_OK){
-                attExclude = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
-                multi_exclude.setText(attExclude.toString());
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
+                }
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    //Write your code if there's no result
+                }
+                break;
+            case 2:
+                if(resultCode == Activity.RESULT_OK){
+                    attExclude = (ArrayList<Attraction>) data.getBundleExtra("list").getSerializable("list");
+                    multi_exclude.setText(attExclude.toString());
+                }
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    //Write your code if there's no result
+                }
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         multi_must.setEnabled(true);
         multi_exclude.setEnabled(true);
     }

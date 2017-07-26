@@ -18,6 +18,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -65,7 +67,8 @@
             android:exported="false" />
 
         <activity android:name=".planning.PlanningActivity" />
-        <activity android:name=".plans.PlansActivity"/>
+        <activity android:name=".plans.PlansActivity" />
+        <activity android:name=".SurveyActivity"></activity>
     </application>
 
 </manifest>

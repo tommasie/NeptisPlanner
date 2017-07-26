@@ -198,10 +198,10 @@ public class QueueRecognitionService extends IntentService {
                             Log.d("QUEUE","start report");
                             long queueTime = System.currentTimeMillis() - serviceStartTime;
                             int minutes = (int)((queueTime / 1000)/60);
-                            new ReportAsyncTask(getApplicationContext()).execute(report_URL,
+                            new ReportAsyncTask(getApplicationContext()).execute("queue",
+                                                                                "museum",
                                                                                 attractionId,
-                                                                                String.valueOf(minutes),
-                                                                                    "Queue");
+                                                                                String.valueOf(minutes));
                             sensorManager.unregisterListener(sensorLstr);
                         }
                         queueRecognition.removeFirst();

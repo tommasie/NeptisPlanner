@@ -1,9 +1,17 @@
 <configuration>
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/sdcard/logfile.log</file>
+        <file>/sdcard/neptis_planner/neptis.log</file>
         <append>true</append>
         <encoder>
-            <pattern>[%d{HH:mm:ss}] %logger{35} - %msg %n</pattern>
+            <pattern>%msg %n</pattern>
+        </encoder>
+    </appender>
+    <appender name="EVENT_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/sdcard/neptis_planner/logfile_${bySecond}.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%msg %n</pattern>
         </encoder>
     </appender>
     <appender name="GPS" class="ch.qos.logback.core.FileAppender">
@@ -26,7 +34,10 @@
     <logger name="signals" level="DEBUG" additivity="false">
         <appender-ref ref="SIGNALS"/>
     </logger>
-    <root>
+    <logger name="event_logger" level="DEBUG" additivity="false">
+        <appender-ref ref="EVENT_LOG"/>
+    </logger>
+    <root additivity="false">
         <appender-ref ref="FILE"/>
     </root>
 </configuration>

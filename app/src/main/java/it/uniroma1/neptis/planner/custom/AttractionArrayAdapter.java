@@ -13,21 +13,17 @@ import android.widget.TextView;
 import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.model.city.CityAttraction;
+import it.uniroma1.neptis.planner.model.Attraction;
 
 /**
- * Created by thomas on 30/06/17.
+ * Created by thomas on 11/07/17.
  */
 
-public class CityAttractionArrayAdapter extends ArrayAdapter<CityAttraction> {
+public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
 
-    private List<CityAttraction> attractions;
+    protected List<Attraction> attractions;
 
-    public CityAttractionArrayAdapter(@NonNull Context context, @LayoutRes int resource) {
-        super(context, resource);
-    }
-
-    public CityAttractionArrayAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<CityAttraction> objects) {
+    public AttractionArrayAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Attraction> objects) {
         super(context, resource, objects);
         this.attractions = objects;
     }
@@ -40,12 +36,12 @@ public class CityAttractionArrayAdapter extends ArrayAdapter<CityAttraction> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        CityAttraction attraction = getItem(position);
+        Attraction attraction = getItem(position);
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.plans_list_item, parent, false);
         }
         TextView attractionName = (TextView)convertView.findViewById(R.id.textest);
-        attractionName.setText("visit " + attraction.getName());
+        attractionName.setText(attraction.getName());
         return convertView;
     }
 }

@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Neptis Planner</string>
 
-    <string name="title_activity_best_time__planning" translatable="false">BestTime_Planning</string>
     <string name="notification_text">The destination has been reached</string>
     <string name="open_gps">Would you like to open the navigation app?</string>
     <string name="activity_report">Report</string>
@@ -12,7 +11,7 @@
     <string name="alert_welcome">Please set your transport modality in the \'Settings\' menu.\n(default: \'walking\')\n\nYour location: %1$s</string>
     <string name="alert_information_title">Information</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="action_register_user">Register as a new user</string>
+    <string name="action_register_user">New user</string>
     <string name="action_remember_login">Remember me</string>
     <string name="planning_choice_tour">Customize your tour</string>
     <string name="planning_choice_hint">Digit to select..</string>
@@ -31,4 +30,12 @@
     <string name="fragment_visits_text2">Attractions you want to include:</string>
     <string name="fragment_visits_text3">Attractions you want to exclude:</string>
     <string name="fragment_plans_list_title">My plans</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="facebook_app_id" translatable="false">250853348761905</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb250853348761905</string>
+    <string name="rating_fragment_main_text">Rate the attraction</string>
+    <string name="or">Or</string>
+    <string name="google_key" translatable="false">274641228836-9k36s0n5gu7h1dgpim8b5heu9sqve32p.apps.googleusercontent.com</string>
+    <string name="empty">[empty]</string>
 </resources>

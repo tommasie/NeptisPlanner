@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,20 +25,27 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.logging.LogEvent;
 
 public class ChoiceFragment extends Fragment implements View.OnClickListener{
+
+    private Logger eventLogger = LoggerFactory.getLogger("event_logger");
+    private LogEvent logEvent;
 
     private final static String url_city = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/cities";
     private final static String url_museum = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/museums";
@@ -100,6 +105,8 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         autocomplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapter, View view, int pos, long id) {
+                logEvent = new LogEvent(getActivity().getClass().getName(),"select attraction", "attraction_autocomplete", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 String selected = (String)adapter.getItemAtPosition(pos);
                 for (int i = 0; i < queryResults.size(); i++) {
                     if (queryResults.get(i).getName().equals(selected)) {
@@ -122,7 +129,13 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.next_f:
+                logEvent = new LogEvent(getActivity().getClass().getName(),"next step", "next_button", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 next();
+                break;
+            case R.id.spinner_f:
+                logEvent = new LogEvent(getActivity().getClass().getName(),"select structure", "structure_spinner", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 break;
         }
     }

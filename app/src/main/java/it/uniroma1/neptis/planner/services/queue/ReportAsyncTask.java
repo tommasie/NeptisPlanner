@@ -14,12 +14,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 
+import it.uniroma1.neptis.planner.LoginActivity;
+
 /**
  * Created by thomas on 24/01/17.
  */
 
 public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
 
+    private String report_URL = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/report_";
     private Context context;
 
     public ReportAsyncTask(Context context) {
@@ -31,12 +34,12 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
         InputStream in;
         int code;
         String charset = "UTF-8";
-        String urlString = params[0]; // URL to call
-        String attractionId = params[1];
-        String minutes = params[2];
-        String type = params[3];
+        String type = params[0];
+        String category = params[1];
+        String attractionId = params[2];
+        String minutes = params[3];
         try {
-            URL url = new URL(urlString);
+            URL url = new URL(report_URL + type);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             // set like post request
             urlConnection.setDoOutput(true);
@@ -45,9 +48,7 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             urlConnection.setRequestProperty("Content-Type", "application/json");
             // JSON object to send
             JSONObject json = new JSONObject();
-            json.put("type", type);
-            json.put("category", "City");
-            json.put("nameId", ""); //parameter not used server-side
+            json.put("category", category);
             json.put("attractionId", attractionId);
             json.put("minutes", minutes);
 

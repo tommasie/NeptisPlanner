@@ -9,8 +9,8 @@
     <string name="toast_close">Premi Indietro nuovamente per uscire</string>
     <string name="alert_welcome">Seleziona la modalità di trasporto nelle Impostazioni.\n(predefinito: \'a piedi\')\n\n La tua posizione: %1$s</string>
     <string name="alert_information_title">Attenzione</string>
-    <string name="action_sign_in_short">Login</string>
-    <string name="action_register_user">Registra un nuovo utente</string>
+    <string name="action_sign_in_short">Accedi</string>
+    <string name="action_register_user">Nuovo utente</string>
     <string name="action_remember_login">Ricordami</string>
     <string name="planning_choice_tour">Personalizza il tuo percorso</string>
     <string name="planning_choice_hint">Digita</string>
@@ -23,6 +23,11 @@
     <string name="next">Avanti</string>
     <string name="fragment_visits_text1">Numero di attrazioni che si vuole visitare:</string>
     <string name="fragment_visits_text2">Attrazioni da includere nel percorso:</string>
-    <string name="fragment_visits_text3">Attrazioni da escludere nel percorso:</string>
+    <string name="fragment_visits_text3">Attrazioni da escludere dal percorso:</string>
     <string name="fragment_plans_list_title">I miei percorsi</string>
+    <string name="rating_fragment_main_text">Valuta l\'attrazione</string>
+    <string name="or">Oppure</string>
+    <string name="title_plan_detail">Dettagli del piano</string>
+    <string name="title_plan_list">Piani</string>
+    <string name="empty">[vuoto]</string>
 </resources>

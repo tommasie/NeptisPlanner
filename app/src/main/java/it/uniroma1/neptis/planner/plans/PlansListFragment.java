@@ -1,10 +1,7 @@
 package it.uniroma1.neptis.planner.plans;
 
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,19 +12,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Comparator;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.custom.PlansListAdapter;
+import it.uniroma1.neptis.planner.logging.LogEvent;
 
 public class PlansListFragment extends Fragment {
+
+    private Logger eventLogger = LoggerFactory.getLogger("event_logger");
+    private LogEvent logEvent;
 
     public final static String EXTRA_MESSAGE = "key message";
 
@@ -46,12 +50,12 @@ public class PlansListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_plans_list, container, false);
     }
 
@@ -64,13 +68,14 @@ public class PlansListFragment extends Fragment {
         filesList = new ArrayList<>();
         //Get the list of plans in the folder and display them in the ListView
         File fileDirectory = getContext().getFilesDir();
-        File[] dirFiles = fileDirectory.listFiles();
+        File[] dirFiles = fileDirectory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches("\\w+\\_\\d+");
+            }
+        });
         for (File f : dirFiles) {
-            String fileName = f.getName();
-            //Needed for Android Studio with Instant Run enabled
-            //The IDE creates an empty file named "instant-run", don't include it in the list
-            if(!fileName.equals("instant-run"))
-                filesList.add(f.getName());
+            filesList.add(f.getName());
         }
         adapter = new PlansListAdapter(getContext(), R.layout.plans_list_item2, filesList);
         adapter.sort(new Comparator<String>() {
@@ -88,6 +93,8 @@ public class PlansListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
+                logEvent = new LogEvent(getActivity().getClass().getName(),"select plan", "listview_selectedPlan_item", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 String item = (String) parent.getItemAtPosition(position);
                 Bundle bundle = new Bundle();
                 bundle.putString(EXTRA_MESSAGE, item);
@@ -99,6 +106,8 @@ public class PlansListFragment extends Fragment {
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(final AdapterView parent, View view, final int position, long id) {
+                logEvent = new LogEvent(getActivity().getClass().getName(),"open list menu", "listview_selectedPlan_item", System.currentTimeMillis());
+                eventLogger.info(logEvent.toJSONString());
                 listPosition = position;
                 menu.findItem(R.id.delete_plan).setVisible(true);
                 return true;
@@ -126,22 +135,24 @@ public class PlansListFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.plans_menu, menu);
-        menu.findItem(R.id.delete_plan).setVisible(false);
         this.menu = menu;
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        File dir = getContext().getFilesDir();
-        File file = new File(dir, filesList.get(listPosition));
-        boolean deleted = file.delete();
-        filesList.remove(listPosition);
-        adapter.notifyDataSetChanged();
-        Toast.makeText(getContext(), "Removed", Toast.LENGTH_SHORT).show();
+        if(item.getItemId() == R.id.delete_plan) {
+            logEvent = new LogEvent(getActivity().getClass().getName(),"delete eplan", "delete_plan_options_button", System.currentTimeMillis());
+            eventLogger.info(logEvent.toJSONString());
+            File dir = getContext().getFilesDir();
+            File file = new File(dir, filesList.get(listPosition));
+            boolean deleted = file.delete();
+            filesList.remove(listPosition);
+            adapter.notifyDataSetChanged();
+            Toast.makeText(getContext(), "Removed", Toast.LENGTH_SHORT).show();
+        }
         return true;
     }
-
 
 }

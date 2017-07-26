@@ -5,8 +5,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -19,24 +20,30 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.TrackingActivity;
+import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
+import it.uniroma1.neptis.planner.plans.PlansActivity;
 
 public class FINDService extends Service {
 
@@ -44,19 +51,20 @@ public class FINDService extends Service {
     private static final String TRACK = "track";
     private static final String report_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/report_queue";
     private IBinder binder = new LocalBinder();
-    private String action;
     private Timer timer;
     private WifiManager wifiManager;
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
+    private WifiReceiver wifiReceiver;
 
-    private String room;
     private String museum;
-    private String currentRoom;
-    private List<String> roomList;
-    private Map<String,Integer> roomCounter;
-    private long startTimeRoom;
-    private long startTimeMuseum;
+    private ArrayList<MuseumAttraction> attractions;
+    private MuseumAttraction currentAttraction;
+
+    private String planFileName;
+    private int index;
+
+    private String user;
 
     private NotificationManager notificationManager;
     private static final int NOTIFICATION_ID = 123;
@@ -73,19 +81,21 @@ public class FINDService extends Service {
         wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,"FindWifiLock");
         wifiLock.acquire();
+        wifiReceiver = new WifiReceiver();
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("service","started");
-        action = intent.getAction();
-        Log.d("service action",action);
-        //room = intent.getStringExtra("room");
-        museum = intent.getStringExtra("attraction_id");
-        currentRoom = null;
-        roomList = new ArrayList<>();
-        roomCounter = new HashMap<>();
-        startTimeMuseum = System.currentTimeMillis();
+        Log.d("FINDService","started");
+        museum = intent.getStringExtra("museum_name");
+        attractions = (ArrayList<MuseumAttraction>) intent.getSerializableExtra("attractions");
+        user = intent.getStringExtra("user");
+        planFileName = intent.getStringExtra("current_plan");
+        index = intent.getIntExtra("index", 0);
+        if(index == -1)
+            index = 0;
+        currentAttraction = attractions.get(index);
         setUpNotification();
         startForeground(NOTIFICATION_ID,notification);
         startScanThread();
@@ -111,7 +121,8 @@ public class FINDService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("service","stopped");
+        Log.d("FINDService","stopped");
+        unregisterReceiver(wifiReceiver);
         stopForeground(true);
         notificationManager.cancel(NOTIFICATION_ID);
         wifiLock.release();
@@ -122,13 +133,14 @@ public class FINDService extends Service {
     }
 
     private void setUpNotification() {
-        Intent i = new Intent(this,TrackingActivity.class);
-        i.putExtra("running",true);
+        Intent i = new Intent(this,PlansActivity.class);
+        i.putExtra("computed_plan_file", planFileName);
+        i.putExtra("index", index);
         PendingIntent pi = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_UPDATE_CURRENT);
         builder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_main_notification)
-                .setContentTitle("Neptis: room recognition")
-                .setContentText("Current room:")
+                .setContentTitle(currentAttraction.getName())
+                .setContentText("Current room:" + currentAttraction.getArea())
                 .setContentIntent(pi);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
@@ -138,12 +150,10 @@ public class FINDService extends Service {
     public class WifiReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("WifiReceiver","message received");
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            if(action.equals(LEARN))
-                new LearnTask(getApplicationContext(),scanResults).execute(room,museum);
-            else if(action.equals(TRACK))
-                new TrackTask(getApplicationContext(),scanResults,roomList).execute(room,museum);
+            for(ScanResult r : scanResults)
+                Log.d("scan", r.toString());
+            new TrackTask(scanResults).execute(user, museum, currentAttraction.getName());
         }
     }
 
@@ -163,125 +173,103 @@ public class FINDService extends Service {
     private class WiFiScanHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            switch(msg.what) {
+            switch (msg.what) {
                 case 1:
-                    Log.d("SERVICE","scan request");
                     boolean n = wifiManager.startScan();
-                    Log.d("SERVICE", "wifi.startScan " + n);
-                    getResults();
                     break;
                 default:
                     super.handleMessage(msg);
             }
         }
-
-        private void getResults() {
-            //TODO get museum id/name from the queue service class (and somehow retrieve rooms ids)
-            List<ScanResult> scanResults = wifiManager.getScanResults();
-            if(action.equals(LEARN))
-                new LearnTask(getApplicationContext(),scanResults).execute(room,museum);
-            else if(action.equals(TRACK))
-                new TrackTask(getApplicationContext(),scanResults, roomList).execute(room,museum);
-
-            if(roomList.size() == 5) {
-                roomCounter.clear();
-                for(String r : roomList) {
-                    Integer count = roomCounter.get(r);
-                    roomCounter.put(r,count == null ? 1 : ++count);
-                }
-                for(String r : roomCounter.keySet()) {
-                    int v = roomCounter.get(r);
-                   if(v > 3) {
-                       if(currentRoom == null) {
-                           startTimeRoom = System.currentTimeMillis();
-                           currentRoom = r;
-                       } else {
-                           //TODO the room has changed, therefore we need to send data to the server
-                           int minutes = (int)(((System.currentTimeMillis() - startTimeRoom)/1000)/60);
-                           new TrackingAsyncTask().execute(report_URL,String.valueOf(minutes));
-                           currentRoom = r;
-                           startTimeRoom = System.currentTimeMillis();
-                       }
-                   }
-                }
-            }
-        }
     }
 
-    private class TrackingAsyncTask extends AsyncTask<String,Void,Integer> {
+    private class TrackTask extends AsyncTask<String,String,String> {
 
-//        protected void onPreExecute() {
-//            progress.show();
-//        }
+        private org.slf4j.Logger logger = LoggerFactory.getLogger(TrackTask.class);
+
+        private JSONObject serverProperties;
+        private List<ScanResult> scanResults;
+
+        private TrackTask(List<ScanResult> scanResults) {
+            this.scanResults = scanResults;
+            serverProperties = readPropertiesFile();
+        }
 
         @Override
-        protected Integer doInBackground(String... params) {
-            InputStream in = null;
-            int code = -1;
-            String charset = "UTF-8";
-
-
-            String urlURL = params[0]; // URL to call
-            String sminutes = params[1];
-            //Log.d("LOG",urlURL);
-
-            // HTTP post
+        protected String doInBackground(String... params) {
+            String user = params[0];
+            String museum = params[1];
+            String attraction = params[2];
+            URL url;
+            String out = null;
             try {
-                URL url = new URL(urlURL);
+                url = new URL(serverProperties.getString("ip_address") + "/track");
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
+                JSONObject q = new JSONObject();
+                q.put("group",museum);
+                q.put("username",user);
+                q.put("location",attraction);
+                q.put("time", System.currentTimeMillis());
 
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                // set like post request
-                urlConnection.setDoOutput(true);
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setRequestProperty("Accept-Charset", charset);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-
-                // Object json to send
-                JSONObject json = new JSONObject();
-                json.put("type", "Visit");
-                json.put("category", "City");
-                json.put("nameId", ""); //parameter not used server-side
-                json.put("attractionId", museum);
-                json.put("minutes", sminutes);
-
-                // get current date
-                Calendar calendar = Calendar.getInstance();
-                java.sql.Timestamp ourJavaTimestampObject = new java.sql.Timestamp(calendar.getTime().getTime());
-                String ts = ourJavaTimestampObject.toString().replace(' ','T');
-                Log.d("timestamp: ",ts);
-                json.put("data",ts);
-                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
-                String s = json.toString();
-                byte[] data = s.getBytes("UTF-8");
-                printout.write(data);
-                printout.flush();
-                printout.close();
-                in = new BufferedInputStream(urlConnection.getInputStream());
-                code = urlConnection.getResponseCode();
-                Log.d("code report",code+"");
-                //urlConnection.disconnect();
-
+                JSONArray array = new JSONArray();
+                for(ScanResult s : scanResults) {
+                    JSONObject obj = new JSONObject();
+                    obj.put("mac",s.BSSID);
+                    obj.put("rssi",s.level);
+                    array.put(obj);
+                }
+                q.put("wifi-fingerprint",array);
+                Log.i("JSON",q.toString());
+                bw.write(q.toString());
+                bw.flush();
+                bw.close();
+                os.close();
+                conn.connect();
+                InputStream is = new BufferedInputStream(conn.getInputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String s;
+                out = "";
+                while((s=br.readLine()) != null) {
+                    out+=s;
+                }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return -1;
+                e.printStackTrace();
             }
-
-
-            return code;
+            JSONObject o = null;
+            try {
+                o = new JSONObject(out);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return out;
         }
 
-
-        protected void onPostExecute(Integer result) {
-
-            if (result== 204)
-                Toast.makeText(getApplicationContext(), "Report succesful! \nThank you!", Toast.LENGTH_LONG).show();
-            else Toast.makeText(getApplicationContext(), result+"Error on reporting..", Toast.LENGTH_LONG).show();
-//            progress.dismiss();
-            stopSelf();
-
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+            Log.d("FINDservice", s);
+            //TODO
         }
 
-
+        private JSONObject readPropertiesFile() {
+            JSONObject out = null;
+            try {
+                StringBuilder properties = new StringBuilder();
+                Scanner s = new Scanner(getAssets().open("server_properties.json"));
+                while(s.hasNext()) {
+                    properties.append(s.next());
+                }
+                out = new JSONObject(properties.toString());
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return out;
+        }
     }
 }

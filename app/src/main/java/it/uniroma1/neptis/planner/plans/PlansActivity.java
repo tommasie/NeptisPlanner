@@ -29,19 +29,44 @@ public class PlansActivity extends AppCompatActivity implements PlansFragmentsIn
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
 
+        String filename = getIntent().getStringExtra("computed_plan_file");
         fragmentManager = getSupportFragmentManager();
         transaction = fragmentManager.beginTransaction();
         plansFragment = new PlansListFragment();
         transaction.add(R.id.activity_plans, plansFragment);
         transaction.commit();
+        if(filename != null) {
+            selectedPlanFragment = new SelectedPlanFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString(EXTRA_MESSAGE, filename);
+            int attrsIndex = getIntent().getIntExtra("index",-1);
+            bundle.putInt("index",attrsIndex);
+            selectedPlanFragment.setArguments(bundle);
+            transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.activity_plans, selectedPlanFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+
     }
 
     @Override
     public void selectPlan(Bundle bundle) {
         transaction = fragmentManager.beginTransaction();
         selectedPlanFragment = new SelectedPlanFragment();
+        bundle.putInt("index",-1);
         selectedPlanFragment.setArguments(bundle);
         transaction.replace(R.id.activity_plans, selectedPlanFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void attractionDetail(Bundle bundle) {
+        transaction = fragmentManager.beginTransaction();
+        Fragment fragment = new RateAttractionFragment();
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.activity_plans, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -64,4 +89,13 @@ public class PlansActivity extends AppCompatActivity implements PlansFragmentsIn
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        fragmentManager.popBackStack();
+        return true;
+    }
+
+    public void popBackStack() {
+        fragmentManager.popBackStack();
+    }
 }

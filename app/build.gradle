@@ -29,6 +29,7 @@ dependencies {
     compile('com.github.tony19:logback-android-classic:1.1.1-6') {
         exclude group: 'com.google.android'
     }
+
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
@@ -38,10 +39,13 @@ dependencies {
     compile 'nz.ac.waikato.cms.weka:LibSVM:1.0.10'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:design:25.3.1'
-
     compile 'com.google.firebase:firebase-auth:11.0.2'
     compile 'com.google.android.gms:play-services-auth:11.0.2'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     testCompile 'junit:junit:4.12'
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'

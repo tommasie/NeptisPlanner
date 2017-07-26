@@ -8,4 +8,6 @@ import android.os.Bundle;
 
 public interface PlansFragmentsInterface {
     void selectPlan(Bundle bundle);
+    void attractionDetail(Bundle bundle);
+    void popBackStack();
 }
