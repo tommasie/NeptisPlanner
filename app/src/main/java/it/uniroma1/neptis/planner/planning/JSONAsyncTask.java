@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 
 public abstract class JSONAsyncTask extends AsyncTask<String,String,Integer> {
 
+
     protected String readResponse(InputStream in){
         //reads from inputStream
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));

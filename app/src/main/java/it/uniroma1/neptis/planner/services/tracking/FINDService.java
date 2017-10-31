@@ -49,7 +49,6 @@ public class FINDService extends Service {
 
     private static final String LEARN = "learn";
     private static final String TRACK = "track";
-    private static final String report_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/report_queue";
     private IBinder binder = new LocalBinder();
     private Timer timer;
     private WifiManager wifiManager;

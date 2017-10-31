@@ -25,7 +25,7 @@ import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 
 public class QueueChecker extends AppCompatActivity implements View.OnClickListener{
 
-    private final static String report_URL = "http://"+LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/report_queue";
+    private final static String report_URL = "";
     private TextView museumName;
     private EditText time;
     private Button report;

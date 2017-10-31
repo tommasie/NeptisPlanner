@@ -18,8 +18,8 @@
     <string name="app_exit">Esci</string>
     <string name="city">Città</string>
     <string name="museum">Museo</string>
-    <string name="fragment_choice_text2">Seleziona \'Città\' per generare un percorso all\'aperto o \'Museo\' per il percorso in un museo</string>
-    <string name="fragment_choice_text3">"Seleziona "</string>
+    <string name="fragment_choice_text2">Seleziona la tipologia di percorso che vorresti richiedere</string>
+    <string name="fragment_choice_text3">Seleziona il museo</string>
     <string name="next">Avanti</string>
     <string name="fragment_visits_text1">Numero di attrazioni che si vuole visitare:</string>
     <string name="fragment_visits_text2">Attrazioni da includere nel percorso:</string>
@@ -30,4 +30,9 @@
     <string name="title_plan_detail">Dettagli del piano</string>
     <string name="title_plan_list">Piani</string>
     <string name="empty">[vuoto]</string>
+    <string name="survey">Questionario</string>
+    <string name="museum_route">Percorso in museo</string>
+    <string name="navigation_drawer_close">Apri menù</string>
+    <string name="navigation_drawer_open">Chiudi menù</string>
+    <string name="open_air_route">Percorso all\'aperto</string>
 </resources>

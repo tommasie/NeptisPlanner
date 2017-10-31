@@ -1,5 +1,7 @@
 package it.uniroma1.neptis.planner.model;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,6 +12,8 @@ import java.io.Serializable;
  */
 
 public class Attraction implements Serializable {
+
+    private static final String TAG = Attraction.class.getName();
 
     protected String id;
     protected String name;
@@ -28,6 +32,7 @@ public class Attraction implements Serializable {
             byte rating = (byte) attraction.getInt("rating");
             return new Attraction(id,name,rating);
         } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
             return null;
         }
 

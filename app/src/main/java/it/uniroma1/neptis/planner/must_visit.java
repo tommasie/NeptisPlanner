@@ -11,21 +11,16 @@ import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.planning.PlanningActivity;
 
 public class must_visit extends Activity {
 
     TextView title;
     ListView lv;
     SearchView sv;
-    private String message;
     private List<Attraction> attractionsList;
     private String calling;
 
@@ -38,7 +33,6 @@ public class must_visit extends Activity {
         setContentView(R.layout.activity_must_visit);
 
         Intent intent = getIntent();
-        message = intent.getStringExtra(PlanningActivity.EXTRA_MESSAGE);
         attractionsList = (ArrayList<Attraction>) intent.getBundleExtra("list").getSerializable("list");
         calling = intent.getStringExtra("calling");
 

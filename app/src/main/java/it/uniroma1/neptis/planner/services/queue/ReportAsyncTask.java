@@ -10,11 +10,13 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import it.uniroma1.neptis.planner.LoginActivity;
+import it.uniroma1.neptis.planner.util.ConfigReader;
 
 /**
  * Created by thomas on 24/01/17.
@@ -22,11 +24,12 @@ import it.uniroma1.neptis.planner.LoginActivity;
 
 public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
 
-    private String report_URL = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/report_";
+    private String report_URL;
     private Context context;
 
     public ReportAsyncTask(Context context) {
         this.context = context;
+        report_URL = ConfigReader.getConfigValue(context, "serverURL") + "/report_";
     }
 
     @Override
@@ -34,13 +37,15 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
         InputStream in;
         int code;
         String charset = "UTF-8";
-        String type = params[0];
+        String reportType = params[0];
         String category = params[1];
         String attractionId = params[2];
-        String minutes = params[3];
+        String sensedData = params[3];
+        String token = params[4];
         try {
-            URL url = new URL(report_URL + type);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            URL url = new URL(report_URL + reportType);
+            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Authorization", token);
             // set like post request
             urlConnection.setDoOutput(true);
             urlConnection.setChunkedStreamingMode(0);
@@ -48,16 +53,16 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             urlConnection.setRequestProperty("Content-Type", "application/json");
             // JSON object to send
             JSONObject json = new JSONObject();
-            json.put("category", category);
-            json.put("attractionId", attractionId);
-            json.put("minutes", minutes);
+            String attraction;
+            if(category.equals("city"))
+                attraction = "attraction_c_id";
+            else attraction = "attraction_m_id";
+            json.put(attraction, attractionId);
+            if(reportType.equals("rating"))
+                json.put("rating", sensedData);
+            else json.put("minutes", sensedData);
 
             // get current date
-            Calendar calendar = Calendar.getInstance();
-            java.sql.Timestamp ourJavaTimestampObject = new java.sql.Timestamp(calendar.getTime().getTime());
-            String ts = ourJavaTimestampObject.toString().replace(' ','T');
-            Log.d("timestamp: ",ts);
-            json.put("data",ts);
             DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
             String s = json.toString();
             byte[] data = s.getBytes("UTF-8");

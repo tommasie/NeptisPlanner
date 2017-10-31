@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.custom.AttractionArrayAdapter;
 import it.uniroma1.neptis.planner.custom.MuseumAttractionArrayAdapter;
+import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
@@ -49,6 +50,8 @@ import it.uniroma1.neptis.planner.services.tracking.FINDService;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
 public class SelectedPlanFragment extends Fragment implements View.OnClickListener{
+
+    private static final String TAG = SelectedPlanFragment.class.getName();
 
     private Logger eventLogger = LoggerFactory.getLogger("event_logger");
     private LogEvent logEvent;
@@ -69,16 +72,16 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
 
     protected AlertDialog.Builder builder;
 
-    private PlansFragmentsInterface activity;
+    private MainInterface activity;
 
     public SelectedPlanFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        planFileName = getArguments().getString(PlansListFragment.EXTRA_MESSAGE);
+
+        planFileName = getArguments().getString("computed_plan_file");
         planString = readFile(planFileName);
-        Log.d("PlanString", planString);
         index = getArguments().getInt("index");
         plan = parsePlan(planString);
     }
@@ -267,8 +270,8 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlansFragmentsInterface) {
-            activity = (PlansFragmentsInterface) context;
+        if (context instanceof MainInterface) {
+            activity = (MainInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");

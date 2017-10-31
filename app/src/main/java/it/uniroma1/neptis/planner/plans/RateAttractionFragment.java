@@ -35,6 +35,9 @@ import java.util.Comparator;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.custom.PlansListAdapter;
+import it.uniroma1.neptis.planner.iface.MainInterface;
+import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
+import it.uniroma1.neptis.planner.util.ConfigReader;
 
 
 public class RateAttractionFragment extends Fragment implements View.OnClickListener{
@@ -48,7 +51,7 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
     private String attractionId;
     private String type;
 
-    private PlansFragmentsInterface activity;
+    private MainInterface activity;
 
     public RateAttractionFragment() {
     }
@@ -82,8 +85,8 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlansFragmentsInterface) {
-            activity = (PlansFragmentsInterface) context;
+        if (context instanceof MainInterface) {
+            activity = (MainInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -99,14 +102,16 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.attraction_rating_button) {
-            new RatingAsyncTask().execute(type, attractionId, String.valueOf((int)ratingBar.getRating()));
+            new ReportAsyncTask(getContext()).execute("rating",type, attractionId, String.valueOf((int)ratingBar.getRating()));
         }
     }
 
     private class RatingAsyncTask extends AsyncTask<String, String, String> {
 
-        private String report_URL = "http://" + LoginActivity.ipvirt + ":" + LoginActivity.portvirt + "/report_rating";
-
+        private String report_URL;
+        public RatingAsyncTask() {
+            report_URL = ConfigReader.getConfigValue(getContext(), "serverURL") + "/report_rating";
+        }
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -114,7 +119,7 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
 
         @Override
         protected String doInBackground(String... params) {
-            String type = params[0];
+            String category = params[0];
             String id = params[1];
             byte rating = Byte.parseByte(params[2]);
             try {
@@ -125,16 +130,14 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
                 urlConnection.setRequestProperty("Content-Type", "application/json");
 
                 JSONObject json = new JSONObject();
-                json.put("type", type);
-                json.put("attractionId", id);
+                String attraction;
+                if(category.equals("city"))
+                    attraction = "attraction_c_id";
+                else attraction = "attraction_m_id";
+                json.put(attraction, attractionId);
                 json.put("rating", rating);
 
                 // get current date
-                Calendar calendar = Calendar.getInstance();
-                java.sql.Timestamp ourJavaTimestampObject = new java.sql.Timestamp(calendar.getTime().getTime());
-                String ts = ourJavaTimestampObject.toString().replace(' ','T');
-                Log.d("timestamp: ",ts);
-                json.put("data",ts);
                 DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
                 String s = json.toString();
                 byte[] data = s.getBytes("UTF-8");

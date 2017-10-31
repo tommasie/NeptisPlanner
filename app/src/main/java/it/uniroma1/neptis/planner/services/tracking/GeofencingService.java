@@ -16,12 +16,20 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
+
 import java.util.ArrayList;
 
+import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.QueueChecker;
 import it.uniroma1.neptis.planner.R;
@@ -37,6 +45,7 @@ public class GeofencingService extends IntentService {
     private LocationListener destListener;
     private double destinationLat;
     private double destinationLng;
+    private double destinationRadius;
     private String currentPlan;
     private String destinationId;
     private String destinationName;
@@ -57,6 +66,8 @@ public class GeofencingService extends IntentService {
 
     private PowerManager.WakeLock lock;
 
+    private FirebaseUser user;
+
     public GeofencingService() {
         super("GeofencingService");
         destinationLat = 0.0;
@@ -75,7 +86,7 @@ public class GeofencingService extends IntentService {
             index = 0;
         destinationLat = Double.parseDouble(currentAttraction.getLatitude());
         destinationLng = Double.parseDouble(currentAttraction.getLongitude());
-
+        destinationRadius = currentAttraction.getRadius();
         locManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             destListener = new DestListener();
@@ -95,7 +106,7 @@ public class GeofencingService extends IntentService {
         lock.acquire();
 
         fenceEntered = false;
-        launchNotification();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -114,8 +125,6 @@ public class GeofencingService extends IntentService {
     }
 
     public void launchNotification() {
-        //Intent i = new Intent(this,Selected_Plan.class);
-        //i.putExtra(MyPlans.EXTRA_MESSAGE,currentPlan);
         Intent i = new Intent(this,QueueChecker.class);
         i.putExtra("destination_name",destinationName);
         i.putExtra("destination_id",destinationId);
@@ -174,8 +183,8 @@ public class GeofencingService extends IntentService {
             lat = location.getLatitude();
             lng = location.getLongitude();
             double distance = getDistance(destinationLat,destinationLng);
-            if(distance <= 50.0) {
-                //launchNotification2();
+            //TODO set diameter of the attraction
+            if(distance <= destinationRadius) {
                 if(!fenceEntered) {
                     fenceEntered = true;
                     fenceEnterTime = System.currentTimeMillis();
@@ -185,8 +194,19 @@ public class GeofencingService extends IntentService {
                 if(fenceEntered) {
                     fenceEntered = false;
                     fenceExitTime = System.currentTimeMillis();
-                    int minutes = (int) Math.ceil((fenceExitTime - fenceEnterTime) / 60000);
-                    new ReportAsyncTask(getApplicationContext()).execute("visit","city",currentAttraction.getId(),String.valueOf(minutes));
+                    final int minutes = (int) Math.ceil((fenceExitTime - fenceEnterTime) / 60000);
+                    user.getIdToken(true)
+                            .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                                public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                    if (task.isSuccessful()) {
+                                        String idToken = task.getResult().getToken();
+                                        new ReportAsyncTask(getApplicationContext()).execute("visit","city",currentAttraction.getId(),String.valueOf(minutes), idToken);
+                                    } else {
+                                        // Handle error -> task.getException();
+                                    }
+                                }
+                            });
+
                     if(index == attractions.size())
                         stopSelf();
                     currentAttraction = attractions.get(index);
@@ -199,17 +219,14 @@ public class GeofencingService extends IntentService {
 
         @Override
         public void onStatusChanged(String s, int i, Bundle bundle) {
-
         }
 
         @Override
         public void onProviderEnabled(String s) {
-
         }
 
         @Override
         public void onProviderDisabled(String s) {
-
         }
 
         private double getDistance(double lat, double lng) {

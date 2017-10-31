@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,10 +27,12 @@ import java.util.Comparator;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.custom.PlansListAdapter;
+import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
 
 public class PlansListFragment extends Fragment {
 
+    private static final String TAG = PlansListFragment.class.getName();
     private Logger eventLogger = LoggerFactory.getLogger("event_logger");
     private LogEvent logEvent;
 
@@ -43,7 +46,7 @@ public class PlansListFragment extends Fragment {
     private ArrayList<String> filesList;
     private Menu menu;
 
-    private PlansFragmentsInterface activity;
+    private MainInterface activity;
     public PlansListFragment() {
     }
 
@@ -71,6 +74,7 @@ public class PlansListFragment extends Fragment {
         File[] dirFiles = fileDirectory.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
+                Log.d(TAG, name);
                 return name.matches("\\w+\\_\\d+");
             }
         });
@@ -97,7 +101,7 @@ public class PlansListFragment extends Fragment {
                 eventLogger.info(logEvent.toJSONString());
                 String item = (String) parent.getItemAtPosition(position);
                 Bundle bundle = new Bundle();
-                bundle.putString(EXTRA_MESSAGE, item);
+                bundle.putString("computed_plan_file", item);
                 activity.selectPlan(bundle);
             }
 
@@ -119,8 +123,8 @@ public class PlansListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlansFragmentsInterface) {
-            activity = (PlansFragmentsInterface) context;
+        if (context instanceof MainInterface) {
+            activity = (MainInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");

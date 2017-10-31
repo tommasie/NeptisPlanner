@@ -13,28 +13,72 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textStyle="bold"
         android:text="@string/planning_choice_tour"
         android:id="@+id/textView_select_f"
         android:textSize="24sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAllCaps="true"
+        android:text="Località corrente"
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/cityName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/textView_desc1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="@string/fragment_choice_text2"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="18sp" />
+
+    <RadioGroup
+        android:id="@+id/tourRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+        <RadioButton
+            android:id="@+id/openTourRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/open_air_route"
+            android:textSize="24sp"/>
+        <RadioButton
+            android:id="@+id/museumTourRadio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/museum_route"
+            android:textSize="24sp"/>
+    </RadioGroup>
 
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:spinnerMode="dialog"
         android:layout_marginTop="10dp"
-        android:id="@+id/spinner_f" />
+        android:id="@+id/spinner_f"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/textView_desc2"
@@ -77,7 +121,9 @@
             android:text="@string/next"
             android:id="@+id/next_f"
             android:background="#C42331"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:enabled="false"
+            />
 
     </LinearLayout>
 </LinearLayout>

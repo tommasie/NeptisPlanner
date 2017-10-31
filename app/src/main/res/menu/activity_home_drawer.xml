@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_planning"
+            android:icon="@drawable/ic_menu_newplan"
+            android:title="@string/activity_planning"
+            android:checkable="true"/>
+        <item
+            android:id="@+id/nav_current"
+            android:icon="@drawable/ic_menu_current"
+            android:title="Percorso corrente" />
+        <item
+            android:id="@+id/nav_plans"
+            android:icon="@drawable/ic_menu_plan"
+            android:title="@string/activity_my_plans" />
+        <item
+            android:id="@+id/nav_survey"
+            android:icon="@drawable/ic_menu_survey"
+            android:title="Survey" />
+        <item android:title="Account">
+            <menu>
+                <item
+                    android:id="@+id/nav_exit"
+                    android:icon="@drawable/ic_menu_logout"
+                    android:title="@string/app_exit" />
+            </menu>
+        </item>
+    </group>
+
+</menu>

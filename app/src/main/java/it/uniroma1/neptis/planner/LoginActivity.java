@@ -54,7 +54,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
+public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
 
     private static final Logger logger = LoggerFactory.getLogger(LoginActivity.class);
@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private ProgressDialog progress;
 
-    // UI references.
     private EditText mEmailView;
     private EditText mPasswordView;
     private String mail_ui;
@@ -92,6 +91,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
 
@@ -102,14 +102,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         remember = (CheckBox) findViewById(R.id.checkBox_rem_login);
         newUserButton = (TextView) findViewById(R.id.button_newuser);
-        newUserButton.setOnClickListener(this);
         logButton = (Button)findViewById(R.id.email_sign_in_button);
-        logButton.setOnClickListener(this);
         progress = new ProgressDialog(this);
         progress.setIndeterminate(true);
         progress.setMessage("Login..");
-
-        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
 
         //Retrieve previously used login credentials
         SharedPreferences pref = getSharedPreferences("MyPref", Context.MODE_PRIVATE);
@@ -135,19 +131,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        mAuth = FirebaseAuth.getInstance();
-        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(firebaseAuth.getCurrentUser()!= null) {
-                    Intent intent = new Intent(getApplicationContext(), Welcome.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    startActivity(intent);
-                }
-            }
-        });
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.google_key))
                 .requestEmail()
@@ -190,7 +173,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null) {
-            Intent intent = new Intent(getApplicationContext(), Welcome.class);
+            Intent intent = new Intent(getApplicationContext(), Home.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -235,8 +218,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("", "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            //updateUI(user);
+                            Intent intent = new Intent(getApplicationContext(), Home.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("", "signInWithCredential:failure", task.getException());
@@ -277,21 +263,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    @Override
-    public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.button_newuser:
-                Intent intent = new Intent(getApplicationContext(), Registration.class);
-                startActivity(intent);
-                break;
-            case R.id.email_sign_in_button:
-                verifyCredentials();
-                break;
-            case R.id.google_sign_in_button:
-                signIn();
-                break;
-        }
-    }
 
     public void verifyCredentials() {
         mail_ui = mEmailView.getText().toString();
@@ -428,7 +399,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     //apply() is the same as commit, but asynchronous
                     editor.apply();
                 }
-                Intent intent = new Intent(getApplicationContext(), Welcome.class);
+                Intent intent = new Intent(getApplicationContext(), Home.class);
                 intent.putExtra(EMAIL, mail_ui);
                 intent.putExtra(UNAME, username);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

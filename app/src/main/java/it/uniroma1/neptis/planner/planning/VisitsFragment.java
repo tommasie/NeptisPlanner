@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -19,6 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.GetTokenResult;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,28 +31,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.uniroma1.neptis.planner.LoginActivity;
+import javax.net.ssl.HttpsURLConnection;
+
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.must_visit;
+import it.uniroma1.neptis.planner.util.ConfigReader;
 
 public class VisitsFragment extends Fragment implements View.OnClickListener{
+
+    private static final String TAG = VisitsFragment.class.getName();
 
     private Logger eventLogger = LoggerFactory.getLogger("event_logger");
     private LogEvent logEvent;
 
-    private static final String attraction_c_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/cities/";
-    private final static String attraction_m_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/museums/";
+    private String attractionURL;
 
     private ProgressDialog progress;
 
@@ -64,14 +71,10 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     private List<Attraction> attMust;
     private List<Attraction> attExclude;
 
-    private List<String> areaList;
-
     private String category;
     private String id;
 
-    protected PlanningFragmentsInterface activity;
-
-    private String x;
+    protected MainInterface activity;
 
     public VisitsFragment() {
     }
@@ -80,7 +83,17 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         category = getArguments().getString("category");
-        id = getArguments().getString("id");
+        attractionURL = ConfigReader.getConfigValue(getContext(), "serverURL");
+        switch(category) {
+            case "city":
+                attractionURL += "/attractionc";
+                attractionURL += "?city=" + getArguments().getString("city");
+                attractionURL += "&region=" + getArguments().getString("region");
+                break;
+            case "museum":
+                attractionURL += "/museums/attractions/";
+                attractionURL += getArguments().getString("id");
+        }
         attractionsList = new ArrayList<>();
         attMust = new ArrayList<>();
         attExclude = new ArrayList<>();
@@ -112,11 +125,17 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         progress = new ProgressDialog(getContext());
         progress.setIndeterminate(true);
         progress.setMessage(" ");
-        String url;
-        if(category.equals("city"))
-            url = attraction_c_URL + id;
-        else url = attraction_m_URL + id;
-        new GetAttractionsAsyncTask().execute(url);
+        activity.getUser().getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            String idToken = task.getResult().getToken();
+                            new GetAttractionsAsyncTask().execute(attractionURL, idToken);
+                        } else {
+                            // Handle error -> task.getException();
+                        }
+                    }
+                });
     }
 
     @Override
@@ -167,11 +186,11 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         } else {
             String numVisits = visits.getText().toString();
             Map<String,String> parameters = new HashMap<>();
-            parameters.put("number_visits",numVisits);
+            parameters.put("visits",numVisits);
 
             Map<String,List<Attraction>> extraParams = new HashMap<>();
-            extraParams.put(PlanningActivity.MUST, attMust);
-            extraParams.put(PlanningActivity.EXCLUDE, attExclude);
+            extraParams.put("must", attMust);
+            extraParams.put("exclude", attExclude);
             activity.computePlan(parameters, extraParams);
         }
     }
@@ -179,8 +198,8 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof PlanningFragmentsInterface) {
-            activity = (PlanningFragmentsInterface) context;
+        if (context instanceof MainInterface) {
+            activity = (MainInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement IBestTime");
@@ -205,11 +224,12 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
             InputStream in;
             int code;
             String urlString = params[0];
-
+            String token = params[1];
             // HTTP GET
             try {
                 URL url = new URL(urlString);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("Authorization", token);
 
                 in = new BufferedInputStream(urlConnection.getInputStream());
                 code = urlConnection.getResponseCode();
@@ -237,6 +257,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
                         e1.printStackTrace();
                     }
                 }
+                Log.d(TAG, attractionsList.toString());
                 return 200;
             } else return code;
         }
@@ -244,10 +265,6 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
         @Override
         protected void onPostExecute(Integer result) {
             if (result == 200) {
-                final JSONArray jarray = new JSONArray();
-                for(Attraction a : attractionsList)
-                    jarray.put(a.serialize());
-
                 multi_must.setOnTouchListener(new View.OnTouchListener() {
 
                     @SuppressLint("ClickableViewAccessibility")
@@ -270,7 +287,6 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
                     @SuppressLint("ClickableViewAccessibility")
                     @Override
                     public boolean onTouch(View paramView, MotionEvent paramMotionEvent) {
-                        // TODO Auto-generated method stub
                         //   multi_exclude.showDropDown();
                         multi_exclude.setEnabled(false);
                         Intent i = new Intent(getContext(), must_visit.class);

@@ -14,10 +14,17 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONObject;
 
@@ -47,9 +54,10 @@ import static android.util.Log.d;
 
 public class QueueRecognitionService extends IntentService {
 
-    private final static String report_URL = "http://"+ LoginActivity.ipvirt+":"+LoginActivity.portvirt+"/report_queue";
     private static final String TAG = "QueueRecognitionService";
     private IBinder binder = new LocalBinder();
+
+    private FirebaseUser user;
 
     //Sensor variables
     private SensorManager sensorManager;
@@ -123,6 +131,7 @@ public class QueueRecognitionService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         attractionId = intent.getStringExtra("destination_id");
+        user = FirebaseAuth.getInstance().getCurrentUser();
         setUpNotification();
         startForeground(NOTIFICATION_ID, notification);
         setUpClassifiers();
@@ -197,11 +206,23 @@ public class QueueRecognitionService extends IntentService {
                         if(values > queueRecognition.size() / 2) {
                             Log.d("QUEUE","start report");
                             long queueTime = System.currentTimeMillis() - serviceStartTime;
-                            int minutes = (int)((queueTime / 1000)/60);
-                            new ReportAsyncTask(getApplicationContext()).execute("queue",
-                                                                                "museum",
-                                                                                attractionId,
-                                                                                String.valueOf(minutes));
+                            final int minutes = (int)((queueTime / 1000)/60);
+                            user.getIdToken(true)
+                                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                            if (task.isSuccessful()) {
+                                                String idToken = task.getResult().getToken();
+                                                new ReportAsyncTask(getApplicationContext()).execute("queue",
+                                                        "museum",
+                                                        attractionId,
+                                                        String.valueOf(minutes),
+                                                        idToken);
+                                            } else {
+                                                // Handle error -> task.getException();
+                                            }
+                                        }
+                                    });
+
                             sensorManager.unregisterListener(sensorLstr);
                         }
                         queueRecognition.removeFirst();
