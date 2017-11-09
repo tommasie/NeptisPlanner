@@ -120,7 +120,7 @@
             android:layout_height="wrap_content"
             android:text="@string/next"
             android:id="@+id/next_f"
-            android:background="#C42331"
+            android:background="@drawable/buttonshape"
             android:textColor="#ffffff"
             android:enabled="false"
             />
