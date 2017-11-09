@@ -11,11 +11,9 @@ import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Calendar;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.util.ConfigReader;
 
 /**
@@ -82,8 +80,8 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
 
     @Override
     protected void onPostExecute(Integer result) {
-        if (result== 204)
+        if (result== 201)
             Toast.makeText(context, "Report successful!\nThank you!", Toast.LENGTH_LONG).show();
-        else Toast.makeText(context, result+"Error on reporting..", Toast.LENGTH_LONG).show();
+        else Toast.makeText(context, result+" Error on reporting..", Toast.LENGTH_LONG).show();
     }
 }

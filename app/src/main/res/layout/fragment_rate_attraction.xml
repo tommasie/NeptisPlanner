@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="it.uniroma1.neptis.planner.plans.RateAttractionFragment">
+    tools:context="it.uniroma1.neptis.planner.rating.RateAttractionFragment">
 
     <TextView
         android:id="@+id/attraction_rating_name"
@@ -21,11 +21,11 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
          />
 
-    <ImageView
+    <!-- <ImageView
         android:id="@+id/attraction_rating_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        app:srcCompat="@android:drawable/ic_menu_gallery" />
+        app:srcCompat="@android:drawable/ic_menu_gallery" /> -->
 
     <TextView
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
         android:gravity="center"
         android:textAllCaps="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Rate the attraction" />
+        android:text="@string/fragment_rating_title" />
 
     <RatingBar
         android:id="@+id/attraction_rating_bar"
@@ -51,7 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Your rating will be used by the system in order to improve the quality of future plans"
+        android:text="@string/fragment_rating_text"
         android:layout_margin="20dp"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 

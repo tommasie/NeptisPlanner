@@ -1,5 +1,7 @@
 package it.uniroma1.neptis.planner.iface;
 
+import android.location.Address;
+import android.location.Location;
 import android.os.Bundle;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -25,4 +27,5 @@ public interface MainInterface {
     void popBackStack();
 
     FirebaseUser getUser();
+    Address getLocation();
 }

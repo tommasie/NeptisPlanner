@@ -5,22 +5,36 @@
         <item
             android:id="@+id/nav_planning"
             android:icon="@drawable/ic_menu_newplan"
-            android:title="@string/activity_planning"
+            android:title="@string/drawer_plan"
             android:checkable="true"/>
         <item
             android:id="@+id/nav_current"
             android:icon="@drawable/ic_menu_current"
-            android:title="Percorso corrente" />
+            android:title="@string/drawer_current" />
         <item
             android:id="@+id/nav_plans"
-            android:icon="@drawable/ic_menu_plan"
-            android:title="@string/activity_my_plans" />
-        <item
-            android:id="@+id/nav_survey"
-            android:icon="@drawable/ic_menu_survey"
-            android:title="Survey" />
+            android:icon="@drawable/ic_menu_plans"
+            android:title="@string/drawer_plans" />
+
+        <item android:title="@string/drawer_rate">
+            <menu>
+                <item
+                    android:id="@+id/city_attractions"
+                    android:icon="@drawable/ic_menu_attraction"
+                    android:title="@string/drawer_city_attrs" />
+                <item
+                    android:id="@+id/museum_attractions"
+                    android:icon="@drawable/ic_menu_attraction"
+                    android:title="@string/drawer_museum_attrs" />
+            </menu>
+        </item>
+
         <item android:title="Account">
             <menu>
+                <item
+                    android:id="@+id/nav_survey"
+                    android:icon="@drawable/ic_menu_survey"
+                    android:title="@string/drawer_survey" />
                 <item
                     android:id="@+id/nav_exit"
                     android:icon="@drawable/ic_menu_logout"

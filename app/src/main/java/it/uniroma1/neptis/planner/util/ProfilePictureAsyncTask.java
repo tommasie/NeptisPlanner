@@ -1,0 +1,49 @@
+package it.uniroma1.neptis.planner.util;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.widget.ImageView;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
+/**
+ * Created by thomas on 01/11/17.
+ */
+
+public class ProfilePictureAsyncTask extends AsyncTask<String,Void, Integer> {
+
+    private ImageView view;
+    private Bitmap bm;
+    public ProfilePictureAsyncTask(ImageView view) {
+        this.view = view;
+    }
+    @Override
+    protected Integer doInBackground(String... params) {
+
+        try {
+            URL url = new URL(params[0]);
+            HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            bm = BitmapFactory.decodeStream(bis);
+            bis.close();
+            is.close();
+            return 200;
+        } catch(IOException e) {
+            return 500;
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Integer integer) {
+        super.onPostExecute(integer);
+        if(integer == 200)
+            view.setImageBitmap(bm);
+    }
+}

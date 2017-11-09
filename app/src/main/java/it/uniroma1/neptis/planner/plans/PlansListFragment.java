@@ -36,8 +36,6 @@ public class PlansListFragment extends Fragment {
     private Logger eventLogger = LoggerFactory.getLogger("event_logger");
     private LogEvent logEvent;
 
-    public final static String EXTRA_MESSAGE = "key message";
-
     private TextView title;
     private ListView listView;
     private int listPosition = -1;
@@ -102,6 +100,7 @@ public class PlansListFragment extends Fragment {
                 String item = (String) parent.getItemAtPosition(position);
                 Bundle bundle = new Bundle();
                 bundle.putString("computed_plan_file", item);
+                bundle.putInt("index", -1);
                 activity.selectPlan(bundle);
             }
 

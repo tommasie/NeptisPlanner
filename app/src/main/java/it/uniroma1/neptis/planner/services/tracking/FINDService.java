@@ -40,7 +40,6 @@ import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
 import it.uniroma1.neptis.planner.plans.PlansActivity;

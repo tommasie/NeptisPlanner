@@ -223,10 +223,11 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         @Override
         protected Integer doInBackground(String... params) {
             InputStream in;
-            int code;
+            int code = 0;
 
             String urlString = params[0]; // URL to call
             String token = params[1];
+            Log.d(TAG,token);
             // HTTP get
 
             try {
@@ -239,6 +240,7 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
 
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
+                Log.e(TAG, ""+code);
                 return -1;
             }
             if (code == 200) {

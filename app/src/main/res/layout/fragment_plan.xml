@@ -16,6 +16,30 @@
         layout="@layout/fragment_plans_list"
         />
 
+    <LinearLayout
+        android:id="@+id/current_plan_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Attrazione corrente"/>
+
+        <TextView
+            android:id="@+id/current_plan_current_attraction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:gravity="center"
+            />
+
+    </LinearLayout>
 
     <Button
         android:layout_width="match_parent"

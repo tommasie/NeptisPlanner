@@ -30,11 +30,9 @@ import com.google.firebase.auth.GetTokenResult;
 import java.util.ArrayList;
 
 import it.uniroma1.neptis.planner.Home;
-import it.uniroma1.neptis.planner.LoginActivity;
 import it.uniroma1.neptis.planner.QueueChecker;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
-import it.uniroma1.neptis.planner.plans.PlansActivity;
 import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 
 public class GeofencingService extends IntentService {
@@ -77,13 +75,14 @@ public class GeofencingService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         attractions = (ArrayList<CityAttraction>)intent.getSerializableExtra("attractions");
+        index = intent.getIntExtra("index",0);
+        if(index == -1)
+            index = 0;
         currentAttraction = attractions.get(index);
         currentPlan = intent.getStringExtra("current_plan");
         destinationId = intent.getStringExtra("id");
         destinationName = intent.getStringExtra("name");
-        index = intent.getIntExtra("index",0);
-        if(index == -1)
-            index = 0;
+
         destinationLat = Double.parseDouble(currentAttraction.getLatitude());
         destinationLng = Double.parseDouble(currentAttraction.getLongitude());
         destinationRadius = currentAttraction.getRadius();
@@ -94,8 +93,8 @@ public class GeofencingService extends IntentService {
                     Manifest.permission.ACCESS_FINE_LOCATION);
             if (permissionCheck == PackageManager.PERMISSION_GRANTED)
                 //It should be granted since it gets asked at the first possible Activity (Welcome)
-                //Cal updates every 15 seconds
-                locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15 * 1000, 0, destListener);;
+                //Cal updates every 10 seconds
+                locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10 * 1000, 0, destListener);;
 
         }
         Log.d("GeoFencing",""+destinationLat);
@@ -107,6 +106,7 @@ public class GeofencingService extends IntentService {
 
         fenceEntered = false;
         user = FirebaseAuth.getInstance().getCurrentUser();
+        launchNotification();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -125,39 +125,30 @@ public class GeofencingService extends IntentService {
     }
 
     public void launchNotification() {
-        Intent i = new Intent(this,QueueChecker.class);
-        i.putExtra("destination_name",destinationName);
-        i.putExtra("destination_id",destinationId);
-        PendingIntent pi = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_UPDATE_CURRENT);
-        builder = new NotificationCompat.Builder(this)
-                .setSmallIcon((R.drawable.ic_main_notification))
-                .setContentTitle("Neptis: destination reached")
-                .setContentText(getString(R.string.notification_text))
-                .setContentIntent(pi)
-                .setAutoCancel(true);
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notification = builder.build();
-        notificationManager.notify(NOTIFICATION_ID, notification);
-        Vibrator v = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
-        locManager.removeUpdates(destListener);
-        v.vibrate(500);
-        stopSelf();
-    }
-
-    public void launchNotification2() {
-        //Intent i = new Intent(this,Selected_Plan.class);
-        //i.putExtra(MyPlans.EXTRA_MESSAGE,currentPlan);
-        Intent i = new Intent(this,PlansActivity.class);
+        Intent i = new Intent(this,Home.class);
         i.putExtra("computed_plan_file", currentPlan);
         i.putExtra("index", index);
         PendingIntent pi = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_UPDATE_CURRENT);
         builder = new NotificationCompat.Builder(this)
                 .setSmallIcon((R.drawable.ic_main_notification))
-                .setContentTitle("Neptis: destination reached")
-                .setContentText(getString(R.string.notification_text))
-                .setContentIntent(pi)
-                .setAutoCancel(true);
+                .setContentTitle("Neptis Planner")
+                .setContentText("")
+                .setContentIntent(pi);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notification = builder.build();
+        notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    public void launchNotification2(String message) {
+        Intent i = new Intent(this, Home.class);
+        i.putExtra("computed_plan_file", currentPlan);
+        i.putExtra("index", index);
+        PendingIntent pi = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_UPDATE_CURRENT);
+        builder = new NotificationCompat.Builder(this)
+                .setSmallIcon((R.drawable.ic_main_notification))
+                .setContentTitle("Neptis Planner")
+                .setContentText(message)
+                .setContentIntent(pi);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
         notificationManager.notify(NOTIFICATION_ID, notification);
@@ -168,7 +159,6 @@ public class GeofencingService extends IntentService {
 
     @Override
     public void onDestroy() {
-        Log.d(NAME,"onDestroy()");
         lock.release();
         super.onDestroy();
     }
@@ -187,6 +177,7 @@ public class GeofencingService extends IntentService {
             if(distance <= destinationRadius) {
                 if(!fenceEntered) {
                     fenceEntered = true;
+                    launchNotification2("Arrivato");
                     fenceEnterTime = System.currentTimeMillis();
                 }
             }
@@ -206,13 +197,14 @@ public class GeofencingService extends IntentService {
                                     }
                                 }
                             });
-
+                    index++;
+                    launchNotification2("La visita è durata " + minutes + " minuti");
                     if(index == attractions.size())
                         stopSelf();
                     currentAttraction = attractions.get(index);
                     destinationLat = Double.parseDouble(currentAttraction.getLatitude());
                     destinationLng = Double.parseDouble(currentAttraction.getLongitude());
-                    launchNotification2();
+
                 }
             }
         }

@@ -19,9 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +48,7 @@ import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
+import it.uniroma1.neptis.planner.services.queue.QueueRecognitionService;
 import it.uniroma1.neptis.planner.services.tracking.FINDService;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
@@ -58,6 +61,8 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
 
     protected TextView title;
     protected ListView listView;
+    private LinearLayout currentLinearLayout;
+    private TextView current;
     protected Button startButton;
     protected Button pauseButton;
     protected String planFileName;
@@ -106,31 +111,20 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             adapter = new MuseumAttractionArrayAdapter(getContext(), R.layout.plans_item_3, plan.getAttractions());
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Attraction attraction = (Attraction)parent.getItemAtPosition(position);
-                Bundle b = new Bundle();
-                b.putString("id", attraction.getId());
-                b.putString("name", attraction.getName());
-                b.putString("category", plan.getType());
-                activity.attractionDetail(b);
-            }
-        });
-
+        currentLinearLayout = (LinearLayout)view.findViewById(R.id.current_plan_ll);
+        current = (TextView)view.findViewById(R.id.current_plan_current_attraction);
         startButton = (Button)view.findViewById(R.id.button_plan_start);
         startButton.setOnClickListener(this);
         pauseButton = (Button)view.findViewById(R.id.button_plan_pause);
-        pauseButton.setOnClickListener(this);
 
         Log.d("index",""+index);
         if(index != -1) {
             startButton.setVisibility(View.GONE);
-            pauseButton.setVisibility(View.VISIBLE);
+            currentLinearLayout.setVisibility(View.VISIBLE);
+            current.setText(attractions.get(index).getName());
         }
         else {
             startButton.setVisibility(View.VISIBLE);
-            pauseButton.setVisibility(View.GONE);
         }
 
         if(index != -1 && plan.getType().equals("city")) {
@@ -147,11 +141,6 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     @Override
     public void onPause() {
         super.onPause();
-    }
-
-    @Override
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
-        super.dump(prefix, fd, writer, args);
     }
 
     private void initAlertDialog(String latitude, String longitude) {
@@ -223,7 +212,13 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
         if(v.getId() == R.id.button_plan_start) {
             Log.d("start button", "tour started");
             v.setEnabled(false);
-            pauseButton.setVisibility(View.VISIBLE);
+            startButton.setVisibility(View.INVISIBLE);
+            currentLinearLayout.setVisibility(View.VISIBLE);
+            current.setText(attractions.get(0).getName());
+            /*Intent queueService = new Intent(getContext(), QueueRecognitionService.class);
+            queueService.putExtra("attractions", plan.getAttractions());
+            queueService.putExtra("index",index);
+            getActivity().startService(queueService);*/
             switch (plan.getType()) {
                 case "city":
                     Intent geofencingService = new Intent(getContext(), GeofencingService.class);

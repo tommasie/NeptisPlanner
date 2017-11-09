@@ -5,31 +5,17 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Locale;
 
-import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.custom.PlansListAdapter;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
-import it.uniroma1.neptis.planner.plans.PlansFragmentsInterface;
 
 /**
  * Created by thomas on 09/10/17.

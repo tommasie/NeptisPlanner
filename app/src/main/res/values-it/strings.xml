@@ -25,7 +25,6 @@
     <string name="fragment_visits_text2">Attrazioni da includere nel percorso:</string>
     <string name="fragment_visits_text3">Attrazioni da escludere dal percorso:</string>
     <string name="fragment_plans_list_title">I miei percorsi</string>
-    <string name="rating_fragment_main_text">Valuta l\'attrazione</string>
     <string name="or">Oppure</string>
     <string name="title_plan_detail">Dettagli del piano</string>
     <string name="title_plan_list">Piani</string>
@@ -35,4 +34,15 @@
     <string name="navigation_drawer_close">Apri menù</string>
     <string name="navigation_drawer_open">Chiudi menù</string>
     <string name="open_air_route">Percorso all\'aperto</string>
+    <string name="activity_attractions">Attrazioni</string>
+    <string name="fragment_rating_text">La tua valutazione sarà usata dal sistema per migliorare la qualità dei percorsi futuri</string>
+    <string name="fragment_rating_title">Valuta l\'attrazione</string>
+    <string name="activity_rate">Valuta</string>
+    <string name="drawer_city_attrs">Città</string>
+    <string name="drawer_museum_attrs">Museo</string>
+    <string name="drawer_rate">Valuta attrazioni</string>
+    <string name="drawer_plan">Nuovo percorso</string>
+    <string name="drawer_current">Piano corrente</string>
+    <string name="drawer_plans">Percorsi salvati</string>
+    <string name="drawer_survey">Questionario</string>
 </resources>

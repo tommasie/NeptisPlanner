@@ -31,7 +31,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.login.LoginManager;
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,7 +46,6 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
@@ -56,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import it.uniroma1.neptis.planner.rating.CityAttractionsFragment;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
@@ -63,12 +63,13 @@ import it.uniroma1.neptis.planner.planning.ChoiceFragment;
 import it.uniroma1.neptis.planner.planning.JSONAsyncTask;
 import it.uniroma1.neptis.planner.planning.VisitsFragment;
 import it.uniroma1.neptis.planner.plans.CurrentPlanFragment;
-import it.uniroma1.neptis.planner.plans.PlansActivity;
 import it.uniroma1.neptis.planner.plans.PlansListFragment;
-import it.uniroma1.neptis.planner.plans.RateAttractionFragment;
+import it.uniroma1.neptis.planner.rating.MuseumAttractionsFragment;
+import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
+import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainInterface, LocationListener {
@@ -105,47 +106,45 @@ public class Home extends AppCompatActivity
 
         this.apiURL = ConfigReader.getConfigValue(this, "serverURL");
 
+        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+        progress = new ProgressDialog(this);
+        progress.setIndeterminate(true);
+        progress.setMessage("Attendi la connessione del GPS");
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         boolean checkFineLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
         boolean checkCoarseLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
         if(checkCoarseLocation & checkFineLocation) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},1);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            if(location != null) {
+                Geocoder g = new Geocoder(this, Locale.ITALIAN);
+                try {
+                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                    address = addresses.get(0);
+                    Log.d("addressLine", address.getAddressLine(0));
+                    Log.d("adminArea", address.getAdminArea());
+                    Log.d("featureName", address.getFeatureName());
+                    Log.d("locality", address.getLocality());
+                    //Log.d("premises", address.getPremises());
+                    Log.d("subAdminArea", address.getSubAdminArea());
+                    //Log.d("subLocality", address.getSubLocality());
+                    Log.d("subThoroughFare", address.getSubThoroughfare());
+                    Log.d("thoroughFare", address.getThoroughfare());
+                    locationFound = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                new MyTask().execute();
+            }
         }
 
         setContentView(R.layout.activity_home);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        progress = new ProgressDialog(this);
-        progress.setIndeterminate(true);
-        progress.setMessage("Computing plan...");
-
-        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        if(location != null) {
-            Geocoder g = new Geocoder(this, Locale.ITALIAN);
-            try {
-                List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-                address = addresses.get(0);
-                Log.d("addressLine", address.getAddressLine(0));
-                Log.d("adminArea", address.getAdminArea());
-                Log.d("featureName", address.getFeatureName());
-                Log.d("locality", address.getLocality());
-                //Log.d("premises", address.getPremises());
-                Log.d("subAdminArea", address.getSubAdminArea());
-                //Log.d("subLocality", address.getSubLocality());
-                Log.d("subThoroughFare", address.getSubThoroughfare());
-                Log.d("thoroughFare", address.getThoroughfare());
-                locationFound = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            new MyTask().execute();
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -163,20 +162,25 @@ public class Home extends AppCompatActivity
         TextView headerEmail = (TextView) header.findViewById(R.id.headerEmailView);
         headerEmail.setText(user.getEmail());
         ImageView headerImg = (ImageView) header.findViewById(R.id.headerImageView);
-        headerImg.setImageURI(user.getPhotoUrl());
+        new ProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
 
         fragmentManager = getSupportFragmentManager();
-        if(locationFound) {
-            transaction = fragmentManager.beginTransaction();
-            fragment = new ChoiceFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("city", address.getLocality());
-            bundle.putString("region", address.getAdminArea());
-            fragment.setArguments(bundle);
-            transaction.replace(R.id.content_home, fragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-            toolbar.setTitle("Pianifica");
+        if(getIntent().getStringExtra("computed_plan_file") != null) {
+            selectPlan(getIntent().getExtras());
+        }
+        else {
+            if (locationFound) {
+                transaction = fragmentManager.beginTransaction();
+                fragment = new ChoiceFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("city", address.getLocality());
+                bundle.putString("region", address.getAdminArea());
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_home, fragment);
+                //transaction.addToBackStack(null);
+                transaction.commit();
+                toolbar.setTitle("Pianifica");
+            }
         }
     }
 
@@ -195,12 +199,14 @@ public class Home extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
+        Bundle bundle;
         switch(id) {
             case R.id.nav_planning:
                 transaction = fragmentManager.beginTransaction();
                 fragment = new ChoiceFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString("address", address.getLocality());
+                bundle = new Bundle();
+                bundle.putString("city", address.getLocality());
+                bundle.putString("region", address.getAdminArea());
                 fragment.setArguments(bundle);
                 transaction.replace(R.id.content_home, fragment);
                 transaction.commit();
@@ -221,6 +227,28 @@ public class Home extends AppCompatActivity
                 transaction.commit();
                 getSupportActionBar().setTitle("Piani salvati");
                 break;
+            case R.id.city_attractions:
+                transaction = fragmentManager.beginTransaction();
+                fragment = new CityAttractionsFragment();
+                bundle = new Bundle();
+                bundle.putString("city", address.getLocality());
+                bundle.putString("region", address.getAdminArea());
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_home, fragment);
+                transaction.commit();
+                getSupportActionBar().setTitle("Attrazioni");
+                break;
+            case R.id.museum_attractions:
+                transaction = fragmentManager.beginTransaction();
+                fragment = new MuseumAttractionsFragment();
+                bundle = new Bundle();
+                bundle.putString("city", address.getLocality());
+                bundle.putString("region", address.getAdminArea());
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_home, fragment);
+                transaction.commit();
+                getSupportActionBar().setTitle("Attrazioni");
+                break;
             case R.id.nav_survey:
                 transaction = fragmentManager.beginTransaction();
                 fragment = new SurveyFragment();
@@ -229,13 +257,23 @@ public class Home extends AppCompatActivity
                 getSupportActionBar().setTitle("Questionario");
                 break;
             case R.id.nav_exit:
-                mAuth.signOut();
+
+                /*mAuth.signOut();
                 LoginManager.getInstance().logOut();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity2.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                break;
+                break;*/
+                AuthUI.getInstance()
+                        .signOut(this)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                // user is now signed out
+                                startActivity(new Intent(Home.this, LoginActivity.class));
+                                finish();
+                            }
+                        });
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -285,8 +323,6 @@ public class Home extends AppCompatActivity
     public void selectPlan(Bundle bundle) {
         transaction = fragmentManager.beginTransaction();
         fragment = new SelectedPlanFragment();
-
-        bundle.putInt("index",-1);
         fragment.setArguments(bundle);
         transaction.replace(R.id.content_home, fragment);
         transaction.addToBackStack(null);
@@ -311,6 +347,11 @@ public class Home extends AppCompatActivity
     @Override
     public FirebaseUser getUser() {
         return user;
+    }
+
+    @Override
+    public Address getLocation() {
+        return this.address;
     }
 
     @Override
@@ -442,28 +483,35 @@ public class Home extends AppCompatActivity
             Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_SHORT).show();
             return filename;
         }
-
-
     }
+
+    /*@Override
+    protected void onNewIntent(Intent intent) {
+        Log.d("Home","new intent");
+        Bundle extras = intent.getExtras();
+        selectPlan(extras);
+    }*/
 
     private class MyTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            inAnimation = new AlphaAnimation(0f, 1f);
+            progress.show();
+            /*inAnimation = new AlphaAnimation(0f, 1f);
             inAnimation.setDuration(200);
             progressBarHolder.setAnimation(inAnimation);
-            progressBarHolder.setVisibility(View.VISIBLE);
+            progressBarHolder.setVisibility(View.VISIBLE);*/
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            outAnimation = new AlphaAnimation(1f, 0f);
+            progress.dismiss();
+            /*outAnimation = new AlphaAnimation(1f, 0f);
             outAnimation.setDuration(200);
             progressBarHolder.setAnimation(outAnimation);
-            progressBarHolder.setVisibility(View.GONE);
+            progressBarHolder.setVisibility(View.GONE);*/
 
             transaction = fragmentManager.beginTransaction();
             fragment = new ChoiceFragment();
@@ -487,6 +535,46 @@ public class Home extends AppCompatActivity
                 }
             }
             return null;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                    location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                    if(location != null) {
+                        Geocoder g = new Geocoder(this, Locale.ITALIAN);
+                        try {
+                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                            address = addresses.get(0);
+                            Log.d("addressLine", address.getAddressLine(0));
+                            Log.d("adminArea", address.getAdminArea());
+                            Log.d("featureName", address.getFeatureName());
+                            Log.d("locality", address.getLocality());
+                            //Log.d("premises", address.getPremises());
+                            Log.d("subAdminArea", address.getSubAdminArea());
+                            //Log.d("subLocality", address.getSubLocality());
+                            Log.d("subThoroughFare", address.getSubThoroughfare());
+                            Log.d("thoroughFare", address.getThoroughfare());
+                            locationFound = true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        new MyTask().execute();
+                    }
+
+                } else {
+
+                }
+                return;
+            }
         }
     }
 }

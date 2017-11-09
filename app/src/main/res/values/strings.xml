@@ -32,8 +32,8 @@
     <string name="fragment_plans_list_title">My plans</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="facebook_app_id" translatable="false">250853348761905</string>
-    <string name="fb_login_protocol_scheme" translatable="false">fb250853348761905</string>
+    <string name="facebook_application_id" translatable="false">250853348761905</string>
+    <string name="facebook_login_protocol_scheme" translatable="false">fb250853348761905</string>
     <string name="rating_fragment_main_text">Rate the attraction</string>
     <string name="or">Or</string>
     <string name="google_key" translatable="false">274641228836-9k36s0n5gu7h1dgpim8b5heu9sqve32p.apps.googleusercontent.com</string>
@@ -48,18 +48,27 @@
     <string name="museum_route">Museum</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_firebase_login">Sign in</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="action_sign_in">Sign in or register</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="activity_attractions">Attractions</string>
+    <string name="fragment_rating_text">Your rating will be used by the system in order to improve the quality of future plans</string>
+    <string name="fragment_rating_title">Rate the attraction</string>
+    <string name="activity_rate">Rate</string>
+    <string name="drawer_city_attrs">City</string>
+    <string name="drawer_museum_attrs">Museum</string>
+    <string name="drawer_rate">Rate attractions</string>
+    <string name="drawer_plan">New plan</string>
+    <string name="drawer_current">Current plan</string>
+    <string name="drawer_plans">Saved plans</string>
+    <string name="drawer_survey">Survey</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
