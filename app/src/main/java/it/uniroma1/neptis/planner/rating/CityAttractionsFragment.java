@@ -36,7 +36,7 @@ import it.uniroma1.neptis.planner.custom.AttractionArrayAdapter;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.planning.JSONAsyncTask;
+import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
 
 public class CityAttractionsFragment extends Fragment {

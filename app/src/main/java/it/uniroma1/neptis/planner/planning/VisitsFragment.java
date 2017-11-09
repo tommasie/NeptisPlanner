@@ -46,6 +46,7 @@ import it.uniroma1.neptis.planner.logging.LogEvent;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.must_visit;
 import it.uniroma1.neptis.planner.util.ConfigReader;
+import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 
 public class VisitsFragment extends Fragment implements View.OnClickListener{
 

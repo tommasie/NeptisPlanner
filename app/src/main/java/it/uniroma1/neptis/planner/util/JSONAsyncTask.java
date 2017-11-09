@@ -1,4 +1,4 @@
-package it.uniroma1.neptis.planner.planning;
+package it.uniroma1.neptis.planner.util;
 
 import android.os.AsyncTask;
 

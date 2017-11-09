@@ -45,6 +45,7 @@ import it.uniroma1.neptis.planner.util.ConfigReader;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
+import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 
 public class ChoiceFragment extends Fragment implements View.OnClickListener{
 

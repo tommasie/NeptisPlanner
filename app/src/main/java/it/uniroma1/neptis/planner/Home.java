@@ -60,7 +60,7 @@ import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
 import it.uniroma1.neptis.planner.planning.ChoiceFragment;
-import it.uniroma1.neptis.planner.planning.JSONAsyncTask;
+import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 import it.uniroma1.neptis.planner.planning.VisitsFragment;
 import it.uniroma1.neptis.planner.plans.CurrentPlanFragment;
 import it.uniroma1.neptis.planner.plans.PlansListFragment;
