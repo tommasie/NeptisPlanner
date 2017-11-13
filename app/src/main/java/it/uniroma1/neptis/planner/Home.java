@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner;
 
 import android.app.ProgressDialog;
@@ -12,7 +17,9 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -55,20 +62,20 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.uniroma1.neptis.planner.rating.CityAttractionsFragment;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
 import it.uniroma1.neptis.planner.planning.ChoiceFragment;
-import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 import it.uniroma1.neptis.planner.planning.VisitsFragment;
 import it.uniroma1.neptis.planner.plans.CurrentPlanFragment;
 import it.uniroma1.neptis.planner.plans.PlansListFragment;
+import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
+import it.uniroma1.neptis.planner.rating.CityAttractionsFragment;
 import it.uniroma1.neptis.planner.rating.MuseumAttractionsFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
-import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
+import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
@@ -76,8 +83,10 @@ public class Home extends AppCompatActivity
 
     private String apiURL;
 
+    private CoordinatorLayout coordLayout;
 
     private ProgressDialog progress;
+    private Snackbar snackbar;
     private Toolbar toolbar;
     private FragmentManager fragmentManager;
     private FragmentTransaction transaction;
@@ -106,46 +115,11 @@ public class Home extends AppCompatActivity
 
         this.apiURL = ConfigReader.getConfigValue(this, "serverURL");
 
-        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
-        progress = new ProgressDialog(this);
-        progress.setIndeterminate(true);
-        progress.setMessage("Attendi la connessione del GPS");
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean checkFineLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-        boolean checkCoarseLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-        if(checkCoarseLocation & checkFineLocation) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},1);
-        } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if(location != null) {
-                Geocoder g = new Geocoder(this, Locale.ITALIAN);
-                try {
-                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-                    address = addresses.get(0);
-                    Log.d("addressLine", address.getAddressLine(0));
-                    Log.d("adminArea", address.getAdminArea());
-                    Log.d("featureName", address.getFeatureName());
-                    Log.d("locality", address.getLocality());
-                    //Log.d("premises", address.getPremises());
-                    Log.d("subAdminArea", address.getSubAdminArea());
-                    //Log.d("subLocality", address.getSubLocality());
-                    Log.d("subThoroughFare", address.getSubThoroughfare());
-                    Log.d("thoroughFare", address.getThoroughfare());
-                    locationFound = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                new MyTask().execute();
-            }
-        }
-
         setContentView(R.layout.activity_home);
+        coordLayout = findViewById(R.id.coordinator_layout);
+        snackbar = Snackbar.make(coordLayout, "Accendi il GPS", Snackbar.LENGTH_LONG);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -163,6 +137,39 @@ public class Home extends AppCompatActivity
         headerEmail.setText(user.getEmail());
         ImageView headerImg = (ImageView) header.findViewById(R.id.headerImageView);
         new ProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
+
+        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+        progress = new ProgressDialog(this);
+        progress.setIndeterminate(true);
+        progress.setMessage("Attendi la connessione del GPS");
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            snackbar.show();
+        }
+
+        boolean checkFineLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        boolean checkCoarseLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        if(checkCoarseLocation & checkFineLocation) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},1);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            if(location != null) {
+                Log.d("latlng", location.getLatitude() + " " + location.getLongitude());
+                Geocoder g = new Geocoder(this, Locale.ITALIAN);
+
+                try {
+                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                    address = addresses.get(0);
+                    locationFound = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                new MyTask().execute();
+            }
+        }
 
         fragmentManager = getSupportFragmentManager();
         if(getIntent().getStringExtra("computed_plan_file") != null) {
@@ -257,14 +264,6 @@ public class Home extends AppCompatActivity
                 getSupportActionBar().setTitle("Questionario");
                 break;
             case R.id.nav_exit:
-
-                /*mAuth.signOut();
-                LoginManager.getInstance().logOut();
-                Intent intent = new Intent(getApplicationContext(), LoginActivity2.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                break;*/
                 AuthUI.getInstance()
                         .signOut(this)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -377,12 +376,16 @@ public class Home extends AppCompatActivity
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        if(provider.equals(LocationManager.GPS_PROVIDER)) {
+            snackbar.dismiss();
+        }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        if(provider.equals(LocationManager.GPS_PROVIDER)) {
+            snackbar.show();
+        }
     }
 
     private class ComputePlanAsyncTask extends JSONAsyncTask {

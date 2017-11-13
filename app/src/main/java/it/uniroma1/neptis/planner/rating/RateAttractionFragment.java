@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.rating;
 
 import android.content.Context;
@@ -19,7 +24,6 @@ import com.google.firebase.auth.GetTokenResult;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
-
 
 public class RateAttractionFragment extends Fragment implements View.OnClickListener{
     public final static String EXTRA_MESSAGE = "key message";

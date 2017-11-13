@@ -1,3 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="" />
+  <settings default="Neptis Planner Thomas Collerton">
+    <module2copyright>
+      <element module="Project Files" copyright="Neptis Planner Thomas Collerton" />
+    </module2copyright>
+  </settings>
 </component>

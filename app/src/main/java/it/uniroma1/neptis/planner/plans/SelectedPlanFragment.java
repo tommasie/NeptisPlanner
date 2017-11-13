@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.plans;
 
 import android.Manifest;
@@ -17,13 +22,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,12 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import it.uniroma1.neptis.planner.R;
@@ -48,7 +49,6 @@ import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
-import it.uniroma1.neptis.planner.services.queue.QueueRecognitionService;
 import it.uniroma1.neptis.planner.services.tracking.FINDService;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 

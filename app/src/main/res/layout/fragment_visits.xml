@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+  ~ This file is part of the Neptis project
+  -->
+
 <!-- There was a ScrollView here -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

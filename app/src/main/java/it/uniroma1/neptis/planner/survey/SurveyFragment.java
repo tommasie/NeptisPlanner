@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.survey;
 
 import android.content.Context;
@@ -16,10 +21,6 @@ import java.util.Locale;
 
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
-
-/**
- * Created by thomas on 09/10/17.
- */
 
 public class SurveyFragment extends Fragment {
 

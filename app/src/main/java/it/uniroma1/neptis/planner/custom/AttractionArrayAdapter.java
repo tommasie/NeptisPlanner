@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.custom;
 
 import android.content.Context;
@@ -14,10 +19,6 @@ import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.model.Attraction;
-
-/**
- * Created by thomas on 11/07/17.
- */
 
 public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.planning;
 
 import android.annotation.SuppressLint;
@@ -41,10 +46,10 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.uniroma1.neptis.planner.util.ConfigReader;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.logging.LogEvent;
+import it.uniroma1.neptis.planner.util.ConfigReader;
 import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 
 public class ChoiceFragment extends Fragment implements View.OnClickListener{

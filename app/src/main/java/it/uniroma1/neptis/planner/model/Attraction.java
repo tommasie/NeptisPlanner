@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.model;
 
 import android.util.Log;
@@ -6,10 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-
-/**
- * Created by thomas on 30/06/17.
- */
 
 public class Attraction implements Serializable {
 

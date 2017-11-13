@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.logging;
 
 import org.json.JSONException;
@@ -5,10 +10,6 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-/**
- * Created by thomas on 26/07/17.
- */
 
 public class LogEvent {
     //The activity where the event was triggered

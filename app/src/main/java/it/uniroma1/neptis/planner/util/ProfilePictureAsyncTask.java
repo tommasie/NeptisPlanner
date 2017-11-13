@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.util;
 
 import android.graphics.Bitmap;
@@ -11,10 +16,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
-
-/**
- * Created by thomas on 01/11/17.
- */
 
 public class ProfilePictureAsyncTask extends AsyncTask<String,Void, Integer> {
 

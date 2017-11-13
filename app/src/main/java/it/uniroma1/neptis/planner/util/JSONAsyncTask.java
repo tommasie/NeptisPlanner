@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.util;
 
 import android.os.AsyncTask;
@@ -6,10 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-/**
- * Created by thomas on 20/01/17.
- */
 
 public abstract class JSONAsyncTask extends AsyncTask<String,String,Integer> {
 

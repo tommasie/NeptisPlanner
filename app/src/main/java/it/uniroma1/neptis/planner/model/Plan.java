@@ -1,13 +1,11 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.model;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import it.uniroma1.neptis.planner.model.city.CityAttraction;
-
-/**
- * Created by thomas on 19/06/17.
- */
 
 public class Plan {
 

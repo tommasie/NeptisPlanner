@@ -1,24 +1,17 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner;
 
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Calendar;
 
 import it.uniroma1.neptis.planner.services.queue.QueueRecognitionService;
 import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;

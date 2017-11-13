@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.services.queue;
 
 import android.content.Context;
@@ -15,10 +20,6 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 import it.uniroma1.neptis.planner.util.ConfigReader;
-
-/**
- * Created by thomas on 24/01/17.
- */
 
 public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
 

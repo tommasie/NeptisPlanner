@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.util;
 
 import android.content.Context;
@@ -9,10 +14,6 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import it.uniroma1.neptis.planner.R;
-
-/**
- * Created by thomas on 30/10/17.
- */
 
 public class ConfigReader {
 

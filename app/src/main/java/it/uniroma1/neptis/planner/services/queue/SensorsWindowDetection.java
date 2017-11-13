@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.services.queue;
 
 import org.apache.commons.math3.complex.Complex;
@@ -7,11 +12,6 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 import java.util.List;
-import java.util.List;
-
-/**
- * Created by thomas on 16/01/17.
- */
 
 public class SensorsWindowDetection {
 

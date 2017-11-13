@@ -1,12 +1,11 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.model.city;
 
-import java.io.Serializable;
-
 import it.uniroma1.neptis.planner.model.Attraction;
-
-/**
- * Created by thomas on 19/06/17.
- */
 
 public class CityAttraction extends Attraction {
 

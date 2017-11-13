@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner;
 
 import android.content.Intent;
@@ -13,10 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-
-/**
- * Created by thomas on 09/11/17.
- */
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -63,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), Home.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 }

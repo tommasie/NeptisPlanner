@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * This file is part of the Neptis project
+ */
+
 package it.uniroma1.neptis.planner.iface;
 
 import android.location.Address;
@@ -10,10 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import it.uniroma1.neptis.planner.model.Attraction;
-
-/**
- * Created by thomas on 09/10/17.
- */
 
 public interface MainInterface {
 
