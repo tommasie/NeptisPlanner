@@ -6,3 +6,10 @@
 .DS_Store
 /build
 /captures
+/projectFilesBackup
+.idea/copyright/Neptis_Planner_Thomas_Collerton.xml
+.idea/fileTemplates/
+.idea/vcs.xml
+app/google-services.json
+app/src/main/res/mipmap-xxxhdpi/ic_launcher_web.png
+app/src/main/res/values-en/
