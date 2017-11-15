@@ -13,10 +13,6 @@
             android:title="@string/drawer_plan"
             android:checkable="true"/>
         <item
-            android:id="@+id/nav_current"
-            android:icon="@drawable/ic_menu_current"
-            android:title="@string/drawer_current" />
-        <item
             android:id="@+id/nav_plans"
             android:icon="@drawable/ic_menu_plans"
             android:title="@string/drawer_plans" />

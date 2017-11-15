@@ -5,6 +5,8 @@
 
 package it.uniroma1.neptis.planner;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,11 +14,11 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -32,13 +34,16 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -79,12 +84,18 @@ import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MainInterface, LocationListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        MainInterface,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
+    private static final String TAG = Home.class.getName();
     private String apiURL;
 
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
     private CoordinatorLayout coordLayout;
-
     private ProgressDialog progress;
     private Snackbar snackbar;
     private Toolbar toolbar;
@@ -103,92 +114,168 @@ public class Home extends AppCompatActivity
     public Address address;
     private boolean locationFound = false;
 
-    AlphaAnimation inAnimation;
-    AlphaAnimation outAnimation;
-    FrameLayout progressBarHolder;
+    LocationRequest locationRequest;
+    GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-
         this.apiURL = ConfigReader.getConfigValue(this, "serverURL");
 
         setContentView(R.layout.activity_home);
         coordLayout = findViewById(R.id.coordinator_layout);
-        snackbar = Snackbar.make(coordLayout, "Accendi il GPS", Snackbar.LENGTH_LONG);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        snackbar = Snackbar.make(coordLayout, "Attiva il GPS", Snackbar.LENGTH_LONG);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_planning);
 
         View header = navigationView.getHeaderView(0);
-        TextView headerName = (TextView) header.findViewById(R.id.headerNameView);
+        TextView headerName =
+                header.findViewById(R.id.headerNameView);
         headerName.setText(user.getDisplayName());
-        TextView headerEmail = (TextView) header.findViewById(R.id.headerEmailView);
+        TextView headerEmail =
+                header.findViewById(R.id.headerEmailView);
         headerEmail.setText(user.getEmail());
         ImageView headerImg = (ImageView) header.findViewById(R.id.headerImageView);
         new ProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
 
-        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
         progress = new ProgressDialog(this);
         progress.setIndeterminate(true);
         progress.setMessage("Attendi la connessione del GPS");
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             snackbar.show();
         }
 
+        fragmentManager = getSupportFragmentManager();
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d("GoogleApiClient", "connected");
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000); // Update location every second
+
         boolean checkFineLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
         boolean checkCoarseLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-        if(checkCoarseLocation & checkFineLocation) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},1);
+        if (checkCoarseLocation && checkFineLocation) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if(location != null) {
+            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            if (location != null) {
                 Log.d("latlng", location.getLatitude() + " " + location.getLongitude());
                 Geocoder g = new Geocoder(this, Locale.ITALIAN);
-
                 try {
-                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                     address = addresses.get(0);
                     locationFound = true;
+                    initFragment();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else {
-                new MyTask().execute();
+                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+                new WaitGPSTask().execute();
             }
-        }
 
-        fragmentManager = getSupportFragmentManager();
-        if(getIntent().getStringExtra("computed_plan_file") != null) {
-            selectPlan(getIntent().getExtras());
         }
-        else {
-            if (locationFound) {
-                transaction = fragmentManager.beginTransaction();
-                fragment = new ChoiceFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString("city", address.getLocality());
-                bundle.putString("region", address.getAdminArea());
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.content_home, fragment);
-                //transaction.addToBackStack(null);
-                transaction.commit();
-                toolbar.setTitle("Pianifica");
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                    if (location != null) {
+                        Log.d("latlng", location.getLatitude() + " " + location.getLongitude());
+                        Geocoder g = new Geocoder(this, Locale.ITALIAN);
+                        try {
+                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            address = addresses.get(0);
+                            locationFound = true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+                        new WaitGPSTask().execute();
+                    }
+
+                } else {
+                    finish();
+                }
             }
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        this.location = location;
+        Geocoder g = new Geocoder(this, Locale.ITALIAN);
+        try {
+            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            address = addresses.get(0);
+            Log.d("address", address.getLocality());
+            Log.d("address", address.getAddressLine(0));
+            locationFound = true;
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Connect the client.
+        googleApiClient.connect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            if (getIntent().getStringExtra("computed_plan_file") != null) {
+                setCurrentPlan(getIntent().getExtras());
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        // Disconnecting the client invalidates it.
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
     }
 
     @Override
@@ -207,7 +294,7 @@ public class Home extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         Bundle bundle;
-        switch(id) {
+        switch (id) {
             case R.id.nav_planning:
                 transaction = fragmentManager.beginTransaction();
                 fragment = new ChoiceFragment();
@@ -218,14 +305,6 @@ public class Home extends AppCompatActivity
                 transaction.replace(R.id.content_home, fragment);
                 transaction.commit();
                 toolbar.setTitle("Pianifica");
-                break;
-            case R.id.nav_current:
-                transaction = fragmentManager.beginTransaction();
-                fragment = new CurrentPlanFragment();
-                transaction.replace(R.id.content_home, fragment);
-                transaction.commit();
-                getSupportActionBar().setTitle("Piano corrente");
-
                 break;
             case R.id.nav_plans:
                 transaction = fragmentManager.beginTransaction();
@@ -275,9 +354,25 @@ public class Home extends AppCompatActivity
                         });
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void mainMenu() {
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager = getSupportFragmentManager();
+        transaction = fragmentManager.beginTransaction();
+        fragment = new ChoiceFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("city", address.getLocality());
+        bundle.putString("region", address.getAdminArea());
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.content_home, fragment);
+        //transaction.addToBackStack(null);
+        transaction.commit();
+        toolbar.setTitle("Pianifica");
+        navigationView.setCheckedItem(R.id.nav_planning);
     }
 
     @Override
@@ -300,7 +395,7 @@ public class Home extends AppCompatActivity
     }
 
     @Override
-    public void computePlan(Map<String, String> parameters, Map<String,List<Attraction>> extraParams) {
+    public void computePlan(Map<String, String> parameters, Map<String, List<Attraction>> extraParams) {
         request.addRequestParams(parameters);
         request.setMustVisit(extraParams.get("must"));
         request.setExcludeVisit(extraParams.get("exclude"));
@@ -322,10 +417,22 @@ public class Home extends AppCompatActivity
     public void selectPlan(Bundle bundle) {
         transaction = fragmentManager.beginTransaction();
         fragment = new SelectedPlanFragment();
+//        fragment = new CurrentPlanFragment();
         fragment.setArguments(bundle);
         transaction.replace(R.id.content_home, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void setCurrentPlan(Bundle bundle) {
+        transaction = fragmentManager.beginTransaction();
+        fragment = new CurrentPlanFragment();
+        fragment.setArguments(bundle);
+        transaction.replace(R.id.content_home, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+        getSupportActionBar().setTitle("Piano corrente");
     }
 
     @Override
@@ -353,45 +460,31 @@ public class Home extends AppCompatActivity
         return this.address;
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-
-        this.location = location;
-        Geocoder g = new Geocoder(this, Locale.ITALIAN);
-        try {
-            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-            address = addresses.get(0);
-            Log.d("address", address.getLocality());
-            Log.d("address", address.getAddressLine(0));
-            locationFound = true;
-        } catch (IOException e) {
-            e.printStackTrace();
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+    public void onConnectionSuspended(int i) {
 
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
-        if(provider.equals(LocationManager.GPS_PROVIDER)) {
-            snackbar.dismiss();
-        }
-    }
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    @Override
-    public void onProviderDisabled(String provider) {
-        if(provider.equals(LocationManager.GPS_PROVIDER)) {
-            snackbar.show();
-        }
     }
 
     private class ComputePlanAsyncTask extends JSONAsyncTask {
 
         @Override
         protected void onPreExecute() {
+            progress.setMessage("Calcolo del percorso, attendi");
             progress.show();
         }
 
@@ -495,41 +588,24 @@ public class Home extends AppCompatActivity
         selectPlan(extras);
     }*/
 
-    private class MyTask extends AsyncTask<Void, Void, Void> {
+    private class WaitGPSTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             progress.show();
-            /*inAnimation = new AlphaAnimation(0f, 1f);
-            inAnimation.setDuration(200);
-            progressBarHolder.setAnimation(inAnimation);
-            progressBarHolder.setVisibility(View.VISIBLE);*/
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progress.dismiss();
-            /*outAnimation = new AlphaAnimation(1f, 0f);
-            outAnimation.setDuration(200);
-            progressBarHolder.setAnimation(outAnimation);
-            progressBarHolder.setVisibility(View.GONE);*/
-
-            transaction = fragmentManager.beginTransaction();
-            fragment = new ChoiceFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("address", address.getLocality());
-            fragment.setArguments(bundle);
-            transaction.replace(R.id.content_home, fragment);
-            transaction.commit();
-            toolbar.setTitle("Pianifica");
-            //TODO kill GPS listener
-            //locationManager.removeUpdates();
+            initFragment();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
+            Log.d("WaitGPSTask","loactionFound " + locationFound);
             while(!locationFound) {
                 try {
                     TimeUnit.SECONDS.sleep(1000);
@@ -541,43 +617,14 @@ public class Home extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-                    location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-                    if(location != null) {
-                        Geocoder g = new Geocoder(this, Locale.ITALIAN);
-                        try {
-                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(),1);
-                            address = addresses.get(0);
-                            Log.d("addressLine", address.getAddressLine(0));
-                            Log.d("adminArea", address.getAdminArea());
-                            Log.d("featureName", address.getFeatureName());
-                            Log.d("locality", address.getLocality());
-                            //Log.d("premises", address.getPremises());
-                            Log.d("subAdminArea", address.getSubAdminArea());
-                            //Log.d("subLocality", address.getSubLocality());
-                            Log.d("subThoroughFare", address.getSubThoroughfare());
-                            Log.d("thoroughFare", address.getThoroughfare());
-                            locationFound = true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        new MyTask().execute();
-                    }
-
-                } else {
-
-                }
+    private void initFragment() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            if (getIntent().getStringExtra("computed_plan_file") != null) {
+                setCurrentPlan(getIntent().getExtras());
                 return;
             }
         }
+        mainMenu();
     }
 }

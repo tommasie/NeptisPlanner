@@ -18,12 +18,14 @@ import it.uniroma1.neptis.planner.model.Attraction;
 
 public interface MainInterface {
 
+    void mainMenu();
     //Planning functions
     void requestTime(Map<String, String> parameters);
     void computePlan(Map<String, String> params, Map<String, List<Attraction>> visitPreferences);
 
     //Plans functions
     void selectPlan(Bundle bundle);
+    void setCurrentPlan(Bundle bundle);
     void attractionDetail(Bundle bundle);
     void popBackStack();
 

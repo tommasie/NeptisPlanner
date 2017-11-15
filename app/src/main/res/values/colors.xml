@@ -6,6 +6,7 @@
     <color name="white">#FFFFFF</color>
     <color name="neptis_blue">#3F51B5</color>
     <color name="neptis_light">#2980B9</color>
+    <color name="radius_fill">#50777777</color>
 
     <color name="material_green_50">#E8F5E9</color>
     <color name="material_green_500">#4CAF50</color>

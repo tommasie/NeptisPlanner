@@ -64,9 +64,7 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     private LinearLayout currentLinearLayout;
     private TextView current;
     protected Button startButton;
-    protected Button pauseButton;
     protected String planFileName;
-    private int index;
 
     protected String planString;
     protected Plan plan;
@@ -87,7 +85,6 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
 
         planFileName = getArguments().getString("computed_plan_file");
         planString = readFile(planFileName);
-        index = getArguments().getInt("index");
         plan = parsePlan(planString);
     }
 
@@ -101,9 +98,9 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         builder = new AlertDialog.Builder(getContext());
-        title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
+        title = view.findViewById(R.id.textView_selectedPlan_f);
         title.setText(plan.getName());
-        listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
+        listView = view.findViewById(R.id.listView_selectedPlan_f);
 
         if(plan.getType().equals("city"))
             adapter = new AttractionArrayAdapter(getContext(), R.layout.plans_list_item, plan.getAttractions());
@@ -111,26 +108,10 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             adapter = new MuseumAttractionArrayAdapter(getContext(), R.layout.plans_item_3, plan.getAttractions());
         listView.setAdapter(adapter);
 
-        currentLinearLayout = (LinearLayout)view.findViewById(R.id.current_plan_ll);
-        current = (TextView)view.findViewById(R.id.current_plan_current_attraction);
-        startButton = (Button)view.findViewById(R.id.button_plan_start);
+        currentLinearLayout = view.findViewById(R.id.current_plan_ll);
+        current = view.findViewById(R.id.current_plan_current_attraction);
+        startButton = view.findViewById(R.id.button_plan_start);
         startButton.setOnClickListener(this);
-        pauseButton = (Button)view.findViewById(R.id.button_plan_pause);
-
-        Log.d("index",""+index);
-        if(index != -1) {
-            startButton.setVisibility(View.GONE);
-            currentLinearLayout.setVisibility(View.VISIBLE);
-            current.setText(attractions.get(index).getName());
-        }
-        else {
-            startButton.setVisibility(View.VISIBLE);
-        }
-
-        if(index != -1 && plan.getType().equals("city")) {
-            CityAttraction a = (CityAttraction) (attractions.get(index));
-            initAlertDialog(a.getLatitude(),a.getLongitude());
-        }
     }
 
     @Override
@@ -210,11 +191,7 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_plan_start) {
-            Log.d("start button", "tour started");
-            v.setEnabled(false);
-            startButton.setVisibility(View.INVISIBLE);
-            currentLinearLayout.setVisibility(View.VISIBLE);
-            current.setText(attractions.get(0).getName());
+            Log.d(TAG, "click");
             /*Intent queueService = new Intent(getContext(), QueueRecognitionService.class);
             queueService.putExtra("attractions", plan.getAttractions());
             queueService.putExtra("index",index);
@@ -222,14 +199,20 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             switch (plan.getType()) {
                 case "city":
                     Intent geofencingService = new Intent(getContext(), GeofencingService.class);
-                    geofencingService.putExtra("attractions", plan.getAttractions());
-                    geofencingService.putExtra("current_plan", planFileName);
-                    geofencingService.putExtra("index",index);
+                    Bundle serviceBundle = new Bundle();
+                    serviceBundle.putSerializable("attractions", plan.getAttractions());
+                    serviceBundle.putString("current_plan", planFileName);
+                    serviceBundle.putInt("index",0);
+                    geofencingService.putExtras(serviceBundle);
                     CityAttraction attraction = (CityAttraction) plan.getAttractions().get(0);
-                    initAlertDialog(attraction.getLatitude(), attraction.getLongitude());
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+                    //initAlertDialog(attraction.getLatitude(), attraction.getLongitude());
+                    //AlertDialog dialog = builder.create();
+                    //dialog.show();
                     getActivity().startService(geofencingService);
+                    Bundle fragmentBundle = new Bundle();
+                    fragmentBundle.putString("computed_plan_file", planFileName);
+                    fragmentBundle.putInt("index",0);
+                    activity.setCurrentPlan(fragmentBundle);
                     break;
                 case "museum":
                     int permissionCheck = ContextCompat.checkSelfPermission(getContext(),
@@ -242,23 +225,11 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                         findService.putExtra("attractions", plan.getAttractions());
                         findService.putExtra("user","");
                         findService.putExtra("current_plan", planFileName);
-                        findService.putExtra("index",index);
+                        findService.putExtra("index",0);
                         getActivity().startService(findService);
                     }
                     break;
             }
-        }
-
-        if(v.getId() == R.id.button_plan_pause) {
-            Log.d("start button", "tour paused");
-            pauseButton.setVisibility(View.GONE);
-            startButton.setEnabled(true);
-            Intent intent;
-            if(plan.getType().equals("city"))
-                intent = new Intent(getContext(), GeofencingService.class);
-            else
-                intent = new Intent(getContext(), FINDService.class);
-            getActivity().stopService(intent);
         }
     }
 
@@ -292,7 +263,7 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                     //TODO add user name
                     findService.putExtra("user","");
                     findService.putExtra("current_plan", planFileName);
-                    findService.putExtra("index",index);
+                    findService.putExtra("index",0);
                     getActivity().startService(findService);
                 }
         }
