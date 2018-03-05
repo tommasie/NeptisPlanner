@@ -13,7 +13,7 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_register_user">New user</string>
     <string name="action_remember_login">Remember me</string>
-    <string name="planning_choice_tour">Customize your tour</string>
+    <string name="planning_choice_tour">Create your tour</string>
     <string name="planning_choice_hint">Digit to select..</string>
     <string name="planning_choice_structure_selection">Select the structure</string>
 
@@ -51,10 +51,10 @@
     <string name="title_activity_firebase_login">Sign in</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
+    <string name="prompt_email" translatable="false">Email</string>
     <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
+    <string name="action_sign_in" translatable="false">Sign in or register</string>
+    <string name="permission_rationale" translatable="false">"Contacts permissions are needed for providing email
         completions."
     </string>
     <string name="activity_attractions">Attractions</string>
@@ -70,5 +70,11 @@
     <string name="drawer_survey">Survey</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="attraction_minutes">%1$d minutes</string>
+    <string name="attraction_minutes_shortened" translatable="false">%1$dm</string>
+    <string name="choose_museum_hint">Museum name</string>
+    <string name="choose_museum_title">Choose the museum</string>
+    <string name="attraction_dialog_add">Add</string>
+    <string name="attraction_dialog_cancel">Cancel</string>
 </resources>

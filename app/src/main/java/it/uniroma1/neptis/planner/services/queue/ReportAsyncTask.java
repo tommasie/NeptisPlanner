@@ -73,7 +73,7 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             Log.d("code report",code+"");
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return -1;
         }
         return code;

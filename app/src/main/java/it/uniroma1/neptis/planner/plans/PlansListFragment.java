@@ -10,46 +10,43 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.custom.PlansListAdapter;
 import it.uniroma1.neptis.planner.iface.MainInterface;
-import it.uniroma1.neptis.planner.logging.LogEvent;
 
 public class PlansListFragment extends Fragment {
 
     private static final String TAG = PlansListFragment.class.getName();
-    private Logger eventLogger = LoggerFactory.getLogger("event_logger");
-    private LogEvent logEvent;
 
-    private TextView title;
-    private ListView listView;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
     private int listPosition = -1;
-    private PlansListAdapter adapter;
 
     private ArrayList<String> filesList;
     private Menu menu;
 
     private MainInterface activity;
+
     public PlansListFragment() {
     }
 
@@ -62,65 +59,40 @@ public class PlansListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_plans_list, container, false);
+        return inflater.inflate(R.layout.fragment_plans_list_recycler, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        title = (TextView)view.findViewById(R.id.textView_selectedPlan_f);
-        title.setText(getString(R.string.fragment_plans_list_title));
-        listView = (ListView)view.findViewById(R.id.listView_selectedPlan_f);
         filesList = new ArrayList<>();
-        //Get the list of plans in the folder and display them in the ListView
+        //Get the list of plans in the folder and display them in the RecyclerView
         File fileDirectory = getContext().getFilesDir();
         File[] dirFiles = fileDirectory.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                Log.d(TAG, name);
-                return name.matches("\\w+\\_\\d+");
+                return name.matches("\\w+_\\d+");
             }
         });
         for (File f : dirFiles) {
             filesList.add(f.getName());
         }
-        adapter = new PlansListAdapter(getContext(), R.layout.plans_list_item2, filesList);
-        adapter.sort(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                Long l1 = Long.parseLong(o1.split("_")[1]);
-                Long l2 = Long.parseLong(o2.split("_")[1]);
-                return l1.compareTo(l2) * -1;
-            }
-        });
-        listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        Collections.sort(filesList, new Comparator<String>() {
+                    @Override
+                    public int compare(String s1, String s2) {
+                        Long l1 = Long.parseLong(s1.split("_")[1]);
+                        Long l2 = Long.parseLong(s2.split("_")[1]);
+                        return l1.compareTo(l2) * -1;
+                    }
+                });
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                logEvent = new LogEvent(getActivity().getClass().getName(),"select plan", "listview_selectedPlan_item", System.currentTimeMillis());
-                eventLogger.info(logEvent.toJSONString());
-                String item = (String) parent.getItemAtPosition(position);
-                Bundle bundle = new Bundle();
-                bundle.putString("computed_plan_file", item);
-                bundle.putInt("index", -1);
-                activity.selectPlan(bundle);
-            }
-
-        });
-
-
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            public boolean onItemLongClick(final AdapterView parent, View view, final int position, long id) {
-                logEvent = new LogEvent(getActivity().getClass().getName(),"open list menu", "listview_selectedPlan_item", System.currentTimeMillis());
-                eventLogger.info(logEvent.toJSONString());
-                listPosition = position;
-                menu.findItem(R.id.delete_plan).setVisible(true);
-                return true;
-            }
-        });
+        recyclerView = view.findViewById(R.id.plans_recycler);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
+        adapter = new PlansRecyclerAdapter(filesList);
+        recyclerView.setAdapter(adapter);
 
     }
 
@@ -151,16 +123,82 @@ public class PlansListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.delete_plan) {
-            logEvent = new LogEvent(getActivity().getClass().getName(),"delete eplan", "delete_plan_options_button", System.currentTimeMillis());
-            eventLogger.info(logEvent.toJSONString());
             File dir = getContext().getFilesDir();
             File file = new File(dir, filesList.get(listPosition));
             boolean deleted = file.delete();
             filesList.remove(listPosition);
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemRemoved(listPosition);
+            adapter.notifyItemRangeChanged(listPosition, filesList.size());
             Toast.makeText(getContext(), "Removed", Toast.LENGTH_SHORT).show();
+            menu.findItem(R.id.delete_plan).setVisible(false);
         }
         return true;
     }
 
+    private class PlansRecyclerAdapter extends RecyclerView.Adapter<PlansRecyclerAdapter.PlanHolder> {
+
+        private List<String> fileNames;
+
+        private PlansRecyclerAdapter(List<String> files) {
+            this.fileNames = files;
+        }
+
+        @Override
+        public PlansRecyclerAdapter.PlanHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.plans_item_3, parent, false);
+            return new PlansRecyclerAdapter.PlanHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(PlansRecyclerAdapter.PlanHolder holder, int position) {
+            holder.bind(fileNames.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return fileNames.size();
+        }
+
+        public class PlanHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener, View.OnLongClickListener {
+            private TextView planName;
+            private TextView planDate;
+
+
+            private PlanHolder(View v) {
+                super(v);
+                this.planName = v.findViewById(R.id.plan_n);
+                this.planDate = v.findViewById(R.id.plan_d);
+                v.setOnClickListener(this);
+                v.setOnLongClickListener(this);
+            }
+
+            private void bind(String filename) {
+                String[] split = filename.split("_");
+                this.planName.setText(split[0]);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(split[1]));
+                String d = DateFormat.getDateTimeInstance().format(calendar.getTime());
+                this.planDate.setText(d);
+            }
+
+            @Override
+            public void onClick(View v) {
+                String item = fileNames.get(getLayoutPosition());
+                Bundle bundle = new Bundle();
+                bundle.putString("computed_plan_file", item);
+                bundle.putInt("index", -1);
+                activity.selectPlan(bundle);
+            }
+
+            @Override
+            public boolean onLongClick(View v) {
+                //v.setBackgroundColor(Color.LTGRAY);
+                listPosition = getLayoutPosition();
+                menu.findItem(R.id.delete_plan).setVisible(true);
+                return true;
+            }
+        }
+    }
 }

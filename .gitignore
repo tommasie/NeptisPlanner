@@ -14,3 +14,16 @@ app/google-services.json
 app/src/main/res/mipmap-xxxhdpi/ic_launcher_web.png
 app/src/main/res/values-en/
 /app/src/main/AndroidManifest.xml
+/app/src/main/res/values/strings.xml
+/app/src/main/res/values-it/strings.xml
+app/release/
+app/src/main/res/drawable-hdpi/ic_access_time.png
+app/src/main/res/drawable-hdpi/ic_stars.png
+app/src/main/res/drawable-mdpi/ic_access_time.png
+app/src/main/res/drawable-mdpi/ic_stars.png
+app/src/main/res/drawable-xhdpi/ic_access_time.png
+app/src/main/res/drawable-xhdpi/ic_stars.png
+app/src/main/res/drawable-xxhdpi/ic_access_time.png
+app/src/main/res/drawable-xxhdpi/ic_stars.png
+app/src/main/res/ic_delete.png
+app/src/main/res/res/

@@ -126,6 +126,7 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, destListener);
+        notificationManager.cancel(MAIN_NOTIFICATION_ID);
         lock.release();
         super.onDestroy();
     }

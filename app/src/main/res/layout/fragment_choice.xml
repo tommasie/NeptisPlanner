@@ -85,31 +85,6 @@
         android:id="@+id/spinner_f"
         android:visibility="gone"/>
 
-    <TextView
-        android:id="@+id/textView_desc2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:gravity="center"
-        android:text="@string/fragment_choice_text3"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="18sp" />
-
-    <AutoCompleteTextView
-        android:hint="@string/planning_choice_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="5dp"
-        android:focusableInTouchMode="true"
-        android:elegantTextHeight="true"
-        android:maxLines="1"
-        android:imeOptions="actionDone"
-        android:textSize="20sp"
-        android:id="@+id/autoCompleteTextView_f" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -125,7 +100,7 @@
             android:layout_height="wrap_content"
             android:text="@string/next"
             android:id="@+id/next_f"
-            android:background="@drawable/buttonshape"
+            android:background="@drawable/button_next"
             android:textColor="#ffffff"
             android:enabled="false"
             />

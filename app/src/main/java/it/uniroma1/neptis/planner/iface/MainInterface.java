@@ -15,13 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 import it.uniroma1.neptis.planner.model.Attraction;
+import it.uniroma1.neptis.planner.model.Element;
 
 public interface MainInterface {
 
     void mainMenu();
-    //Planning functions
-    void requestTime(Map<String, String> parameters);
-    void computePlan(Map<String, String> params, Map<String, List<Attraction>> visitPreferences);
+    //Request planning functions
+    void selectVisits(Map<String, String> parameters);
+    void selectMuseum(Map<String, String> parameters);
+    void selectIncludeExclude(Map<String, String> parameters);
+    void computePlan(Map<String, List<Attraction>> visitPreferences);
 
     //Plans functions
     void selectPlan(Bundle bundle);

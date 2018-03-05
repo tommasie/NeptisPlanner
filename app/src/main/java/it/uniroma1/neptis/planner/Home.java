@@ -6,7 +6,6 @@
 package it.uniroma1.neptis.planner;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,10 +14,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -35,14 +32,17 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -58,25 +58,28 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
+import it.uniroma1.neptis.planner.planning.AttractionsFragment;
 import it.uniroma1.neptis.planner.planning.ChoiceFragment;
+import it.uniroma1.neptis.planner.planning.ChooseMuseumFragment;
 import it.uniroma1.neptis.planner.planning.VisitsFragment;
 import it.uniroma1.neptis.planner.plans.CurrentPlanFragment;
 import it.uniroma1.neptis.planner.plans.PlansListFragment;
 import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
-import it.uniroma1.neptis.planner.rating.CityAttractionsFragment;
-import it.uniroma1.neptis.planner.rating.MuseumAttractionsFragment;
+import it.uniroma1.neptis.planner.rating.CityAttractionTimeFragment;
+import it.uniroma1.neptis.planner.rating.MuseumAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
@@ -85,10 +88,7 @@ import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        MainInterface,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        MainInterface {
 
     private static final String TAG = Home.class.getName();
     private String apiURL;
@@ -97,12 +97,12 @@ public class Home extends AppCompatActivity
     private NavigationView navigationView;
     private CoordinatorLayout coordLayout;
     private ProgressDialog progress;
+    private ProgressBar progressBar;
     private Snackbar snackbar;
     private Toolbar toolbar;
     private FragmentManager fragmentManager;
     private FragmentTransaction transaction;
     private Fragment fragment;
-
 
     private Request request;
 
@@ -112,14 +112,15 @@ public class Home extends AppCompatActivity
     private LocationManager locationManager;
     private Location location;
     public Address address;
-    private boolean locationFound = false;
 
     LocationRequest locationRequest;
-    GoogleApiClient googleApiClient;
+    FusedLocationProviderClient locationClient;
 
+    public static List<Attraction> attractionsList;
+
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
@@ -161,15 +162,17 @@ public class Home extends AppCompatActivity
 
         fragmentManager = getSupportFragmentManager();
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
-    }
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d("GoogleApiClient", "connected");
+        request = null;
+        attractionsList = new ArrayList<>();
+
+        progressBar = new ProgressBar(this,null,android.R.attr.progressBarStyleLarge);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100,100);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        drawer.addView(progressBar,params);
+        progressBar.setVisibility(View.GONE);     // To Hide ProgressBar
+
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(1000); // Update location every second
@@ -179,23 +182,79 @@ public class Home extends AppCompatActivity
         if (checkCoarseLocation && checkFineLocation) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
-            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            if (location != null) {
-                Log.d("latlng", location.getLatitude() + " " + location.getLongitude());
-                Geocoder g = new Geocoder(this, Locale.ITALIAN);
-                try {
-                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    address = addresses.get(0);
-                    locationFound = true;
-                    initFragment();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-                new WaitGPSTask().execute();
-            }
+            progressBar.setVisibility(View.VISIBLE);  //To show ProgressBar
+            /*locationClient.getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(@NonNull Location loc) {
+                            Log.d("onsuccesslistener", "success");
+                            location = loc;
+                            long currTime = System.currentTimeMillis();
+                            if(currTime <= location.getTime() + (10 * 60 * 1000)) {
+                                locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                                    @Override
+                                    public void onLocationResult(LocationResult locationResult) {
+                                        super.onLocationResult(locationResult);
+                                        location = locationResult.getLastLocation();
+                                        Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
+                                        try {
+                                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                            address = addresses.get(0);
+                                            Log.d("address", address.getLocality());
+                                            Log.d("address", address.getAddressLine(0));
+                                            progress.dismiss();
+                                            initFragment();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        locationClient.removeLocationUpdates(new LocationCallback());
+                                    }
+                                }, null);
+                            } else {
+                                Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
+                                try {
+                                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                    address = addresses.get(0);
+                                    Log.d("address", address.getLocality());
+                                    Log.d("address", address.getAddressLine(0));
+                                    progress.dismiss();
+                                    initFragment();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("onfaillistener", "fail");
+                            e.printStackTrace();
+                        }
+                    });*/
+
+            //LocationCallback cb
+
+            locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    locationClient.removeLocationUpdates(this);
+                    location = locationResult.getLastLocation();
+                    Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
+                    try {
+                        List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        address = addresses.get(0);
+                        Log.d("address", address.getLocality());
+                        Log.d("address", address.getAddressLine(0));
+                        progressBar.setVisibility(View.GONE);  //To show ProgressBar
+                        drawer.removeView(progressBar);
+                        initFragment();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, null);
         }
     }
 
@@ -208,50 +267,32 @@ public class Home extends AppCompatActivity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-                    if (location != null) {
-                        Log.d("latlng", location.getLatitude() + " " + location.getLongitude());
-                        Geocoder g = new Geocoder(this, Locale.ITALIAN);
-                        try {
-                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                            address = addresses.get(0);
-                            locationFound = true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    progress.show();
+                    locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                            super.onLocationResult(locationResult);
+                            location = locationResult.getLastLocation();
+                            Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
+                            try {
+                                List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                address = addresses.get(0);
+                                Log.d("address", address.getLocality());
+                                Log.d("address", address.getAddressLine(0));
+                                progress.dismiss();
+                                initFragment();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            locationClient.removeLocationUpdates(new LocationCallback());
                         }
-                    } else {
-                        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-                        new WaitGPSTask().execute();
-                    }
+                    }, null);
 
                 } else {
                     finish();
                 }
             }
         }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        this.location = location;
-        Geocoder g = new Geocoder(this, Locale.ITALIAN);
-        try {
-            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            address = addresses.get(0);
-            Log.d("address", address.getLocality());
-            Log.d("address", address.getAddressLine(0));
-            locationFound = true;
-            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Connect the client.
-        googleApiClient.connect();
     }
 
     @Override
@@ -263,13 +304,6 @@ public class Home extends AppCompatActivity
                 setCurrentPlan(getIntent().getExtras());
             }
         }
-    }
-
-    @Override
-    protected void onStop() {
-        // Disconnecting the client invalidates it.
-        googleApiClient.disconnect();
-        super.onStop();
     }
 
     @Override
@@ -291,8 +325,9 @@ public class Home extends AppCompatActivity
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        navigationView.setCheckedItem(id);
         Bundle bundle;
         switch (id) {
             case R.id.nav_planning:
@@ -313,9 +348,9 @@ public class Home extends AppCompatActivity
                 transaction.commit();
                 getSupportActionBar().setTitle("Piani salvati");
                 break;
-            case R.id.city_attractions:
+            case R.id.city_attractions_sensing:
                 transaction = fragmentManager.beginTransaction();
-                fragment = new CityAttractionsFragment();
+                fragment = new CityAttractionTimeFragment();
                 bundle = new Bundle();
                 bundle.putString("city", address.getLocality());
                 bundle.putString("region", address.getAdminArea());
@@ -324,9 +359,9 @@ public class Home extends AppCompatActivity
                 transaction.commit();
                 getSupportActionBar().setTitle("Attrazioni");
                 break;
-            case R.id.museum_attractions:
+            case R.id.museum_attractions_sensing:
                 transaction = fragmentManager.beginTransaction();
-                fragment = new MuseumAttractionsFragment();
+                fragment = new MuseumAttractionTimeFragment();
                 bundle = new Bundle();
                 bundle.putString("city", address.getLocality());
                 bundle.putString("region", address.getAdminArea());
@@ -360,7 +395,7 @@ public class Home extends AppCompatActivity
 
     @Override
     public void mainMenu() {
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        //fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         fragmentManager = getSupportFragmentManager();
         transaction = fragmentManager.beginTransaction();
         fragment = new ChoiceFragment();
@@ -376,8 +411,8 @@ public class Home extends AppCompatActivity
     }
 
     @Override
-    public void requestTime(Map<String, String> parameters) {
-        request = new Request();
+    public void selectVisits(Map<String, String> parameters) {
+        if(request == null) request = new Request();
         request.addRequestParams(parameters);
         Fragment visitsFragment = new VisitsFragment();
 
@@ -395,17 +430,51 @@ public class Home extends AppCompatActivity
     }
 
     @Override
-    public void computePlan(Map<String, String> parameters, Map<String, List<Attraction>> extraParams) {
+    public void selectMuseum(Map<String, String> parameters) {
+        request = new Request();
         request.addRequestParams(parameters);
-        request.setMustVisit(extraParams.get("must"));
-        request.setExcludeVisit(extraParams.get("exclude"));
+        Fragment chooseMuseumFragment = new ChooseMuseumFragment();
+        Bundle b = new Bundle();
+        //Parameters needed to make the call in the AsyncTask
+        b.putString("category", request.getRequestParameters().get("category"));
+        b.putString("city", request.getRequestParameters().get("city"));
+        b.putString("region", request.getRequestParameters().get("region"));
+        chooseMuseumFragment.setArguments(b);
+        transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.content_home, chooseMuseumFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+
+    @Override
+    public void selectIncludeExclude(Map<String, String> parameters) {
+        request.addRequestParams(parameters);
+        Fragment attractionsFragment = new AttractionsFragment();
+        Bundle b = new Bundle();
+        b.putString("category", request.getRequestParameters().get("category"));
+        b.putString("city", request.getRequestParameters().get("city"));
+        b.putString("region", request.getRequestParameters().get("region"));
+        b.putString("id", request.getRequestParameters().get("id"));
+        attractionsFragment.setArguments(b);
+        transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.content_home, attractionsFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void computePlan(Map<String, List<Attraction>> params) {
+        request.setMustVisit(params.get("must"));
+        request.setExcludeVisit(params.get("exclude"));
 
         user.getIdToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
                             String idToken = task.getResult().getToken();
-                            new ComputePlanAsyncTask().execute(apiURL + "/compute-plan-" + request.getRequestParameters().get("category"), idToken);
+                            ComputePlanAsyncTask t = new ComputePlanAsyncTask(getApplicationContext(), progress, request, location, transaction,fragmentManager);
+                            t.execute(apiURL + "/compute-plan-" + request.getRequestParameters().get("category"), idToken);
                         } else {
                             // Handle error -> task.getException();
                         }
@@ -460,27 +529,26 @@ public class Home extends AppCompatActivity
         return this.address;
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
+    private static class ComputePlanAsyncTask extends JSONAsyncTask {
+
+        private WeakReference<Context> context;
+        private ProgressDialog progress;
+        private Request request;
+        private Location location;
+
+        private FragmentTransaction transaction;
+        private FragmentManager fragmentManager;
+
+        private ComputePlanAsyncTask(Context context, ProgressDialog progress,
+                                        Request request, Location location,
+                                     FragmentTransaction transaction, FragmentManager fragmentManager) {
+            this.context = new WeakReference<>(context);
+            this.progress = progress;
+            this.request = request;
+            this.location = location;
+            this.transaction = transaction;
+            this.fragmentManager = fragmentManager;
         }
-        return false;
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    private class ComputePlanAsyncTask extends JSONAsyncTask {
 
         @Override
         protected void onPreExecute() {
@@ -548,6 +616,7 @@ public class Home extends AppCompatActivity
             return code;
         }
 
+
         @Override
         protected void onPostExecute(Integer result) {
             progress.dismiss();
@@ -570,54 +639,18 @@ public class Home extends AppCompatActivity
             String filename = request.getRequestParameters().get("name")  + "_" + ts;
             FileOutputStream outputStream;
             try {
-                outputStream = getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream = context.get().openFileOutput(filename, Context.MODE_PRIVATE);
                 outputStream.write(request.getPlan().getBytes());
                 outputStream.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.get(), "Saved!", Toast.LENGTH_SHORT).show();
             return filename;
         }
     }
 
-    /*@Override
-    protected void onNewIntent(Intent intent) {
-        Log.d("Home","new intent");
-        Bundle extras = intent.getExtras();
-        selectPlan(extras);
-    }*/
-
-    private class WaitGPSTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progress.show();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            progress.dismiss();
-            initFragment();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Log.d("WaitGPSTask","loactionFound " + locationFound);
-            while(!locationFound) {
-                try {
-                    TimeUnit.SECONDS.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-    }
-
-    private void initFragment() {
+    public void initFragment() {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             if (getIntent().getStringExtra("computed_plan_file") != null) {

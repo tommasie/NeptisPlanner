@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "it.uniroma1.neptis.planner"
-        minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 22
+        targetSdkVersion 26
+        versionCode 3
+        versionName "beta1"
         multiDexEnabled true
         resConfigs "auto"
         vectorDrawables {
@@ -26,6 +26,7 @@ android {
 
     dexOptions {
         preDexLibraries = false
+        javaMaxHeapSize "2048M"
     }
 
 }
@@ -56,5 +57,13 @@ dependencies {
     testCompile 'junit:junit:4.12'
     implementation 'com.google.android.gms:play-services-maps:11.4.2'
 }
+
+
+
+
+
+
+
+
 
 apply plugin: 'com.google.gms.google-services'

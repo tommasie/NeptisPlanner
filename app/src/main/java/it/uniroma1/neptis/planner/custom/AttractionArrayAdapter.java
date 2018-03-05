@@ -41,7 +41,7 @@ public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.plans_list_item, parent, false);
         }
-        TextView attractionName = (TextView)convertView.findViewById(R.id.textest);
+        TextView attractionName = convertView.findViewById(R.id.textest);
         attractionName.setText(attraction.getName());
         return convertView;
     }

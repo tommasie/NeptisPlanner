@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
                                         new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()))
                         .setIsSmartLockEnabled(false)
                         .setLogo(R.mipmap.ic_launcher_web)
-                        .setTheme(R.style.GreenTheme)
+                        .setTheme(R.style.AppTheme)
                         .build(),
                 RC_SIGN_IN);
 

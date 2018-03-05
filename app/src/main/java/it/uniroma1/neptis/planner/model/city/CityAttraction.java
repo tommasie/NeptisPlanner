@@ -13,8 +13,8 @@ public class CityAttraction extends Attraction {
     private String longitude;
     private double radius;
 
-    public CityAttraction(String id, String name, byte rating, String latitude, String longitude, double radius) {
-        super(id, name, rating);
+    public CityAttraction(String id, String name, String description, byte rating, int time, String url, String latitude, String longitude, double radius) {
+        super(id, name, description, rating, time, url);
         this.latitude = latitude;
         this.longitude = longitude;
         this.radius = radius;

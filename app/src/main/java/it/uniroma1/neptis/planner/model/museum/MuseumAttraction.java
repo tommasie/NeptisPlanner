@@ -11,16 +11,12 @@ public class MuseumAttraction extends Attraction {
 
     private String area;
 
-    public MuseumAttraction(String id, String name, byte rating, String area) {
-        super(id, name, rating);
+    public MuseumAttraction(String id, String name, String description, byte rating, int time,String url, String area) {
+        super(id, name,description, rating, time, url);
         this.area = area;
     }
 
     public String getArea() {
         return area;
-    }
-
-    public void setArea(String area) {
-        this.area = area;
     }
 }

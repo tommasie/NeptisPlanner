@@ -5,6 +5,7 @@
 
 package it.uniroma1.neptis.planner.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -18,20 +19,26 @@ public class Attraction implements Serializable {
 
     protected String id;
     protected String name;
+    protected String description;
     protected byte rating;
+    protected int time;
+    protected String imageURL;
 
-    public Attraction(String id, String name, byte rating) {
+    public Attraction(String id, String name, String description, byte rating, int time, String url) {
         this.id = id;
         this.name = name;
+        this.description = description;
         this.rating = rating;
+        this.time = time;
+        this.imageURL = url;
     }
 
     public static Attraction parse(JSONObject attraction) {
         try {
             String id = attraction.getString("id");
             String name = attraction.getString("name");
-            byte rating = (byte) attraction.getInt("rating");
-            return new Attraction(id,name,rating);
+            //byte rating = (byte) attraction.getInt("rating");
+            return new Attraction(id,name,"descrizione",(byte)2, 2, null);
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
             return null;
@@ -63,8 +70,8 @@ public class Attraction implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getDescription() {
+        return description;
     }
 
     public byte getRating() {
@@ -73,6 +80,14 @@ public class Attraction implements Serializable {
 
     public void setRating(byte rating) {
         this.rating = rating;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public String getImageURL() {
+        return this.imageURL;
     }
 
     @Override

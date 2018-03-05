@@ -12,7 +12,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -32,12 +33,21 @@ public class MuseumAttractionArrayAdapter extends AttractionArrayAdapter {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         MuseumAttraction attraction = (MuseumAttraction) getItem(position);
         if(convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.plans_item_3, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.plans_item_new, parent, false);
         }
-        TextView attractionName = (TextView)convertView.findViewById(R.id.museum_attraction_name);
+        ImageView attractionImage = convertView.findViewById(R.id.museum_attraction_image);
+        TextView attractionName = convertView.findViewById(R.id.plan_n);
         attractionName.setText(attraction.getName());
-        TextView areaName = (TextView)convertView.findViewById(R.id.museum_room_name);
+        TextView areaName = convertView.findViewById(R.id.museum_attraction_description);
         areaName.setText("Room: " + attraction.getArea());
+        TextView attractionTime = convertView.findViewById(R.id.museum_attraction_visit_time);
+        attractionTime.setText(getContext().getString(R.string.attraction_minutes, 1));
+
+        Button beginVisit = convertView.findViewById(R.id.museum_attraction_begin_timer);
+        Button endVisit =  convertView.findViewById(R.id.museum_attraction_end_timer);
+
+        Button rateAttraction = convertView.findViewById(R.id.museum_attraction_rate);
+        //TODO il pulsante di rating e di inizio/fine della visita
         return convertView;
     }
 }

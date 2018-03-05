@@ -30,7 +30,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="API"/>
+            android:value="AIzaSyBr9W_Xgwb2EhYto34eE7r2r9fEr1aEIMk"/>
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -60,7 +60,6 @@
             android:exported="false" />
 
         <activity android:name=".plans.PlansActivity" />
-        <activity android:name=".must_visit" />
         <activity
             android:name=".Home"
             android:launchMode="singleTop"

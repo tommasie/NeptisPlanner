@@ -205,10 +205,11 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
                 for (int i = 0; i < route.length(); i++) {
                     JSONObject attraction = route.getJSONObject(i);
                     String attrName = attraction.getString("name");
+                    //String description =
                     String id = attraction.getString("id");
                     String lat = attraction.getJSONObject("coordinates").getString("latitude");
                     String lng = attraction.getJSONObject("coordinates").getString("longitude");
-                    CityAttraction a = new CityAttraction(id, attrName, (byte) 50, lat, lng, 10.0);
+                    CityAttraction a = new CityAttraction(id, attrName, "", (byte) 50, 2,"", lat, lng, 10.0);
                     plan.addAttraction(a);
                 }
                 attractions = plan.getAttractions();
@@ -227,7 +228,7 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
                         String attractionName = att.getString("name");
                         String attractionId = att.getString("id");
                         byte attractionRating = (byte) att.getInt("rating");
-                        MuseumAttraction at = new MuseumAttraction(attractionId, attractionName, attractionRating, areaName);
+                        MuseumAttraction at = new MuseumAttraction(attractionId, attractionName, "", attractionRating, 2, "", areaName);
                         plan.addAttraction(at);
                     }
                 }
@@ -282,6 +283,7 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
         //lineOptions.add(current);
         for(Attraction attraction : plan.getAttractions()) {
             CityAttraction cityAttraction = (CityAttraction)attraction;
+            Log.d(cityAttraction.getName() + " radius", ""+cityAttraction.getRadius());
             double lat = Double.parseDouble(cityAttraction.getLatitude());
             double lng = Double.parseDouble(cityAttraction.getLongitude());
             LatLng attractionCoord = new LatLng(lat, lng);
