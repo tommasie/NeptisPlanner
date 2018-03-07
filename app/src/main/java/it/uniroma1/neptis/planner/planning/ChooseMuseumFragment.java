@@ -57,7 +57,6 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
     private RecyclerView recyclerView;
     private MuseumRecyclerAdapter adapter;
     private Button next;
-    private ProgressDialog progress;
 
     public ChooseMuseumFragment() {
     }
@@ -86,9 +85,6 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        progress = new ProgressDialog(getContext());
-        progress.setIndeterminate(true);
-        //progress.setMessage(" ");
         refreshLayout = view.findViewById(R.id.swiperefresh);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeResources(R.color.neptis_light, R.color.neptis_blue);
