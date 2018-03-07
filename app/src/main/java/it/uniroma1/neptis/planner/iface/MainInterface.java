@@ -24,7 +24,6 @@ public interface MainInterface {
     void selectVisits(Map<String, String> parameters);
     void selectMuseum(Map<String, String> parameters);
     void selectIncludeExclude(Map<String, String> parameters);
-    void computePlan(Map<String, List<Attraction>> visitPreferences);
 
     //Plans functions
     void selectPlan(Bundle bundle);

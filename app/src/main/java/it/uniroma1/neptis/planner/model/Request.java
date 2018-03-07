@@ -5,12 +5,13 @@
 
 package it.uniroma1.neptis.planner.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Request {
+public class Request implements Serializable {
 
     private Map<String,String> planningParameters;
     private List<Attraction> mustVisit;
@@ -54,5 +55,10 @@ public class Request {
 
     public void setPlan(String plan) {
         this.plan = plan;
+    }
+
+    @Override
+    public String toString() {
+        return planningParameters.toString();
     }
 }

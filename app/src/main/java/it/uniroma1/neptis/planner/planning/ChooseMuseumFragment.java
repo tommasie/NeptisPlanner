@@ -6,7 +6,6 @@
 package it.uniroma1.neptis.planner.planning;
 
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,13 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.asynctasks.GetMuseumsListAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Element;
-import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
-import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 
 public class ChooseMuseumFragment extends Fragment implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener{
 
@@ -71,8 +69,7 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
         prevView = null;
         museumQuery = new ArrayList<>();
         filteredList = new ArrayList<>();
-        this.museumUrl = ConfigReader.getConfigValue(getContext(), "serverURL") + "/museums";
-        this.museumUrl += String.format("?city=%s&region=%s", city, region);
+        this.museumUrl = Home.apiURL + String.format("/museums?city=%s&region=%s", city, region);
     }
 
 

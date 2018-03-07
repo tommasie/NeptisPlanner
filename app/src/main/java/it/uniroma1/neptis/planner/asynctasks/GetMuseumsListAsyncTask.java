@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ import it.uniroma1.neptis.planner.planning.ChooseMuseumFragment;
 public class GetMuseumsListAsyncTask extends JSONAsyncTask {
 
     private MainInterface activity;
-    private SwipeRefreshLayout refreshLayout;
+    private WeakReference<SwipeRefreshLayout> refreshLayout;
     private List<Element> museumQuery;
     private List<Element> filteredList;
     private ChooseMuseumFragment.MuseumRecyclerAdapter adapter;
@@ -36,7 +37,7 @@ public class GetMuseumsListAsyncTask extends JSONAsyncTask {
                                    List<Element> museumQuery, List<Element> filteredList,
                                    ChooseMuseumFragment.MuseumRecyclerAdapter adapter) {
         this.activity = activity;
-        this.refreshLayout = layout;
+        this.refreshLayout = new WeakReference<>(layout);
         this.museumQuery = museumQuery;
         this.filteredList = filteredList;
         this.adapter = adapter;
@@ -95,7 +96,7 @@ public class GetMuseumsListAsyncTask extends JSONAsyncTask {
     @Override
     protected void onPostExecute(Integer result) {
         activity.hideToolbarProgress();
-        refreshLayout.setRefreshing(false);
+        refreshLayout.get().setRefreshing(false);
         if (result == 200) {
             if (!museumQuery.isEmpty()){
                 Collections.sort(museumQuery);

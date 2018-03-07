@@ -23,14 +23,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.asynctasks.ComputePlanAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
+import it.uniroma1.neptis.planner.model.Request;
 
 public class AttractionsFragment extends Fragment implements View.OnClickListener{
 
@@ -42,6 +44,7 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
 
     //Input variables
     private String category, id;
+    private Request request;
     private AutoCompleteTextView autocomplete;
     private Button includeButton;
     private RecyclerView includeRecycler;
@@ -53,6 +56,8 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
 
     private View prevView = null;
     private int position;
+
+    private String computeURL;
 
     private MainInterface activity;
 
@@ -66,8 +71,11 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
         for(Attraction a : attractions) {
             attractionsString.add(a.getName());
         }
+
+        request = (Request)getArguments().getSerializable("request");
         include = new ArrayList<>();
         exclude = new ArrayList<>();
+        computeURL = Home.apiURL + "/compute-plan-" + request.getRequestParameters().get("category");
     }
 
     @Override
@@ -134,10 +142,11 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
                 }
                 break;
             case R.id.filter_attractions_next:
-                Map<String, List<Attraction>> params = new HashMap<>();
-                params.put("must", include);
-                params.put("exclude", exclude);
-                activity.computePlan(params);
+                request.setMustVisit(include);
+                request.setExcludeVisit(exclude);
+                JSONAsyncTask t = new ComputePlanAsyncTask(activity, getContext(), request, activity.getLocation());
+                activity.getUser().getIdToken(true)
+                        .addOnCompleteListener(new FirebaseOnCompleteListener(t, computeURL));
                 break;
         }
     }

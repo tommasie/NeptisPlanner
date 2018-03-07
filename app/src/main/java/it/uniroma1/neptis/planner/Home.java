@@ -34,7 +34,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -47,25 +46,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
@@ -81,7 +67,6 @@ import it.uniroma1.neptis.planner.rating.MuseumAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
@@ -89,7 +74,7 @@ public class Home extends AppCompatActivity
         MainInterface {
 
     private static final String TAG = Home.class.getName();
-    private String apiURL;
+    public static String apiURL;
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
@@ -104,7 +89,7 @@ public class Home extends AppCompatActivity
     private FragmentTransaction transaction;
     private Fragment fragment;
 
-    private Request request;
+    public Request request;
 
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -127,7 +112,7 @@ public class Home extends AppCompatActivity
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        this.apiURL = ConfigReader.getConfigValue(this, "serverURL");
+        apiURL = ConfigReader.getConfigValue(this, "serverURL");
 
         setContentView(R.layout.activity_home);
         coordLayout = findViewById(R.id.coordinator_layout);
@@ -166,6 +151,7 @@ public class Home extends AppCompatActivity
         }
 
         fragmentManager = getSupportFragmentManager();
+        mainMenu();
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -455,33 +441,12 @@ public class Home extends AppCompatActivity
         b.putString("city", request.getRequestParameters().get("city"));
         b.putString("region", request.getRequestParameters().get("region"));
         b.putString("id", request.getRequestParameters().get("id"));
+        b.putSerializable("request", request);
         attractionsFragment.setArguments(b);
         transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.content_home, attractionsFragment);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
-
-    @Override
-    public void computePlan(Map<String, List<Attraction>> params) {
-        request.setMustVisit(params.get("must"));
-        request.setExcludeVisit(params.get("exclude"));
-
-        ComputePlanAsyncTask t = new ComputePlanAsyncTask(getApplicationContext(), progressBar, request, location, transaction,fragmentManager);
-        String url = apiURL + "/compute-plan-" + request.getRequestParameters().get("category");
-        user.getIdToken(true)
-                .addOnCompleteListener(new FirebaseOnCompleteListener(t, url));
-                /*.addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            String idToken = task.getResult().getToken();
-                            ComputePlanAsyncTask t = new ComputePlanAsyncTask(getApplicationContext(), progressBar, request, location, transaction,fragmentManager);
-                            t.execute(apiURL + "/compute-plan-" + request.getRequestParameters().get("category"), idToken);
-                        } else {
-                            // Handle error -> task.getException();
-                        }
-                    }
-                });*/
     }
 
     @Override
@@ -579,125 +544,6 @@ public class Home extends AppCompatActivity
         Snackbar.make(coordLayout, msg, Snackbar.LENGTH_SHORT).show();
     }
 
-    private static class ComputePlanAsyncTask extends JSONAsyncTask {
-
-        private WeakReference<Context> context;
-        private ProgressBar progress;
-        private Request request;
-        private Location location;
-
-        private FragmentTransaction transaction;
-        private FragmentManager fragmentManager;
-
-        private ComputePlanAsyncTask(Context context, ProgressBar progress,
-                                        Request request, Location location,
-                                     FragmentTransaction transaction, FragmentManager fragmentManager) {
-            this.context = new WeakReference<>(context);
-            this.progress = progress;
-            this.request = request;
-            this.location = location;
-            this.transaction = transaction;
-            this.fragmentManager = fragmentManager;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            progress.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            InputStream in;
-            int code;
-            String charset = "UTF-8";
-            String urlString = params[0];
-            String token = params[1];
-            // HTTP post
-            try {
-                URL url = new URL(urlString);
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", token);
-                urlConnection.setDoOutput(true);
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setRequestProperty("Accept-Charset", charset);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-
-                // Object json to send
-                JSONObject json = new JSONObject();
-                for(String param : request.getRequestParameters().keySet()) {
-                    json.put(param,request.getRequestParameters().get(param));
-                }
-
-                //Add the list of must-see places
-                JSONArray must = new JSONArray();
-                for(Attraction a : request.getMustVisit())
-                    must.put(a.getId());
-                json.put("must", must);
-
-                //Add the list of excluded places
-                JSONArray exclude = new JSONArray();
-                for(Attraction a : request.getExcludeVisit())
-                    exclude.put(a.getId());
-                json.put("exclude", exclude);
-
-                json.put("lat", location.getLatitude());
-                json.put("lng", location.getLongitude());
-
-                DataOutputStream printout = new DataOutputStream(urlConnection.getOutputStream());
-                String s = json.toString();
-                byte[] data = s.getBytes("UTF-8");
-                printout.write(data);
-                printout.flush();
-                printout.close();
-
-                in = new BufferedInputStream(urlConnection.getInputStream());
-                code = urlConnection.getResponseCode();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return -1;
-            }
-
-            //****  CHECK the ResponseCode FIRST! ****
-            if (code == 200) {
-                request.setPlan(readResponse(in));
-                Log.d("LOG", "Your Plan: " + request.getPlan());
-            }
-            return code;
-        }
-
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            progress.setVisibility(View.INVISIBLE);
-            if (result == 200) {
-                String filename = savePlan();
-                Fragment planFragment = new SelectedPlanFragment();
-                Bundle b = new Bundle();
-                b.putString("computed_plan_file", filename);
-                planFragment.setArguments(b);
-                transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.content_home, planFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        }
-
-        private String savePlan() {
-            Calendar calendar = Calendar.getInstance();
-            long ts = calendar.getTimeInMillis();
-            String filename = request.getRequestParameters().get("name")  + "_" + ts;
-            FileOutputStream outputStream;
-            try {
-                outputStream = context.get().openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(request.getPlan().getBytes());
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Toast.makeText(context.get(), "Saved!", Toast.LENGTH_SHORT).show();
-            return filename;
-        }
-    }
 
     public void initFragment() {
         Bundle extras = getIntent().getExtras();
