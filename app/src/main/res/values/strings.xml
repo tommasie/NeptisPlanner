@@ -77,4 +77,9 @@
     <string name="choose_museum_title">Choose the museum</string>
     <string name="attraction_dialog_add">Add</string>
     <string name="attraction_dialog_cancel">Cancel</string>
+    <string name="city_region" translatable="false">%1$s, %2$s</string>
+    <string name="current_location">Current location</string>
+    <string name="loading_loc_data">Loading location data</string>
+    <string name="searching">Searching&#8230;</string>
+    <string name="filter_museum_hint">Filter museum name</string>
 </resources>

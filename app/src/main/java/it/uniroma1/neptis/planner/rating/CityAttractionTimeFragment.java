@@ -41,7 +41,7 @@ import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.util.JSONAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 
 public class CityAttractionTimeFragment extends Fragment {
 

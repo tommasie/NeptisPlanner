@@ -21,8 +21,26 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            debuggable true
+        }
     }
-    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
+
+    signingConfigs {
+        release {
+            storeFile file("/home/thomas/Documenti/keystore/neptis-keystore.jks")
+            storePassword "plannerkeystore"
+            keyAlias "NeptisPlanner"
+            keyPassword "neptiskeystore"
+        }
+    }
+    sourceSets {
+        main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] }
+        debug {
+            manifest.srcFile 'src/debug/AndroidManifest.xml'
+        }
+    }
 
     dexOptions {
         preDexLibraries = false

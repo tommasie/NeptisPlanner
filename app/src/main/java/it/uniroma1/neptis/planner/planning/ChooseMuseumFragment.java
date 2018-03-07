@@ -10,50 +10,39 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.GetTokenResult;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.asynctasks.GetMuseumsListAsyncTask;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Element;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.util.JSONAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 
-public class ChooseMuseumFragment extends Fragment implements View.OnClickListener{
+public class ChooseMuseumFragment extends Fragment implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener{
 
     private String museumUrl;
     private String city, region;
@@ -64,8 +53,8 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
     private MainInterface activity;
 
     private EditText nameSearch;
+    private SwipeRefreshLayout refreshLayout;
     private RecyclerView recyclerView;
-    private RecyclerView.LayoutManager layoutManager;
     private MuseumRecyclerAdapter adapter;
     private Button next;
     private ProgressDialog progress;
@@ -76,6 +65,7 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         city = getArguments().getString("city");
         region = getArguments().getString("region");
         position = -1;
@@ -83,7 +73,7 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
         museumQuery = new ArrayList<>();
         filteredList = new ArrayList<>();
         this.museumUrl = ConfigReader.getConfigValue(getContext(), "serverURL") + "/museums";
-        this.museumUrl += "?city=" + city + "&region=" + region;
+        this.museumUrl += String.format("?city=%s&region=%s", city, region);
     }
 
 
@@ -99,27 +89,20 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
         progress = new ProgressDialog(getContext());
         progress.setIndeterminate(true);
         //progress.setMessage(" ");
-
+        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout.setOnRefreshListener(this);
+        refreshLayout.setColorSchemeResources(R.color.neptis_light, R.color.neptis_blue);
         recyclerView = view.findViewById(R.id.choose_museum_recycler);
-        layoutManager = new LinearLayoutManager(getContext());
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
-        recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(dividerItemDecoration);
         adapter = new MuseumRecyclerAdapter(filteredList);
         recyclerView.setAdapter(adapter);
 
+        refreshLayout.setRefreshing(true);
+        JSONAsyncTask t = new GetMuseumsListAsyncTask(activity, refreshLayout, museumQuery, filteredList, adapter);
         activity.getUser().getIdToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            String idToken = task.getResult().getToken();
-                            new MuseumListASyncTask().execute(museumUrl ,idToken);
-                        } else {
-                            // Handle error -> task.getException();
-                        }
-                    }
-                });
+                .addOnCompleteListener(new FirebaseOnCompleteListener(t, museumUrl));
 
         nameSearch = view.findViewById(R.id.choose_museum_filter);
         nameSearch.addTextChangedListener(new TextWatcher() {
@@ -159,6 +142,26 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.choose_museum_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        refreshLayout.setRefreshing(true);
+        JSONAsyncTask t = new GetMuseumsListAsyncTask(activity, refreshLayout, museumQuery, filteredList, adapter);
+        if(item.getItemId() == R.id.choose_museum_menu_refresh) {
+            activity.getUser().getIdToken(true)
+                    .addOnCompleteListener(
+                            new FirebaseOnCompleteListener(t, museumUrl));
+        }
+        return true;
+    }
+
+
+
+    @Override
     public void onClick(View v) {
         Element selected = filteredList.get(position);
         Map<String, String> planningParameters = new HashMap<>();
@@ -167,73 +170,15 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
         activity.selectVisits(planningParameters);
     }
 
-    private class MuseumListASyncTask extends JSONAsyncTask {
-
-        private final String TAG = MuseumListASyncTask.class.getName();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            InputStream in;
-            int code = 0;
-
-            String urlString = params[0]; // URL to call
-            String token = params[1];
-            Log.d(TAG,token);
-            // HTTP get
-
-            try {
-                URL url = new URL(urlString);
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", token);
-                //get the response
-                in = new BufferedInputStream(urlConnection.getInputStream());
-                code = urlConnection.getResponseCode();
-
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-                Log.e(TAG, ""+code);
-                return -1;
-            }
-            if (code == 200) {
-                String jsonResponse = readResponse(in);
-                JSONObject item;
-                JSONArray items;
-                try {
-                    items = new JSONArray(jsonResponse);
-                    for (int i = 0; i < items.length(); ++i) {
-                        item = items.getJSONObject(i);
-                        museumQuery.add(new Element(item.getString("name"), item.getString("id")));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return 400;
-                }
-            }
-            return code;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (result == 200) {
-                if (!museumQuery.isEmpty()){
-                    Collections.sort(museumQuery);
-                    filteredList.addAll(museumQuery);
-                    adapter.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(getContext(), "No items available now.\nPlease try later", Toast.LENGTH_LONG).show();
-                }
-            }else {
-                Toast.makeText(getContext(), result+"There is a problem. \nTry later", Toast.LENGTH_LONG).show();
-            }
-        }
+    @Override
+    public void onRefresh() {
+        JSONAsyncTask t = new GetMuseumsListAsyncTask(activity, refreshLayout, museumQuery, filteredList, adapter);
+        activity.getUser().getIdToken(true)
+                .addOnCompleteListener(
+                        new FirebaseOnCompleteListener(t, museumUrl));
     }
 
-    private class MuseumRecyclerAdapter extends RecyclerView.Adapter<MuseumRecyclerAdapter.MuseumHolder> {
+    public class MuseumRecyclerAdapter extends RecyclerView.Adapter<MuseumRecyclerAdapter.MuseumHolder> {
 
         private List<Element> museums;
         private CustomFilter filter;
@@ -283,6 +228,7 @@ public class ChooseMuseumFragment extends Fragment implements View.OnClickListen
                 if(prevView != null) {
                     prevView.setBackgroundColor(Color.WHITE);
                 }
+
                 v.setBackgroundColor(Color.LTGRAY);
                 prevView = v;
                 position = getLayoutPosition();

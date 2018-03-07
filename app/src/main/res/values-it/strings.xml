@@ -54,4 +54,8 @@
     <string name="choose_museum_title">Seleziona il museo</string>
     <string name="attraction_dialog_add">Aggiungi</string>
     <string name="attraction_dialog_cancel">Annulla</string>
+    <string name="current_location">Località corrente</string>
+    <string name="loading_loc_data">Caricando i dati GPS</string>
+    <string name="searching">Ricerca&#8230;</string>
+    <string name="filter_museum_hint">Filtra nome del museo</string>
 </resources>

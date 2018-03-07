@@ -18,7 +18,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:text="@string/planning_choice_tour"
+        android:text="seleziona attrazioni da includere/escudere"
         android:textAlignment="center"
         android:textAllCaps="true"
         app:layout_constraintEnd_toEndOf="parent"

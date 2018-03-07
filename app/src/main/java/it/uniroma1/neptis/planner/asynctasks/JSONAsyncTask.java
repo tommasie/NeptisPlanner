@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * Copyright (c) 2018. Thomas Collerton <tho.collerton@gmail.com>
  * This file is part of the Neptis project
  */
 
-package it.uniroma1.neptis.planner.util;
+package it.uniroma1.neptis.planner.asynctasks;
 
 import android.os.AsyncTask;
 

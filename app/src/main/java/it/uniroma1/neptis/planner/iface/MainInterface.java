@@ -34,4 +34,12 @@ public interface MainInterface {
 
     FirebaseUser getUser();
     Address getLocation();
+
+    void showToolbarProgress();
+    void hideToolbarProgress();
+
+    void showProgressLayout(String text);
+    void hideProgressLayout();
+
+    void showSnackBar(String msg);
 }

@@ -6,16 +6,12 @@
 package it.uniroma1.neptis.planner.planning;
 
 
-import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,40 +19,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Filter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.GetTokenResult;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.model.Element;
-import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.util.JSONAsyncTask;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class AttractionsFragment extends Fragment implements View.OnClickListener{
 
     private List<Attraction> attractions;
@@ -80,8 +55,8 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
     private int position;
 
     private MainInterface activity;
-    public AttractionsFragment() {
-    }
+
+    public AttractionsFragment() {}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
