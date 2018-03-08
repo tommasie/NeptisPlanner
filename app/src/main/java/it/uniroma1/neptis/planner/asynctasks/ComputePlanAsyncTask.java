@@ -7,7 +7,6 @@ package it.uniroma1.neptis.planner.asynctasks;
 
 import android.content.Context;
 import android.location.Address;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;

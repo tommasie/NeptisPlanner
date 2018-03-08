@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -8,7 +13,7 @@ android {
         applicationId "it.uniroma1.neptis.planner"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 3
+        versionCode 4
         versionName "beta1"
         multiDexEnabled true
         resConfigs "auto"
@@ -16,25 +21,27 @@ android {
             useSupportLibrary true
         }
     }
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
-
         debug {
             debuggable true
         }
     }
 
-    signingConfigs {
-        release {
-            storeFile file("/home/thomas/Documenti/keystore/neptis-keystore.jks")
-            storePassword "plannerkeystore"
-            keyAlias "NeptisPlanner"
-            keyPassword "neptiskeystore"
-        }
-    }
     sourceSets {
         main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] }
         debug {
@@ -47,6 +54,10 @@ android {
         javaMaxHeapSize "2048M"
     }
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
+
 }
 
 dependencies {
@@ -57,8 +68,7 @@ dependencies {
     compile('com.github.tony19:logback-android-classic:1.1.1-6') {
         exclude group: 'com.google.android'
     }
-
-    compile 'com.android.support:multidex:1.0.2'
+    compile 'com.android.support:multidex:1.0.3'
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support:design:26.1.0'
@@ -72,6 +82,9 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.facebook.android:facebook-android-sdk:4.28.0'
     compile 'com.firebaseui:firebase-ui-auth:3.1.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.4'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
     testCompile 'junit:junit:4.12'
     implementation 'com.google.android.gms:play-services-maps:11.4.2'
 }

@@ -7,9 +7,14 @@ package it.uniroma1.neptis.planner.model;
 
 import android.support.annotation.NonNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Element implements Comparable<Element>{
-    private String name;
+
+    @JsonProperty
     private String id;
+    @JsonProperty
+    private String name;
 
     public Element(String n, String id) {
         this.name = n;

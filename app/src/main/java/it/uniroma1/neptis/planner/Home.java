@@ -162,6 +162,7 @@ public class Home extends AppCompatActivity
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(1000); // Update location every second
 
+        //Mock Location for Bracciano
         Location mock = new Location("test");
         mock.setLatitude(42.1017979);
         mock.setLongitude(12.176142199999958);
@@ -178,6 +179,23 @@ public class Home extends AppCompatActivity
             progressBar.setVisibility(View.VISIBLE);  //To show ProgressBar
             progressText.setText(R.string.loading_loc_data);
             progressLayout.setVisibility(View.VISIBLE);
+            if(BuildConfig.DEBUG) {
+                locationClient.setMockMode(true);
+                locationClient.setMockLocation(mock);
+                location = mock;
+                computeGeolocation(location);
+            }
+            else {
+                locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        super.onLocationResult(locationResult);
+                        locationClient.removeLocationUpdates(this);
+                        location = locationResult.getLastLocation();
+                        computeGeolocation(location);
+                    }
+                }, null);
+            }
             /*locationClient.getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
@@ -234,15 +252,6 @@ public class Home extends AppCompatActivity
             location = mock;
             computeGeolocation(location);*/
 
-            locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
-                    locationClient.removeLocationUpdates(this);
-                    location = locationResult.getLastLocation();
-                    computeGeolocation(location);
-                }
-            }, null);
         }
     }
 
