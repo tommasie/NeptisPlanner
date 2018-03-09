@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) 2018. Thomas Collerton <tho.collerton@gmail.com>
+  ~ This file is part of the Neptis project
+  -->
+
 <configuration>
     <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
@@ -14,30 +19,18 @@
             <pattern>%msg %n</pattern>
         </encoder>
     </appender>
-    <appender name="GPS" class="ch.qos.logback.core.FileAppender">
-        <file>/sdcard/gps.log</file>
-        <append>true</append>
+    <appender name="LOGCAT" class="ch.qos.logback.classic.android.LogcatAppender">
         <encoder>
-            <pattern>[%d{HH:mm:ss}] %logger{35} - %msg %n</pattern>
+            <pattern>%logger - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="SIGNALS" class="ch.qos.logback.core.FileAppender">
-        <file>/sdcard/signals.log</file>
-        <append>true</append>
-        <encoder>
-            <pattern>[%d{HH:mm:ss}] %logger{35} - %msg %n</pattern>
-        </encoder>
-    </appender>
-    <logger name="gps" level="DEBUG" additivity="false">
-        <appender-ref ref="GPS"/>
-    </logger>
-    <logger name="signals" level="DEBUG" additivity="false">
-        <appender-ref ref="SIGNALS"/>
-    </logger>
     <logger name="event_logger" level="DEBUG" additivity="false">
         <appender-ref ref="EVENT_LOG"/>
     </logger>
+    <logger name="logcat_logger" level="DEBUG" additivity="false">
+        <appender-ref ref="LOGCAT"/>
+    </logger>
     <root additivity="false">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="LOGCAT"/>
     </root>
 </configuration>

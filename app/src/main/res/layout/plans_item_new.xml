@@ -94,7 +94,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/button_basic"
         android:text="Inizio"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/museum_attraction_rate"
         app:layout_constraintEnd_toStartOf="@+id/museum_attraction_end_timer"
         app:layout_constraintTop_toBottomOf="@+id/museum_attraction_description" />
@@ -109,7 +109,7 @@
         android:background="@drawable/button_basic"
         android:text="Fine"
         android:enabled="false"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/museum_attraction_rate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/museum_attraction_description" />
@@ -124,7 +124,7 @@
         android:background="@drawable/button_basic"
         android:drawableStart="@drawable/ic_stars"
         android:text="Valuta attrazione"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

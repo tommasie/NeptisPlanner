@@ -46,6 +46,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,13 +70,14 @@ import it.uniroma1.neptis.planner.rating.MuseumAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.util.ProfilePictureAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.GetFirebaseProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         MainInterface {
 
     private static final String TAG = Home.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger("logcat_logger");
     public static String apiURL;
 
     private DrawerLayout drawer;
@@ -110,6 +114,7 @@ public class Home extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        logger.debug("activity started");
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         apiURL = ConfigReader.getConfigValue(this, "serverURL");
@@ -140,7 +145,7 @@ public class Home extends AppCompatActivity
         headerEmail.setText(user.getEmail());
         ImageView headerImg = header.findViewById(R.id.headerImageView);
         if(user.getPhotoUrl() != null)
-            new ProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
+            new GetFirebaseProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
         else {
 
         }

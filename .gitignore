@@ -28,5 +28,4 @@ app/src/main/res/drawable-xxhdpi/ic_stars.png
 app/src/main/res/ic_delete.png
 app/src/main/res/res/
 app/src/debug/
-app/src/main/java/it/uniroma1/neptis/planner/asynctasks/GetMuseumsListAsyncTask2.java
 keystore.properties

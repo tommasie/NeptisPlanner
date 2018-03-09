@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class Plan {
 
-    //TODO filename?
     protected String name;
     private String type;
     protected ArrayList<Attraction> attractions;

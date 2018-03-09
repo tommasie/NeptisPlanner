@@ -6,13 +6,12 @@
 package it.uniroma1.neptis.planner.asynctasks;
 
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
@@ -36,6 +35,7 @@ public class GetMuseumsListAsyncTask extends JSONAsyncTask {
     public GetMuseumsListAsyncTask(MainInterface activity, SwipeRefreshLayout layout,
                                    List<Element> museumQuery, List<Element> filteredList,
                                    ChooseMuseumFragment.MuseumRecyclerAdapter adapter) {
+        super();
         this.activity = activity;
         this.refreshLayout = new WeakReference<>(layout);
         this.museumQuery = museumQuery;
@@ -59,36 +59,19 @@ public class GetMuseumsListAsyncTask extends JSONAsyncTask {
 
         String urlString = params[0]; // URL to call
         String token = params[1];
-        Log.d(TAG,token);
-        // HTTP get
 
         try {
             URL url = new URL(urlString);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestProperty("Authorization", token);
-            //get the response
             in = new BufferedInputStream(urlConnection.getInputStream());
             code = urlConnection.getResponseCode();
 
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-            Log.e(TAG, ""+code);
-            return -1;
-        }
-        if (code == 200) {
-            String jsonResponse = readResponse(in);
-            JSONObject item;
-            JSONArray items;
-            try {
-                items = new JSONArray(jsonResponse);
-                for (int i = 0; i < items.length(); ++i) {
-                    item = items.getJSONObject(i);
-                    museumQuery.add(new Element(item.getString("name"), item.getString("id")));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return 400;
+            if (code == 200) {
+                museumQuery = mapper.readValue(in, new TypeReference<List<Element>>() {});
             }
+        } catch(IOException urlE) {
+            return 404;
         }
         return code;
     }

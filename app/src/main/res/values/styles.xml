@@ -1,11 +1,10 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -17,16 +16,21 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="GreenTheme" parent="FirebaseUI">
-        <!-- Required for sign-in flow styling -->
-        <item name="colorPrimary">@color/neptis_light</item>
-        <item name="colorPrimaryDark">@color/neptis_blue</item>
-        <item name="colorAccent">@color/material_purple_a700</item>
-
-        <item name="colorControlNormal">@color/material_green_500</item>
-        <item name="colorControlActivated">@color/material_lime_a700</item>
-        <item name="colorControlHighlight">@color/material_green_a200</item>
-        <item name="android:windowBackground">@color/material_green_50</item>
+    <style name="BasicButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/button_basic</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
+
+    <style name="NextButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/button_next</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- Customize rating bar color -->
+    <style name="RatingBar" parent="AppTheme" >
+        <item name="colorControlNormal">@color/lightGrey</item>
+        <item name="colorControlActivated">@color/starYellow</item>
+    </style>
+
 
 </resources>

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
@@ -37,6 +38,7 @@ public class ComputePlanAsyncTask extends JSONAsyncTask {
 
     public ComputePlanAsyncTask(MainInterface activity, Context context,
                                  Request request, Address location) {
+        super();
         this.activity = activity;
         this.context = new WeakReference<>(context);
         this.request = request;
@@ -101,6 +103,12 @@ public class ComputePlanAsyncTask extends JSONAsyncTask {
         }
 
         if (code == 200) {
+            try {
+                //TODO check if parsing is useful
+                throw new IOException();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
             request.setPlan(readResponse(in));
             Log.d("LOG", "Your Plan: " + request.getPlan());
         }

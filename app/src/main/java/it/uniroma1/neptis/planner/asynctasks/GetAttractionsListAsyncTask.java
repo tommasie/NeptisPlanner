@@ -14,8 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -30,6 +32,7 @@ public class GetAttractionsListAsyncTask extends JSONAsyncTask {
     private Button top10, top20, top30;
 
     public GetAttractionsListAsyncTask(MainInterface activity, NumberPicker picker, Button... buttons) {
+        super();
         this.activity = activity;
         this.picker = picker;
         this.top10 = buttons[0];
@@ -56,29 +59,15 @@ public class GetAttractionsListAsyncTask extends JSONAsyncTask {
 
             in = new BufferedInputStream(urlConnection.getInputStream());
             code = urlConnection.getResponseCode();
-        } catch (Exception e) {
+            if (code == 200) {
+                Home.attractionsList = mapper.readValue(in, mapper.getTypeFactory().constructCollectionType(List.class, Attraction.class));
+                Log.d("attractions", Home.attractionsList.toString());
+                return 200;
+            } else return code;
+        } catch (IOException e) {
             e.printStackTrace();
             return 500;
         }
-
-        if (code == 200) {
-            String jsonResponse = readResponse(in);
-            Log.d("response", jsonResponse);
-            JSONArray attractions;
-            try {
-                attractions = new JSONArray(jsonResponse);
-                JSONObject attraction;
-                for (int i = 0; i < attractions.length(); ++i) {
-                    attraction = attractions.getJSONObject(i);
-                    Home.attractionsList.add(Attraction.parse(attraction));
-                }
-                return 200;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return 500;
-            }
-
-        } else return code;
     }
 
     @Override

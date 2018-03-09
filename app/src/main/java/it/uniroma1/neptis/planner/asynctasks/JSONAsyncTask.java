@@ -7,6 +7,8 @@ package it.uniroma1.neptis.planner.asynctasks;
 
 import android.os.AsyncTask;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +16,11 @@ import java.io.InputStreamReader;
 
 public abstract class JSONAsyncTask extends AsyncTask<String,String,Integer> {
 
+    protected ObjectMapper mapper;
+
+    protected JSONAsyncTask() {
+        this.mapper = new ObjectMapper();
+    }
 
     protected String readResponse(InputStream in){
         //reads from inputStream

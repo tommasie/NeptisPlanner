@@ -8,6 +8,8 @@ package it.uniroma1.neptis.planner.model;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,12 +19,16 @@ public class Attraction implements Serializable {
 
     private static final String TAG = Attraction.class.getName();
 
+    @JsonProperty("id")
     protected String id;
+    @JsonProperty("name")
     protected String name;
     protected String description;
     protected byte rating;
     protected int time;
     protected String imageURL;
+
+    public Attraction() {}
 
     public Attraction(String id, String name, String description, byte rating, int time, String url) {
         this.id = id;
@@ -58,16 +64,21 @@ public class Attraction implements Serializable {
         return out;
     }
 
+    @JsonProperty("id")
     public String getId() {
         return id;
     }
-
+    @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
     }
-
+    @JsonProperty("name")
     public String getName() {
         return name;
+    }
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -111,6 +122,9 @@ public class Attraction implements Serializable {
 
     @Override
     public String toString() {
-        return this.name;
+        return "Attraction{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

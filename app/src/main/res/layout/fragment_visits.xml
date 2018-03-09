@@ -23,81 +23,7 @@
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView7" /><![CDATA[
-
-
-    />
-
-
-    ]]><!--<TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Durata massima del percorso (minuti):" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:text="-"
-            android:id="@+id/button_decrease_time"/>/>
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:text="10"
-            android:gravity="center"
-            android:cursorVisible="false"
-            android:id="@+id/time_visits"/>
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:text="+"
-            android:id="@+id/button_increase_time"/>
-    </LinearLayout>
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginTop="40dp"
-        android:text="@string/fragment_visits_text2"
-        android:id="@+id/textView_must_f" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/multiAutoCompleteTextView_must_f"
-        android:hint="@string/empty"
-        android:focusable="false" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/fragment_visits_text3"
-        android:id="@+id/textView_exclude_f"
-        android:layout_marginTop="40dp" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/multiAutoCompleteTextView_exclude_f"
-        android:hint="@string/empty"
-        android:focusable="false" /> -->
-
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/visits_button_next"
@@ -106,9 +32,8 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:background="@drawable/button_next"
         android:text="@string/next"
-        android:textColor="@android:color/white"
+        style="@style/NextButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

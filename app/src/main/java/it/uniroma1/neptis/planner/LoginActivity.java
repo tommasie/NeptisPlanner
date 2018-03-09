@@ -14,26 +14,20 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoginActivity.class);
     private static final int RC_SIGN_IN = 123;
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        logger.info("create");
-
         startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                         .setAvailableProviders(
-                                Arrays.asList(  new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                                        new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()))
+                                Arrays.asList(  new AuthUI.IdpConfig.GoogleBuilder().build(),
+                                        new AuthUI.IdpConfig.FacebookBuilder().build()))
                         .setIsSmartLockEnabled(false)
                         .setLogo(R.mipmap.ic_launcher_web)
                         .setTheme(R.style.AppTheme)

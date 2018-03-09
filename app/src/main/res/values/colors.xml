@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#42d1f5</color>
-    <color name="white">#FFFFFF</color>
+    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimaryDark">#283593</color>
+    <color name="colorAccent">#40c4ff</color>
     <color name="neptis_blue">#3F51B5</color>
     <color name="neptis_blue_d">#803F51B5</color>
     <color name="neptis_light">#2980B9</color>
     <color name="radius_fill">#50777777</color>
 
-    <color name="material_green_50">#E8F5E9</color>
-    <color name="material_green_500">#4CAF50</color>
-    <color name="material_green_700">#388E3C</color>
-    <color name="material_green_a200">#69F0AE</color>
-    <color name="material_lime_a700">#AEEA00</color>
-    <color name="material_purple_a700">#AA00FF</color>
+    <color name="starYellow">#ffc400</color>
+    <color name="lightGrey">#bababa</color>
 
 </resources>
