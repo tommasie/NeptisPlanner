@@ -41,25 +41,14 @@ public class FirebaseOnCompleteListener implements OnCompleteListener<GetTokenRe
     }
 
     @Override
-    public void onComplete(@NonNull Task<GetTokenResult> task) {
-        if(task.isSuccessful()) {
-            token = task.getResult().getToken();
-            appendToken();
+    public void onComplete(@NonNull Task<GetTokenResult> tokenTask) {
+        if(tokenTask.isSuccessful()) {
+            token = tokenTask.getResult().getToken();
+            this.task.setToken(token);
             executeAsyncTask();
         } else {
 
         }
-    }
-
-    /**
-     * This method concatenates the input list of strings with the Firebase token
-     * in order to execute the AsyncTask
-     */
-    private void appendToken() {
-        String[] out = new String[args.length + 1];
-        System.arraycopy(args, 0, out, 0, args.length);
-        out[out.length - 1] = token;
-        args = out;
     }
 
     private void executeAsyncTask() {

@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2017. Thomas Collerton <tho.collerton@gmail.com>
+ * Copyright (c) 2018. Thomas Collerton <tho.collerton@gmail.com>
  * This file is part of the Neptis project
  */
 
-package it.uniroma1.neptis.planner.services.queue;
+package it.uniroma1.neptis.planner.asynctasks;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -19,9 +19,10 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
 
-public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
+public class ReportAsyncTask extends JSONAsyncTask {
 
     private String report_URL;
     private Context context;
@@ -40,7 +41,6 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
         String category = params[1];
         String attractionId = params[2];
         String sensedData = params[3];
-        String token = params[4];
         try {
             URL url = new URL(report_URL + reportType);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -58,7 +58,7 @@ public class ReportAsyncTask extends AsyncTask<String, String, Integer> {
             else attraction = "attraction_m_id";
             json.put(attraction, attractionId);
             if(reportType.equals("rating"))
-                json.put("rating", sensedData);
+                json.put("value", sensedData);
             else json.put("minutes", sensedData);
 
             // get current date

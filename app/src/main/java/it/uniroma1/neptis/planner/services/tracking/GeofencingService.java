@@ -13,43 +13,39 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 
 import java.util.ArrayList;
 
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
-import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
 
-public class GeofencingService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class GeofencingService extends IntentService {
 
     private static final String TAG = GeofencingService.class.getName();
     private IBinder binder = new LocalBinder();
-    private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
-    private LocationManager locationManager;
+    private FusedLocationProviderClient locationClient;
+    private LocationCallback cb;
     private LocationListener destListener;
     private double destinationLat;
     private double destinationLng;
@@ -57,6 +53,8 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
     private String currentPlan;
     private String destinationId;
     private String destinationName;
+
+    private double currentLat, currentLng;
 
     private ArrayList<CityAttraction> attractions;
     private CityAttraction currentAttraction;
@@ -83,6 +81,7 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
         destinationLng = 0.0;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -90,14 +89,13 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
         lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "GeofencingWakeLock");
         lock.acquire();
-        googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
-        googleApiClient.connect();
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(10 * 1000); // Update location every 10 seconds
+
+        cb = new GeofenceLocationCallback();
+        locationClient.requestLocationUpdates(locationRequest, cb, null);
     }
 
     @Override
@@ -125,7 +123,7 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, destListener);
+        locationClient.removeLocationUpdates(cb);
         notificationManager.cancel(MAIN_NOTIFICATION_ID);
         lock.release();
         super.onDestroy();
@@ -138,25 +136,6 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
-    }
-
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "connected");
-        destListener = new DestListener();
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, destListener);
-        launchMainNotification();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     public class LocalBinder extends Binder {
@@ -227,69 +206,62 @@ public class GeofencingService extends IntentService implements GoogleApiClient.
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    private class DestListener implements LocationListener {
-
-        private double lat = 0.0;
-        private double lng = 0.0;
-
-        @Override
-        public void onLocationChanged(Location location) {
-            lat = location.getLatitude();
-            lng = location.getLongitude();
-            sendCoordinates("tour_update", lat, lng);
-            double distance = getDistance(destinationLat, destinationLng);
-            //TODO set diameter of the attraction
-            if (distance <= destinationRadius) {
-                if (!fenceEntered) {
-                    fenceEntered = true;
-                    launchUpdateNotification(index, "Arrivato");
-                    fenceEnterTime = System.currentTimeMillis();
-                }
-            } else {
-                if (fenceEntered) {
-                    fenceEntered = false;
-                    fenceExitTime = System.currentTimeMillis();
-                    long totalTime = fenceExitTime - fenceEnterTime;
+    private void updateLocation(Location location) {
+        currentLat = location.getLatitude();
+        currentLng = location.getLongitude();
+        sendCoordinates("tour_update", currentLat, currentLng);
+        double distance = getDistance();
+        //TODO set diameter of the attraction
+        if (distance <= destinationRadius) {
+            if (!fenceEntered) {
+                fenceEntered = true;
+                launchUpdateNotification(index, "Arrivato");
+                fenceEnterTime = System.currentTimeMillis();
+            }
+        } else {
+            if (fenceEntered) {
+                fenceEntered = false;
+                fenceExitTime = System.currentTimeMillis();
+                long totalTime = fenceExitTime - fenceEnterTime;
 //                    final int minutes = (int) Math.ceil((fenceExitTime - fenceEnterTime) / 60000);
-                    final int minutes = (int) (totalTime / 60000) + ((totalTime % 60000 == 0) ? 0 : 1);
-                    user.getIdToken(true)
-                            .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                                public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                    if (task.isSuccessful()) {
-                                        String idToken = task.getResult().getToken();
-                                        new ReportAsyncTask(getApplicationContext()).execute("visit", "city", currentAttraction.getId(), String.valueOf(minutes), idToken);
-                                    } else {
-                                        // Handle error -> task.getException();
-                                    }
-                                }
-                            });
-                    launchUpdateNotification(index, "La visita è durata " + minutes + " minuti");
-                    index++;
-                    if (index == attractions.size()) {
-                        Log.d(TAG, "stopped");
-                        launchEndNotification();
-                        stopSelf();
-                        return;
-                    }
-                    sendNextAttraction(index);
-                    launchMainNotification();
-                    currentAttraction = attractions.get(index);
-                    destinationLat = Double.parseDouble(currentAttraction.getLatitude());
-                    destinationLng = Double.parseDouble(currentAttraction.getLongitude());
-
+                final int minutes = (int) (totalTime / 60000) + ((totalTime % 60000 == 0) ? 0 : 1);
+                JSONAsyncTask task = new ReportAsyncTask(getApplicationContext());
+                user.getIdToken(true)
+                        .addOnCompleteListener(new FirebaseOnCompleteListener(task,"visit", "city", currentAttraction.getId(), String.valueOf(minutes)));
+                launchUpdateNotification(index, "La visita è durata " + minutes + " minuti");
+                index++;
+                if (index == attractions.size()) {
+                    Log.d(TAG, "stopped");
+                    launchEndNotification();
+                    stopSelf();
+                    return;
                 }
+                sendNextAttraction(index);
+                launchMainNotification();
+                currentAttraction = attractions.get(index);
+                destinationLat = Double.parseDouble(currentAttraction.getLatitude());
+                destinationLng = Double.parseDouble(currentAttraction.getLongitude());
+
             }
         }
+    }
 
-        private double getDistance(double lat, double lng) {
-            double earthRadius = 6371000; //meters
-            double dLat = Math.toRadians(this.lat - lat);
-            double dLng = Math.toRadians(this.lng - lng);
-            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(Math.toRadians(lat)) * Math.cos(Math.toRadians(this.lat)) *
-                            Math.sin(dLng / 2) * Math.sin(dLng / 2);
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return earthRadius * c;
+    private double getDistance() {
+        double earthRadius = 6371000; //meters
+        double dLat = Math.toRadians(currentLat - destinationLat);
+        double dLng = Math.toRadians(currentLng - destinationLng);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(destinationLat)) * Math.cos(Math.toRadians(currentLat)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c;
+    }
+
+    private class GeofenceLocationCallback extends LocationCallback {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            updateLocation(locationResult.getLastLocation());
         }
     }
 }

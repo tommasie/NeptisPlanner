@@ -38,9 +38,10 @@ import javax.net.ssl.HttpsURLConnection;
 
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
 import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 
@@ -82,6 +83,7 @@ public class MuseumAttractionTimeFragment extends Fragment {
         adapter = new AttractionRecyclerAdapter(Home.attractionsList);
         recyclerView.setAdapter(adapter);
         activity.getUser().getIdToken(true)
+
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
@@ -219,28 +221,10 @@ public class MuseumAttractionTimeFragment extends Fragment {
             public void onClick(View v) {
                 switch(v.getId()) {
                     case R.id.time_btn:
+                        JSONAsyncTask task =  new ReportAsyncTask(getContext());
                         activity.getUser().getIdToken(true)
-                                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                        if (task.isSuccessful()) {
-                                            String idToken = task.getResult().getToken();
-                                            new ReportAsyncTask(getContext()).execute("queue","city", curr.getId(),String.valueOf(r.nextInt(10)), idToken);
-                                        } else {
-                                            // Handle error -> task.getException();
-                                        }
-                                    }
-                                });
-                        activity.getUser().getIdToken(true)
-                                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                        if (task.isSuccessful()) {
-                                            String idToken = task.getResult().getToken();
-                                            new ReportAsyncTask(getContext()).execute("visit","city", curr.getId(), String.valueOf(r.nextInt(10)), idToken);
-                                        } else {
-                                            // Handle error -> task.getException();
-                                        }
-                                    }
-                                });
+                                .addOnCompleteListener(new FirebaseOnCompleteListener(task, "queue","museum", curr.getId(),String.valueOf(r.nextInt(10))))
+                                .addOnCompleteListener(new FirebaseOnCompleteListener(new ReportAsyncTask(getContext()), "visit","museum", curr.getId(),String.valueOf(r.nextInt(10))));
                         break;
                 }
             }

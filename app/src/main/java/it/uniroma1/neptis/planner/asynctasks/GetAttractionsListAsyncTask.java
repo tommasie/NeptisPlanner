@@ -50,7 +50,6 @@ public class GetAttractionsListAsyncTask extends JSONAsyncTask {
         InputStream in;
         int code;
         String urlString = params[0];
-        String token = params[1];
 
         try {
             URL url = new URL(urlString);

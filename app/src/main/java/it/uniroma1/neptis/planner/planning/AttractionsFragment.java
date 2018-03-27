@@ -12,10 +12,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -29,6 +29,7 @@ import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.asynctasks.ComputePlanAsyncTask;
 import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.custom.AttractionArrayAdapter;
 import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
@@ -38,7 +39,7 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
 
     private List<Attraction> attractions;
     private List<String> attractionsString;
-    private int selectedPosition = -1;
+    private Attraction selectedAttraction;
     private List<Attraction> include;
     private List<Attraction> exclude;
 
@@ -89,7 +90,7 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         autocomplete = view.findViewById(R.id.filter_attractions_autocomplete);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(),android.R.layout.simple_dropdown_item_1line, attractionsString);
+        ArrayAdapter<Attraction> adapter = new AttractionArrayAdapter(getContext(),android.R.layout.simple_dropdown_item_1line, attractions);
         autocomplete.setAdapter(adapter);
         autocomplete.setThreshold(1);
         includeButton = view.findViewById(R.id.filter_attractions_add_include);
@@ -105,13 +106,10 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
         next = view.findViewById(R.id.filter_attractions_next);
         next.setOnClickListener(this);
 
-        autocomplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedPosition = position;
-                includeButton.setEnabled(true);
-                excludeButton.setEnabled(true);
-            }
+        autocomplete.setOnItemClickListener((parent, view1, position, id) -> {
+            selectedAttraction = (Attraction) parent.getItemAtPosition(position);
+            includeButton.setEnabled(true);
+            excludeButton.setEnabled(true);
         });
     }
 
@@ -120,7 +118,8 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
         Attraction selected;
         switch(v.getId()) {
             case R.id.filter_attractions_add_include:
-                selected = attractions.get(selectedPosition);
+                selected = selectedAttraction;
+                Log.d("include attr", selected.toString());
                 if(!exclude.contains(selected)) {
                     include.add(selected);
                     includeAdapter.notifyDataSetChanged();
@@ -131,7 +130,8 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
                 }
                 break;
             case R.id.filter_attractions_add_exclude:
-                selected = attractions.get(selectedPosition);
+                selected = selectedAttraction;
+                Log.d("exclude attr", selected.toString());
                 if(!include.contains(selected)) {
                     exclude.add(selected);
                     excludeAdapter.notifyDataSetChanged();

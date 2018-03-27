@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import it.uniroma1.neptis.planner.asynctasks.GetFirebaseProfilePictureAsyncTask;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Request;
@@ -70,7 +71,6 @@ import it.uniroma1.neptis.planner.rating.MuseumAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.asynctasks.GetFirebaseProfilePictureAsyncTask;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,

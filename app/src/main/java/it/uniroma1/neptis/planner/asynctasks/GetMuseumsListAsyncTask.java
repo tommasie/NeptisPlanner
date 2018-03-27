@@ -58,7 +58,6 @@ public class GetMuseumsListAsyncTask extends JSONAsyncTask {
         int code = 0;
 
         String urlString = params[0]; // URL to call
-        String token = params[1];
 
         try {
             URL url = new URL(urlString);

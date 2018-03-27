@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,24 +69,18 @@ public class PlansListFragment extends Fragment {
         filesList = new ArrayList<>();
         //Get the list of plans in the folder and display them in the RecyclerView
         File fileDirectory = getContext().getFilesDir();
-        File[] dirFiles = fileDirectory.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.matches("\\w+_\\d+");
-            }
-        });
+        for(File f : fileDirectory.listFiles())
+            Log.d("file",f.getName());
+        File[] dirFiles = fileDirectory.listFiles((dir, name) -> name.matches("[\\w\\s]+_\\d+"));
         for (File f : dirFiles) {
             filesList.add(f.getName());
         }
 
-        Collections.sort(filesList, new Comparator<String>() {
-                    @Override
-                    public int compare(String s1, String s2) {
-                        Long l1 = Long.parseLong(s1.split("_")[1]);
-                        Long l2 = Long.parseLong(s2.split("_")[1]);
-                        return l1.compareTo(l2) * -1;
-                    }
-                });
+        Collections.sort(filesList, (s1, s2) -> {
+            Long l1 = Long.parseLong(s1.split("_")[1]);
+            Long l2 = Long.parseLong(s2.split("_")[1]);
+            return l1.compareTo(l2) * -1;
+        });
 
         recyclerView = view.findViewById(R.id.plans_recycler);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
@@ -160,8 +155,7 @@ public class PlansListFragment extends Fragment {
             return fileNames.size();
         }
 
-        public class PlanHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener, View.OnLongClickListener {
+        public class PlanHolder extends RecyclerView.ViewHolder {
             private TextView planName;
             private TextView planDate;
 
@@ -170,8 +164,19 @@ public class PlansListFragment extends Fragment {
                 super(v);
                 this.planName = v.findViewById(R.id.plan_n);
                 this.planDate = v.findViewById(R.id.plan_d);
-                v.setOnClickListener(this);
-                v.setOnLongClickListener(this);
+                v.setOnClickListener((view) -> {
+                    String item = fileNames.get(getLayoutPosition());
+                    Bundle bundle = new Bundle();
+                    bundle.putString("computed_plan_file", item);
+                    bundle.putInt("index", -1);
+                    activity.selectPlan(bundle);
+                });
+                v.setOnLongClickListener((view) -> {
+                    //v.setBackgroundColor(Color.LTGRAY);
+                    listPosition = getLayoutPosition();
+                    menu.findItem(R.id.delete_plan).setVisible(true);
+                    return true;
+                });
             }
 
             private void bind(String filename) {
@@ -181,23 +186,6 @@ public class PlansListFragment extends Fragment {
                 calendar.setTimeInMillis(Long.parseLong(split[1]));
                 String d = DateFormat.getDateTimeInstance().format(calendar.getTime());
                 this.planDate.setText(d);
-            }
-
-            @Override
-            public void onClick(View v) {
-                String item = fileNames.get(getLayoutPosition());
-                Bundle bundle = new Bundle();
-                bundle.putString("computed_plan_file", item);
-                bundle.putInt("index", -1);
-                activity.selectPlan(bundle);
-            }
-
-            @Override
-            public boolean onLongClick(View v) {
-                //v.setBackgroundColor(Color.LTGRAY);
-                listPosition = getLayoutPosition();
-                menu.findItem(R.id.delete_plan).setVisible(true);
-                return true;
             }
         }
     }

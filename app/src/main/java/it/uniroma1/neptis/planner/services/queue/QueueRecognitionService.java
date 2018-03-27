@@ -39,6 +39,9 @@ import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.TrackingActivity;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.DenseInstance;
@@ -201,21 +204,12 @@ public class QueueRecognitionService extends IntentService {
                             Log.d("QUEUE","start report");
                             long queueTime = System.currentTimeMillis() - serviceStartTime;
                             final int minutes = (int)((queueTime / 1000)/60);
+                            JSONAsyncTask task = new ReportAsyncTask(getApplicationContext());
                             user.getIdToken(true)
-                                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                                        public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                            if (task.isSuccessful()) {
-                                                String idToken = task.getResult().getToken();
-                                                new ReportAsyncTask(getApplicationContext()).execute("queue",
-                                                        "museum",
-                                                        attractionId,
-                                                        String.valueOf(minutes),
-                                                        idToken);
-                                            } else {
-                                                // Handle error -> task.getException();
-                                            }
-                                        }
-                                    });
+                                    .addOnCompleteListener(new FirebaseOnCompleteListener(task, "queue",
+                                            "museum",
+                                            attractionId,
+                                            String.valueOf(minutes)));
 
                             sensorManager.unregisterListener(sensorLstr);
                         }

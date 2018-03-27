@@ -5,13 +5,14 @@
 
 package it.uniroma1.neptis.planner.plans;
 
-import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,12 +37,16 @@ import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.asynctasks.DownloadImageAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
+import it.uniroma1.neptis.planner.services.tracking.MuseumVisitService;
 
 public class SelectedPlanFragment extends Fragment implements View.OnClickListener{
 
@@ -64,6 +69,15 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
 
     protected MainInterface activity;
 
+    private int visitTime = 0;
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("visitTime")) {
+                visitTime = intent.getIntExtra("visitTime",0);
+            }
+        }
+    };
     public SelectedPlanFragment() {}
 
     @Override
@@ -99,6 +113,7 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             adapter = new MuseumAttractionArrayAdapter(getContext(), R.layout.plans_item_new, plan.getAttractions());*/
 
         mAdapter = new AttractionRecyclerAdapter(plan.getAttractions(), plan.getType());
+        Log.d("attraction_url", plan.getAttractions().get(0).getImageURL());
         recyclerView.setAdapter(mAdapter);
 
         currentLinearLayout = view.findViewById(R.id.current_plan_ll);
@@ -112,11 +127,14 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(getContext())
+                .registerReceiver(receiver, new IntentFilter("visitTime"));
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
     }
 
     private Plan parsePlan(String planString) {
@@ -134,10 +152,14 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                     JSONObject attraction = route.getJSONObject(i);
                     String attrName = attraction.getString("name");
                     String id = attraction.getString("id");
+                    String description = attraction.getString("description");
                     String lat = attraction.getJSONObject("coordinates").getString("latitude");
                     String lng = attraction.getJSONObject("coordinates").getString("longitude");
+                    double radius = attraction.getDouble("radius");
                     int time = attraction.getInt("time");
-                    CityAttraction a = new CityAttraction(id, attrName, "", (byte)50, time, "", lat, lng, 10.0);
+                    byte attractionRating = (byte)attraction.getInt("rating");
+                    String url = attraction.getString("picture");
+                    CityAttraction a = new CityAttraction(id, attrName, description, attractionRating, time, url, lat, lng, radius);
                     plan.addAttraction(a);
                 }
                 attractions = plan.getAttractions();
@@ -149,10 +171,12 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                     JSONObject att = attractions.getJSONObject(j);
                     String attractionName = att.getString("name");
                     String attractionId = att.getString("id");
+                    String description = att.getString("description");
                     String room = att.getString("room");
                     byte attractionRating = (byte)att.getInt("rating");
                     String url = att.getString("picture");
-                    MuseumAttraction at = new MuseumAttraction(attractionId,attractionName, "", attractionRating, 2, url, room);
+                    int time = att.getInt("time");
+                    MuseumAttraction at = new MuseumAttraction(attractionId,attractionName, description, attractionRating, time, url, room);
                     plan.addAttraction(at);
                 }
                 return plan;
@@ -306,11 +330,14 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                 this.visitLabel = v.findViewById(R.id.visit_label);
                 this.start = v.findViewById(R.id.museum_attraction_begin_timer);
                 this.stop = v.findViewById(R.id.museum_attraction_end_timer);
+                this.stop.setEnabled(false);
                 if(category.equals("city")) {
                     this.start.setVisibility(View.GONE);
                     this.stop.setVisibility(View.GONE);
                     this.visitLabel.setVisibility(View.GONE);
                 }
+                this.start.setOnClickListener(this);
+                this.stop.setOnClickListener(this);
                 this.rate = v.findViewById(R.id.museum_attraction_rate);
                 this.rate.setOnClickListener(this);
             }
@@ -325,7 +352,24 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
 
             @Override
             public void onClick(View v) {
+                Intent intent;
                 switch(v.getId()) {
+                    case R.id.museum_attraction_begin_timer:
+                        intent = new Intent(getContext(), MuseumVisitService.class);
+                        intent.putExtra("attractionName", curr.getName());
+                        //intent.putExtra("attractionIndex", curr.)
+                        getActivity().startService(intent);
+                        this.start.setEnabled(false);
+                        this.stop.setEnabled(true);
+                        break;
+                    case R.id.museum_attraction_end_timer:
+                        intent = new Intent(getContext(), MuseumVisitService.class);
+                        getActivity().stopService(intent);
+                        JSONAsyncTask task = new ReportAsyncTask(getContext());
+                        activity.getUser().getIdToken(true)
+                                .addOnCompleteListener(new FirebaseOnCompleteListener(task, "visit", "museum", curr.getId(), String.valueOf(visitTime)));
+                        this.stop.setEnabled(false);
+                        break;
                     case R.id.museum_attraction_rate:
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("attraction",curr);

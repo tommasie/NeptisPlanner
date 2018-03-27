@@ -56,7 +56,6 @@ public class ComputePlanAsyncTask extends JSONAsyncTask {
         int code;
         String charset = "UTF-8";
         String urlString = params[0];
-        String token = params[1];
 
         try {
             URL url = new URL(urlString);

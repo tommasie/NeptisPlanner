@@ -24,9 +24,11 @@ import com.google.firebase.auth.GetTokenResult;
 
 import it.uniroma1.neptis.planner.R;
 import it.uniroma1.neptis.planner.asynctasks.DownloadImageAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 
 public class RateAttractionFragment extends Fragment implements View.OnClickListener{
 
@@ -91,17 +93,9 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.attraction_rating_button) {
+            JSONAsyncTask task = new RatingAsyncTask(getContext());
             activity.getUser().getIdToken(true)
-                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                        public void onComplete(@NonNull Task<GetTokenResult> task) {
-                            if (task.isSuccessful()) {
-                                String idToken = task.getResult().getToken();
-                                new RatingAsyncTask(getContext()).execute("rating",type, attraction.getId(), String.valueOf((int)ratingBar.getRating()),idToken);
-                            } else {
-                                // Handle error -> task.getException();
-                            }
-                        }
-                    });
+                    .addOnCompleteListener(new FirebaseOnCompleteListener(task, "rating",type, attraction.getId(), String.valueOf((int)ratingBar.getRating())));
         }
     }
 

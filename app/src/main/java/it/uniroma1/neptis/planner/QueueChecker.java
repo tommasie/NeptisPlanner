@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import it.uniroma1.neptis.planner.services.queue.QueueRecognitionService;
-import it.uniroma1.neptis.planner.services.queue.ReportAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 
 public class QueueChecker extends AppCompatActivity implements View.OnClickListener{
 
