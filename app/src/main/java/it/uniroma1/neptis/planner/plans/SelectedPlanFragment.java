@@ -20,19 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
@@ -43,33 +32,27 @@ import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
-import it.uniroma1.neptis.planner.model.city.CityAttraction;
-import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
-import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 import it.uniroma1.neptis.planner.services.tracking.MuseumVisitService;
+import it.uniroma1.neptis.planner.util.LocalStorage;
 
-public class SelectedPlanFragment extends Fragment implements View.OnClickListener{
+public abstract class SelectedPlanFragment extends Fragment implements View.OnClickListener{
 
     private static final String TAG = SelectedPlanFragment.class.getName();
 
     protected TextView title;
-    private TextView totalDuration;
+    protected TextView totalDuration;
     protected RecyclerView recyclerView;
     protected RecyclerView.Adapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected LinearLayout currentLinearLayout;
-    protected TextView current;
     protected Button startButton;
     protected String planFileName;
 
     protected String planString;
     protected Plan plan;
 
-    private ArrayList<Attraction> attractions;
-
     protected MainInterface activity;
 
-    private int visitTime = 0;
+    protected int visitTime = 0;
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -78,15 +61,15 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             }
         }
     };
+
     public SelectedPlanFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         planFileName = getArguments().getString("computed_plan_file");
-        planString = readFile(planFileName);
-        plan = parsePlan(planString);
+        planString = LocalStorage.readFile(getContext(), planFileName);
+        plan = Plan.parse(planString);
     }
 
     @Override
@@ -104,25 +87,15 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
         int time = 0;
         for(Attraction a : plan.getAttractions())
             time += a.getTime();
-        totalDuration.setText("Durata: " + time + "m");
+        totalDuration.setText(getString(R.string.attraction_minutes, time));
         recyclerView = view.findViewById(R.id.recycler_view_nas);
+        setAdapter();
 
-        /*if(plan.getType().equals("city"))
-            adapter = new AttractionArrayAdapter(getContext(), R.layout.plans_list_item, plan.getAttractions());
-        else
-            adapter = new MuseumAttractionArrayAdapter(getContext(), R.layout.plans_item_new, plan.getAttractions());*/
-
-        mAdapter = new AttractionRecyclerAdapter(plan.getAttractions(), plan.getType());
-        Log.d("attraction_url", plan.getAttractions().get(0).getImageURL());
-        recyclerView.setAdapter(mAdapter);
-
-        currentLinearLayout = view.findViewById(R.id.current_plan_ll);
-        current = view.findViewById(R.id.current_plan_current_attraction);
         startButton = view.findViewById(R.id.tour_start);
         startButton.setOnClickListener(this);
-        if(plan.getType().equals("museum"))
-            startButton.setVisibility(View.GONE);
     }
+
+    protected abstract void setAdapter();
 
     @Override
     public void onResume() {
@@ -137,57 +110,6 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
     }
 
-    private Plan parsePlan(String planString) {
-        //Plan plan = null;
-        JSONObject obj;
-        try {
-            obj = new JSONObject(planString);
-            Log.d("object string", obj.toString());
-            String name = obj.getString("name");
-            String type = obj.getString("type");
-            Plan plan = new Plan(name, type);
-            if(type.equals("city")) {
-                JSONArray route = obj.getJSONArray("route");
-                for (int i = 0; i < route.length(); i++) {
-                    JSONObject attraction = route.getJSONObject(i);
-                    String attrName = attraction.getString("name");
-                    String id = attraction.getString("id");
-                    String description = attraction.getString("description");
-                    String lat = attraction.getJSONObject("coordinates").getString("latitude");
-                    String lng = attraction.getJSONObject("coordinates").getString("longitude");
-                    double radius = attraction.getDouble("radius");
-                    int time = attraction.getInt("time");
-                    byte attractionRating = (byte)attraction.getInt("rating");
-                    String url = attraction.getString("picture");
-                    CityAttraction a = new CityAttraction(id, attrName, description, attractionRating, time, url, lat, lng, radius);
-                    plan.addAttraction(a);
-                }
-                attractions = plan.getAttractions();
-                return plan;
-            } else if(type.equals("museum")) {
-                //startButton.setVisibility(View.GONE);
-                JSONArray attractions = obj.getJSONArray("route");
-                for(int j = 0; j < attractions.length(); j++) {
-                    JSONObject att = attractions.getJSONObject(j);
-                    String attractionName = att.getString("name");
-                    String attractionId = att.getString("id");
-                    String description = att.getString("description");
-                    String room = att.getString("room");
-                    byte attractionRating = (byte)att.getInt("rating");
-                    String url = att.getString("picture");
-                    int time = att.getInt("time");
-                    MuseumAttraction at = new MuseumAttraction(attractionId,attractionName, description, attractionRating, time, url, room);
-                    plan.addAttraction(at);
-                }
-                return plan;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return null;
-    }
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.tour_start) {
@@ -196,42 +118,11 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             queueService.putExtra("attractions", plan.getAttractions());
             queueService.putExtra("index",index);
             getActivity().startService(queueService);*/
-            switch (plan.getType()) {
-                case "city":
-                    Intent geofencingService = new Intent(getContext(), GeofencingService.class);
-                    Bundle serviceBundle = new Bundle();
-                    serviceBundle.putSerializable("attractions", plan.getAttractions());
-                    serviceBundle.putString("current_plan", planFileName);
-                    serviceBundle.putInt("index",0);
-                    geofencingService.putExtras(serviceBundle);
-                    CityAttraction attraction = (CityAttraction) plan.getAttractions().get(0);
-                    //initAlertDialog(attraction.getLatitude(), attraction.getLongitude());
-                    //AlertDialog dialog = builder.create();
-                    //dialog.show();
-                    getActivity().startService(geofencingService);
-                    Bundle fragmentBundle = new Bundle();
-                    fragmentBundle.putString("computed_plan_file", planFileName);
-                    fragmentBundle.putInt("index",0);
-                    activity.setCurrentPlan(fragmentBundle);
-                    break;
-                case "museum":
-                    /*int permissionCheck = ContextCompat.checkSelfPermission(getContext(),
-                            Manifest.permission.ACCESS_WIFI_STATE);
-                    if(permissionCheck != PackageManager.PERMISSION_GRANTED)
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_WIFI_STATE},2);
-                    else {
-                        Intent findService = new Intent(getContext(), FINDService.class);
-                        findService.putExtra("museum_name", plan.getName());
-                        findService.putExtra("attractions", plan.getAttractions());
-                        findService.putExtra("user","");
-                        findService.putExtra("current_plan", planFileName);
-                        findService.putExtra("index",0);
-                        getActivity().startService(findService);
-                    }*/
-                    break;
-            }
+            startTour();
         }
     }
+
+    protected abstract void startTour();
 
     @Override
     public void onAttach(Context context) {
@@ -250,35 +141,7 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
         activity = null;
     }
 
-    private String readFile(String filename) {
-        FileInputStream fis = null;
-        try {
-            fis = getContext().openFileInput(filename);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        InputStreamReader isr = new InputStreamReader(fis);
-        BufferedReader bufferedReader = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return sb.toString();
-    }
-
-    public class AttractionRecyclerAdapter extends RecyclerView.Adapter<AttractionRecyclerAdapter.AttractionHolder> {
+    public abstract class AttractionRecyclerAdapter extends RecyclerView.Adapter<AttractionRecyclerAdapter.AttractionHolder> {
 
         private List<Attraction> mDataset;
         private String category;
@@ -287,16 +150,6 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             mDataset = attractions;
             Log.d("category",category);
             this.category = category;
-        }
-
-        @Override
-        public AttractionHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.plans_item_new, parent, false);
-            AttractionHolder vh;
-            vh = new AttractionHolder(v);
-            return vh;
         }
 
         @Override
@@ -310,18 +163,18 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
             return mDataset.size();
         }
 
-        public class AttractionHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        public abstract class AttractionHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
             private TextView attractionName;
-            private TextView attractionDescription;
+            protected TextView attractionDescription;
             private TextView attractionTime;
             private ImageView attractionImage;
             private Attraction curr;
-            private TextView visitLabel;
-            private Button start;
-            private Button stop;
-            private Button rate;
+            protected TextView visitLabel;
+            protected Button start;
+            protected Button stop;
+            protected Button rate;
 
-            public AttractionHolder(View v) {
+            protected AttractionHolder(View v) {
                 super(v);
                 this.attractionName = v.findViewById(R.id.plan_n);
                 this.attractionDescription = v.findViewById(R.id.museum_attraction_description);
@@ -331,24 +184,24 @@ public class SelectedPlanFragment extends Fragment implements View.OnClickListen
                 this.start = v.findViewById(R.id.museum_attraction_begin_timer);
                 this.stop = v.findViewById(R.id.museum_attraction_end_timer);
                 this.stop.setEnabled(false);
-                if(category.equals("city")) {
-                    this.start.setVisibility(View.GONE);
-                    this.stop.setVisibility(View.GONE);
-                    this.visitLabel.setVisibility(View.GONE);
-                }
+                enableButtons();
                 this.start.setOnClickListener(this);
                 this.stop.setOnClickListener(this);
                 this.rate = v.findViewById(R.id.museum_attraction_rate);
                 this.rate.setOnClickListener(this);
             }
 
-            public void bind(Attraction attraction) {
+            protected abstract void enableButtons();
+
+            private void bind(Attraction attraction) {
                 curr = attraction;
                 this.attractionName.setText(attraction.getName());
-                this.attractionDescription.setText(attraction.getDescription());
-                this.attractionTime.setText(attraction.getTime() + "m");
+                setSpecificData(attraction);
+                this.attractionTime.setText(getString(R.string.attraction_minutes_shortened, attraction.getTime()));
                 new DownloadImageAsyncTask(this.attractionImage).execute(attraction.getImageURL());
             }
+
+            protected abstract void setSpecificData(Attraction attraction);
 
             @Override
             public void onClick(View v) {

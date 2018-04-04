@@ -23,7 +23,7 @@ public class Element implements Comparable<Element>{
     @JsonProperty("name")
     private String name;
 
-    public Element() {};
+    public Element() {}
 
     public Element(String name, String id) {
         this.id = id;

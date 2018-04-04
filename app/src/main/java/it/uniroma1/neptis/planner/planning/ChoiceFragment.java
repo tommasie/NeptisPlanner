@@ -66,19 +66,16 @@ public class ChoiceFragment extends Fragment implements View.OnClickListener{
         nextButton.setOnClickListener(this);
 
         tourSelect = view.findViewById(R.id.location_fragment_tour_radio_group);
-        tourSelect.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-                switch(checkedId) {
-                    case R.id.location_fragment_open_radio:
-                        nextButton.setEnabled(true);
-                        category = "city";
-                        break;
-                    case R.id.location_fragment_museum_radio:
-                        category = "museum";
-                        nextButton.setEnabled(true);
-                        break;
-                }
+        tourSelect.setOnCheckedChangeListener((group, checkedId) -> {
+            switch(checkedId) {
+                case R.id.location_fragment_open_radio:
+                    nextButton.setEnabled(true);
+                    category = "city";
+                    break;
+                case R.id.location_fragment_museum_radio:
+                    category = "museum";
+                    nextButton.setEnabled(true);
+                    break;
             }
         });
     }

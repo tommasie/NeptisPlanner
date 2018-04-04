@@ -25,10 +25,6 @@ import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
 
 public class MuseumVisitService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "it.uniroma1.neptis.planner.services.tracking.action.FOO";
-    private static final String ACTION_BAZ = "it.uniroma1.neptis.planner.services.tracking.action.BAZ";
 
     private IBinder mBinder = new VisitsBinder();
     private NotificationManager notificationManager;

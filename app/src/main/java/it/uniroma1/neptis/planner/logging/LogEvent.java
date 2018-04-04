@@ -8,9 +8,6 @@ package it.uniroma1.neptis.planner.logging;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class LogEvent {
     //The activity where the event was triggered
     String activity;

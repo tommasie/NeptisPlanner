@@ -18,16 +18,12 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,8 +43,6 @@ import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-
-import static android.util.Log.d;
 
 public class QueueRecognitionService extends IntentService {
 
@@ -106,17 +100,15 @@ public class QueueRecognitionService extends IntentService {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");
-        wakeLock.acquire();
+        wakeLock.acquire(60*60*1000L /*60 minutes*/);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         pedometer = null;
-        if(Build.VERSION.SDK_INT >= 19) {
-            pedometer = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-            if (pedometer != null)
-                Log.i(TAG, "pedometer available, using this sensor");
-            steps = 0.0F;
-        }
+        pedometer = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if (pedometer != null)
+            Log.i(TAG, "pedometer available, using this sensor");
+        steps = 0.0F;
         xList = new ArrayList<>();
         yList = new ArrayList<>();
         zList = new ArrayList<>();
@@ -190,9 +182,7 @@ public class QueueRecognitionService extends IntentService {
                     neural_class = perceptron.classifyInstance(instance);
                     i.putExtra("neural", neural_class);
                     boolean walking;
-                    if (neural_class == 1.0)
-                        walking = false;
-                    else walking = true;
+                    walking = !(neural_class == 1.0);
                     System.out.println(walking);
                     queueRecognition.add(walking);
                     if(queueRecognition.size() == 5) {
@@ -304,16 +294,12 @@ public class QueueRecognitionService extends IntentService {
                 double z = event.values[2] - gravity[2];
 
                 receiveAccelerometerData(x,y,z);
-
-                return;
             }
             else if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
                 Log.i(TAG,"Step counted");
                 //TODO: compute n of steps in a time frame to detect a walk
                     receiveStepCounterData(event.values[0]);
-                return;
             }
-            else return;
         }
 
         @Override

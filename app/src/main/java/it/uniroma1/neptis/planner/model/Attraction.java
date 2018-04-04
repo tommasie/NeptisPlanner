@@ -5,7 +5,6 @@
 
 package it.uniroma1.neptis.planner.model;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,13 +19,13 @@ public class Attraction implements Serializable {
     private static final String TAG = Attraction.class.getName();
 
     @JsonProperty("id")
-    protected String id;
+    private String id;
     @JsonProperty("name")
-    protected String name;
-    protected String description;
-    protected byte rating;
-    protected int time;
-    protected String imageURL;
+    private String name;
+    private String description;
+    private byte rating;
+    private int time;
+    private String imageURL;
 
     public Attraction() {}
 
@@ -108,8 +107,7 @@ public class Attraction implements Serializable {
 
         Attraction that = (Attraction) o;
 
-        if (!id.equals(that.id)) return false;
-        return name.equals(that.name);
+        return id.equals(that.id) && name.equals(that.name);
 
     }
 

@@ -18,7 +18,6 @@ import android.widget.Filter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import it.uniroma1.neptis.planner.R;
@@ -26,8 +25,8 @@ import it.uniroma1.neptis.planner.model.Attraction;
 
 public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
 
-    protected List<Attraction> attractions;
-    protected List<Attraction> attractionsAll;
+    private List<Attraction> attractions;
+    private List<Attraction> attractionsAll;
     private List<Attraction> suggestions;
 
     public AttractionArrayAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Attraction> objects) {
@@ -64,8 +63,7 @@ public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
     private Filter nameFilter = new Filter() {
         @Override
         public String convertResultToString(Object resultValue) {
-            String str = ((Attraction)(resultValue)).getName();
-            return str;
+            return ((Attraction)(resultValue)).getName();
         }
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {

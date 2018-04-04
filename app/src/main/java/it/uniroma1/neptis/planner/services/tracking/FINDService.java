@@ -80,7 +80,7 @@ public class FINDService extends Service {
         super.onCreate();
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"Find");
-        wakeLock.acquire();
+        wakeLock.acquire(60*60*1000L /*10 minutes*/);
         wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,"FindWifiLock");
         wifiLock.acquire();
@@ -236,10 +236,11 @@ public class FINDService extends Service {
                 InputStream is = new BufferedInputStream(conn.getInputStream());
                 BufferedReader br = new BufferedReader(new InputStreamReader(is));
                 String s;
-                out = "";
+                StringBuilder outBuilder = new StringBuilder();
                 while((s=br.readLine()) != null) {
-                    out+=s;
+                    outBuilder.append(s);
                 }
+                out = outBuilder.toString();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -257,7 +258,6 @@ public class FINDService extends Service {
             super.onPostExecute(s);
             Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
             Log.d("FINDservice", s);
-            //TODO
         }
 
         private JSONObject readPropertiesFile() {

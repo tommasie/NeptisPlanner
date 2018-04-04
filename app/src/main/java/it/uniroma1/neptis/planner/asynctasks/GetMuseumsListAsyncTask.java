@@ -8,7 +8,6 @@ package it.uniroma1.neptis.planner.asynctasks;
 import android.support.v4.widget.SwipeRefreshLayout;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

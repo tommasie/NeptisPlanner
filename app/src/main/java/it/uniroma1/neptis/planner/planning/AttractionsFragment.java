@@ -9,6 +9,7 @@ package it.uniroma1.neptis.planner.planning;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -38,7 +39,6 @@ import it.uniroma1.neptis.planner.model.Request;
 public class AttractionsFragment extends Fragment implements View.OnClickListener{
 
     private List<Attraction> attractions;
-    private List<String> attractionsString;
     private Attraction selectedAttraction;
     private List<Attraction> include;
     private List<Attraction> exclude;
@@ -68,10 +68,6 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         attractions = Home.attractionsList;
-        attractionsString = new ArrayList<>();
-        for(Attraction a : attractions) {
-            attractionsString.add(a.getName());
-        }
 
         request = (Request)getArguments().getSerializable("request");
         include = new ArrayList<>();
@@ -87,7 +83,7 @@ public class AttractionsFragment extends Fragment implements View.OnClickListene
 
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         autocomplete = view.findViewById(R.id.filter_attractions_autocomplete);
         ArrayAdapter<Attraction> adapter = new AttractionArrayAdapter(getContext(),android.R.layout.simple_dropdown_item_1line, attractions);

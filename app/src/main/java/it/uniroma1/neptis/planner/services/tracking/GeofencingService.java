@@ -88,7 +88,7 @@ public class GeofencingService extends IntentService {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "GeofencingWakeLock");
-        lock.acquire();
+        lock.acquire(60*60*1000L /*10 minutes*/);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -211,7 +211,6 @@ public class GeofencingService extends IntentService {
         currentLng = location.getLongitude();
         sendCoordinates("tour_update", currentLat, currentLng);
         double distance = getDistance();
-        //TODO set diameter of the attraction
         if (distance <= destinationRadius) {
             if (!fenceEntered) {
                 fenceEntered = true;

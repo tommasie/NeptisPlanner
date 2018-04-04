@@ -44,13 +44,13 @@
                 android:layout_gravity="center|start"
                 android:textStyle="bold"
                 android:textAllCaps="true"
-                android:text="Prossima attrazione"/>
+                android:text="@string/next_attr"/>
             <TextView
                 android:id="@+id/current_plan_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|start"
-                android:text="Nessun percorso corrente"/>
+                android:text="@string/no_current_tour"/>
         </LinearLayout>
         <Button
             android:id="@+id/current_plan_stop_button"
@@ -59,7 +59,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
-            android:text="Interrompi"
+            android:text="@string/stop"
             android:drawableStart="@drawable/ic_stop_black"
             android:background="@drawable/button_stop_tour"/>
     </LinearLayout>

@@ -10,20 +10,14 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -63,7 +57,6 @@ import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
-import it.uniroma1.neptis.planner.services.tracking.FINDService;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
 public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
@@ -145,14 +138,11 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
         mapView.getMapAsync(this);
         attractionName = view.findViewById(R.id.current_plan_name);
         tourButton = view.findViewById(R.id.current_plan_stop_button);
-        tourButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("FAB", "stop tour");
-                getActivity().stopService(new Intent(getContext(),GeofencingService.class));
-                nextMarker.remove();
-                activity.mainMenu();
-            }
+        tourButton.setOnClickListener(v -> {
+            Log.d("FAB", "stop tour");
+            getActivity().stopService(new Intent(getContext(),GeofencingService.class));
+            nextMarker.remove();
+            activity.mainMenu();
         });
     }
 

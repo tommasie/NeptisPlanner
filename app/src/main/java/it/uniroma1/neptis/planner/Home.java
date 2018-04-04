@@ -58,6 +58,7 @@ import java.util.Map;
 import it.uniroma1.neptis.planner.asynctasks.GetFirebaseProfilePictureAsyncTask;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
+import it.uniroma1.neptis.planner.model.Plan;
 import it.uniroma1.neptis.planner.model.Request;
 import it.uniroma1.neptis.planner.planning.AttractionsFragment;
 import it.uniroma1.neptis.planner.planning.ChoiceFragment;
@@ -65,12 +66,14 @@ import it.uniroma1.neptis.planner.planning.ChooseMuseumFragment;
 import it.uniroma1.neptis.planner.planning.VisitsFragment;
 import it.uniroma1.neptis.planner.plans.CurrentPlanFragment;
 import it.uniroma1.neptis.planner.plans.PlansListFragment;
-import it.uniroma1.neptis.planner.plans.SelectedPlanFragment;
+import it.uniroma1.neptis.planner.plans.SelectedCityPlanFragment;
+import it.uniroma1.neptis.planner.plans.SelectedMuseumPlanFragment;
 import it.uniroma1.neptis.planner.rating.CityAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.MuseumAttractionTimeFragment;
 import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.survey.SurveyFragment;
 import it.uniroma1.neptis.planner.util.ConfigReader;
+import it.uniroma1.neptis.planner.util.LocalStorage;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -379,12 +382,10 @@ public class Home extends AppCompatActivity
             case R.id.nav_exit:
                 AuthUI.getInstance()
                         .signOut(this)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            public void onComplete(@NonNull Task<Void> task) {
-                                // user is now signed out
-                                startActivity(new Intent(Home.this, LoginActivity.class));
-                                finish();
-                            }
+                        .addOnCompleteListener(task -> {
+                            // user is now signed out
+                            startActivity(new Intent(Home.this, LoginActivity.class));
+                            finish();
                         });
         }
 
@@ -466,7 +467,13 @@ public class Home extends AppCompatActivity
     @Override
     public void selectPlan(Bundle bundle) {
         transaction = fragmentManager.beginTransaction();
-        fragment = new SelectedPlanFragment();
+        String planFileName = bundle.getString("computed_plan_file");
+        String planString = LocalStorage.readFile(getApplicationContext(), planFileName);
+        Plan p = Plan.parse(planString);
+        if(p.getType().equals("city"))
+            fragment = new SelectedCityPlanFragment();
+        else
+            fragment = new SelectedMuseumPlanFragment();
 //        fragment = new CurrentPlanFragment();
         fragment.setArguments(bundle);
         transaction.replace(R.id.content_home, fragment);

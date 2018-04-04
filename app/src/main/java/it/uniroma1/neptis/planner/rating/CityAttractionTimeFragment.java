@@ -77,17 +77,9 @@ public class CityAttractionTimeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.attr_rec);
         adapter = new AttractionRecyclerAdapter(Home.attractionsList);
         recyclerView.setAdapter(adapter);
+        JSONAsyncTask task = new GetAttractionsAsyncTask();
         activity.getUser().getIdToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            String idToken = task.getResult().getToken();
-                            new GetAttractionsAsyncTask().execute(attractionURL, idToken);
-                        } else {
-                            // Handle error -> task.getException();
-                        }
-                    }
-                });
+                .addOnCompleteListener(new FirebaseOnCompleteListener(task,attractionURL));
     }
 
     @Override
