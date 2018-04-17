@@ -56,7 +56,6 @@ public class GetAttractionsListAsyncTask extends JSONAsyncTask {
             code = urlConnection.getResponseCode();
             if (code == 200) {
                 Home.attractionsList = mapper.readValue(in, mapper.getTypeFactory().constructCollectionType(List.class, Attraction.class));
-                Log.d("attractions", Home.attractionsList.toString());
                 return 200;
             } else return code;
         } catch (IOException e) {

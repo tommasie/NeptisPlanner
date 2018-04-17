@@ -7,14 +7,17 @@ package it.uniroma1.neptis.planner.services.tracking;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -24,12 +27,13 @@ import java.util.TimerTask;
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
 
+import static it.uniroma1.neptis.planner.util.NotificationChannelManagement.initChannels;
+
 public class MuseumVisitService extends IntentService {
 
     private IBinder mBinder = new VisitsBinder();
     private NotificationManager notificationManager;
     private static final int MAIN_NOTIFICATION_ID = 123;
-    private static final int UPDATE_NOTIFICATION_ID = 456;
 
     private NotificationCompat.Builder builder;
     private Notification notification;
@@ -69,12 +73,14 @@ public class MuseumVisitService extends IntentService {
         return mBinder;
     }
 
+
     public void launchMainNotification() {
         Intent i = new Intent(this, Home.class);
         //i.putExtra("computed_plan_file", currentPlan);
         //i.putExtra("index", index);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Visita in corso: " + attractionName)
                 .setContentText(attractionName)
@@ -85,11 +91,11 @@ public class MuseumVisitService extends IntentService {
     }
 
     public void launchUpdateNotification(String message) {
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this,"default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Visita in corso: " + attractionName)
-                .setContentText(message)
-                .setAutoCancel(true);
+                .setContentText(message);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
         notificationManager.notify(MAIN_NOTIFICATION_ID, notification);
@@ -100,7 +106,6 @@ public class MuseumVisitService extends IntentService {
     }
 
     private void sendTime(String action, int elapsed) {
-        Log.d("sender", "Broadcasting message");
         Intent intent = new Intent(action);
         intent.putExtra("VisitTime", elapsed);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

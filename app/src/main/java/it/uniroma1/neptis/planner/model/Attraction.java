@@ -23,16 +23,28 @@ public class Attraction implements Serializable {
     @JsonProperty("name")
     private String name;
     private String description;
+    private String category;
     private byte rating;
     private int time;
     private String imageURL;
 
     public Attraction() {}
 
+    public Attraction(String id, String name, String description, String category, byte rating, int time, String url) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.rating = rating;
+        this.time = time;
+        this.imageURL = url;
+    }
+
     public Attraction(String id, String name, String description, byte rating, int time, String url) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.category = "categoria";
         this.rating = rating;
         this.time = time;
         this.imageURL = url;
@@ -82,6 +94,10 @@ public class Attraction implements Serializable {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getCategory() {
+        return this.category;
     }
 
     public byte getRating() {

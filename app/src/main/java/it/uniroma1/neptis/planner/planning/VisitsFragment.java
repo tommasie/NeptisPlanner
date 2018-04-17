@@ -78,7 +78,7 @@ public class VisitsFragment extends Fragment implements View.OnClickListener{
 
         numPicker = view.findViewById(R.id.numberPicker);
         numPicker.setMinValue(1);
-        numPicker.setMaxValue(Integer.MAX_VALUE);
+        numPicker.setMaxValue(1);
         numPicker.setValue(1);
 
         next = view.findViewById(R.id.visits_button_next);

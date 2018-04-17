@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -121,7 +120,7 @@ public class PlansListFragment extends Fragment {
             filesList.remove(listPosition);
             adapter.notifyItemRemoved(listPosition);
             adapter.notifyItemRangeChanged(listPosition, filesList.size());
-            Toast.makeText(getContext(), "Removed", Toast.LENGTH_SHORT).show();
+            activity.showSnackBar("Piano rimosso");
             menu.findItem(R.id.delete_plan).setVisible(false);
         }
         return true;

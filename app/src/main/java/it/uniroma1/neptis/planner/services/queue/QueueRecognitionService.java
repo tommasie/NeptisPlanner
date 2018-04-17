@@ -44,6 +44,8 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import static it.uniroma1.neptis.planner.util.NotificationChannelManagement.initChannels;
+
 public class QueueRecognitionService extends IntentService {
 
     private static final String TAG = "QueueRecognitionService";
@@ -241,7 +243,8 @@ public class QueueRecognitionService extends IntentService {
         Intent i = new Intent(this,TrackingActivity.class);
         i.putExtra("attraction_id",attractionId);
         PendingIntent pi = PendingIntent.getActivity(this,0,i,0);
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Neptis: queue detection")
                 .setContentText("")

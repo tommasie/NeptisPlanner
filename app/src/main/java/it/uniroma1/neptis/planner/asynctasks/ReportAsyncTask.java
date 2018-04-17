@@ -69,7 +69,6 @@ public class ReportAsyncTask extends JSONAsyncTask {
             printout.close();
             in = new BufferedInputStream(urlConnection.getInputStream());
             code = urlConnection.getResponseCode();
-            Log.d("code report",code+"");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,7 +80,7 @@ public class ReportAsyncTask extends JSONAsyncTask {
     @Override
     protected void onPostExecute(Integer result) {
         if (result== 201)
-            Toast.makeText(context, "Report successful!\nThank you!", Toast.LENGTH_LONG).show();
-        else Toast.makeText(context, result+" Error on reporting..", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "OK", Toast.LENGTH_SHORT).show();
+        else Toast.makeText(context, result+" Errore", Toast.LENGTH_SHORT).show();
     }
 }

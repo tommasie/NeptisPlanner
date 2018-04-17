@@ -44,7 +44,7 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
     protected RecyclerView recyclerView;
     protected RecyclerView.Adapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected Button startButton;
+    protected Button startButton, stopButton;
     protected String planFileName;
 
     protected String planString;
@@ -89,10 +89,16 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
             time += a.getTime();
         totalDuration.setText(getString(R.string.attraction_minutes, time));
         recyclerView = view.findViewById(R.id.recycler_view_nas);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
+        recyclerView.setDrawingCacheEnabled(true);
+        recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
         setAdapter();
 
         startButton = view.findViewById(R.id.tour_start);
         startButton.setOnClickListener(this);
+        this.stopButton = view.findViewById(R.id.tour_stop);
+        this.stopButton.setOnClickListener(this);
     }
 
     protected abstract void setAdapter();
@@ -112,17 +118,22 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.tour_start) {
-            Log.d(TAG, "click");
-            /*Intent queueService = new Intent(getContext(), QueueRecognitionService.class);
-            queueService.putExtra("attractions", plan.getAttractions());
-            queueService.putExtra("index",index);
-            getActivity().startService(queueService);*/
-            startTour();
+        switch(v.getId()) {
+            case R.id.tour_start:
+                /*Intent queueService = new Intent(getContext(), QueueRecognitionService.class);
+                queueService.putExtra("attractions", plan.getAttractions());
+                queueService.putExtra("index",index);
+                getActivity().startService(queueService);*/
+                startTour();
+                break;
+            case R.id.tour_stop:
+                stopTour();
+                break;
         }
     }
 
     protected abstract void startTour();
+    protected abstract void stopTour();
 
     @Override
     public void onAttach(Context context) {
@@ -141,20 +152,14 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
         activity = null;
     }
 
-    public abstract class AttractionRecyclerAdapter extends RecyclerView.Adapter<AttractionRecyclerAdapter.AttractionHolder> {
+    public abstract class AttractionRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private List<Attraction> mDataset;
+        protected List<Attraction> mDataset;
         private String category;
 
         public AttractionRecyclerAdapter(List<Attraction> attractions, String category) {
             mDataset = attractions;
-            Log.d("category",category);
             this.category = category;
-        }
-
-        @Override
-        public void onBindViewHolder(AttractionHolder holder, int position) {
-            holder.bind(mDataset.get(position));
         }
 
         // Return the size of your dataset (invoked by the layout manager)
@@ -168,7 +173,7 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
             protected TextView attractionDescription;
             private TextView attractionTime;
             private ImageView attractionImage;
-            private Attraction curr;
+            protected Attraction curr;
             protected TextView visitLabel;
             protected Button start;
             protected Button stop;
@@ -193,35 +198,22 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
 
             protected abstract void enableButtons();
 
-            private void bind(Attraction attraction) {
+            protected void bind(Attraction attraction) {
                 curr = attraction;
                 this.attractionName.setText(attraction.getName());
-                setSpecificData(attraction);
+                this.attractionDescription.setText(attraction.getDescription());
                 this.attractionTime.setText(getString(R.string.attraction_minutes_shortened, attraction.getTime()));
                 new DownloadImageAsyncTask(this.attractionImage).execute(attraction.getImageURL());
             }
 
-            protected abstract void setSpecificData(Attraction attraction);
-
             @Override
             public void onClick(View v) {
-                Intent intent;
                 switch(v.getId()) {
                     case R.id.museum_attraction_begin_timer:
-                        intent = new Intent(getContext(), MuseumVisitService.class);
-                        intent.putExtra("attractionName", curr.getName());
-                        //intent.putExtra("attractionIndex", curr.)
-                        getActivity().startService(intent);
-                        this.start.setEnabled(false);
-                        this.stop.setEnabled(true);
+                        startButtonClick();
                         break;
                     case R.id.museum_attraction_end_timer:
-                        intent = new Intent(getContext(), MuseumVisitService.class);
-                        getActivity().stopService(intent);
-                        JSONAsyncTask task = new ReportAsyncTask(getContext());
-                        activity.getUser().getIdToken(true)
-                                .addOnCompleteListener(new FirebaseOnCompleteListener(task, "visit", "museum", curr.getId(), String.valueOf(visitTime)));
-                        this.stop.setEnabled(false);
+                        stopButtonClick();
                         break;
                     case R.id.museum_attraction_rate:
                         Bundle bundle = new Bundle();
@@ -231,6 +223,9 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
                         break;
                 }
             }
+
+            protected abstract void startButtonClick();
+            protected abstract void stopButtonClick();
         }
 
     }

@@ -56,7 +56,6 @@ public class Plan {
         JSONObject obj;
         try {
             obj = new JSONObject(planString);
-            Log.d("object string", obj.toString());
             String name = obj.getString("name");
             String type = obj.getString("type");
             Plan plan = new Plan(name, type);

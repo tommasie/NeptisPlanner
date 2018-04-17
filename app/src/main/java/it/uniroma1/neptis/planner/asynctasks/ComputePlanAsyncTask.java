@@ -9,7 +9,6 @@ import android.content.Context;
 import android.location.Address;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -138,7 +137,6 @@ public class ComputePlanAsyncTask extends JSONAsyncTask {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Toast.makeText(context.get(), "Saved!", Toast.LENGTH_SHORT).show();
         return filename;
     }
 }

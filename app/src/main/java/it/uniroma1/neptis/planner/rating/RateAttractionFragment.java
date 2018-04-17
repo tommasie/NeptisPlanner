@@ -28,6 +28,7 @@ import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 public class RateAttractionFragment extends Fragment implements View.OnClickListener{
 
     private TextView attractionName;
+    private TextView attractionDescription;
     private ImageView attractionPicture;
     private RatingBar ratingBar;
     private Button button;
@@ -59,6 +60,8 @@ public class RateAttractionFragment extends Fragment implements View.OnClickList
         type = getArguments().getString("type");
         attractionName = view.findViewById(R.id.attraction_rating_name);
         attractionName.setText(attraction.getName());
+        attractionDescription = view.findViewById(R.id.attraction_rating_description);
+        attractionDescription.setText(attraction.getDescription());
         attractionPicture = view.findViewById(R.id.attraction_rating_image);
         //Rating bar can get the values {1.0, 2.0, 3.0, 4.0, 5.0} (floats)
         ratingBar = view.findViewById(R.id.attraction_rating_bar);

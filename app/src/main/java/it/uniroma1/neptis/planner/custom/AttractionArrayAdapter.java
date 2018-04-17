@@ -69,18 +69,15 @@ public class AttractionArrayAdapter extends ArrayAdapter<Attraction> {
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();
             if(constraint != null) {
-                Log.d("constraint",constraint.toString());
                 suggestions.clear();
                 for (Attraction attr : attractionsAll) {
                     if(attr.getName().toLowerCase().startsWith(constraint.toString().toLowerCase())){
                         suggestions.add(attr);
                     }
-                    Log.d("suggestions",suggestions.toString());
                 }
                 filterResults.values = suggestions;
                 filterResults.count = suggestions.size();
             } else {
-                Log.d("constraint null","constraint null");
             }
             return filterResults;
         }

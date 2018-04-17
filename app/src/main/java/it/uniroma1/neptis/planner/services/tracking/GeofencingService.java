@@ -19,7 +19,6 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -38,6 +37,8 @@ import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.model.city.CityAttraction;
+
+import static it.uniroma1.neptis.planner.util.NotificationChannelManagement.initChannels;
 
 public class GeofencingService extends IntentService {
 
@@ -71,6 +72,7 @@ public class GeofencingService extends IntentService {
     private NotificationCompat.Builder builder;
     private Notification notification;
 
+    Vibrator vibrator;
     private PowerManager.WakeLock lock;
 
     private FirebaseUser user;
@@ -96,6 +98,8 @@ public class GeofencingService extends IntentService {
 
         cb = new GeofenceLocationCallback();
         locationClient.requestLocationUpdates(locationRequest, cb, null);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     @Override
@@ -108,12 +112,10 @@ public class GeofencingService extends IntentService {
         currentPlan = intent.getStringExtra("current_plan");
         destinationId = intent.getStringExtra("id");
         destinationName = intent.getStringExtra("name");
-
+        launchMainNotification();
         destinationLat = Double.parseDouble(currentAttraction.getLatitude());
         destinationLng = Double.parseDouble(currentAttraction.getLongitude());
         destinationRadius = currentAttraction.getRadius();
-        Log.d("GeoFencing", "" + destinationLat);
-        Log.d("GeoFencing", "" + destinationLng);
 
         fenceEntered = false;
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -122,7 +124,6 @@ public class GeofencingService extends IntentService {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
         locationClient.removeLocationUpdates(cb);
         notificationManager.cancel(MAIN_NOTIFICATION_ID);
         lock.release();
@@ -149,18 +150,19 @@ public class GeofencingService extends IntentService {
         i.putExtra("computed_plan_file", currentPlan);
         i.putExtra("index", index);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Percorso corrente")
                 .setContentText("Prossima attrazione: " + attractions.get(index).getName())
                 .setContentIntent(pi);
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
         notificationManager.notify(MAIN_NOTIFICATION_ID, notification);
     }
 
     public void launchUpdateNotification(int index, String message) {
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle(attractions.get(index).getName())
                 .setContentText(message)
@@ -168,15 +170,16 @@ public class GeofencingService extends IntentService {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notification = builder.build();
         notificationManager.notify(UPDATE_NOTIFICATION_ID, notification);
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
         // Vibrate for 500 milliseconds
-        v.vibrate(500);
+        vibrator.vibrate(500);
     }
 
     public void launchEndNotification() {
         Intent i = new Intent(this, Home.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder = new NotificationCompat.Builder(this)
+        initChannels(getApplicationContext());
+        builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon((R.drawable.ic_main_notification))
                 .setContentTitle("Percorso corrente")
                 .setContentText("Fine")
@@ -188,7 +191,6 @@ public class GeofencingService extends IntentService {
     }
 
     private void sendCoordinates(String action, double latitude, double longitude) {
-        Log.d("sender", "Broadcasting message");
         Intent intent = new Intent(action);
         intent.putExtra("latitude", latitude);
         intent.putExtra("longitude", longitude);
@@ -200,9 +202,13 @@ public class GeofencingService extends IntentService {
     }
 
     private void sendNextAttraction(int index) {
-        Log.d("sender", "Broadcasting message");
         Intent intent = new Intent("next_attraction");
         intent.putExtra("index", index);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void sendTourEnd(int index) {
+        Intent intent = new Intent("end_tour");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
@@ -230,7 +236,6 @@ public class GeofencingService extends IntentService {
                 launchUpdateNotification(index, "La visita è durata " + minutes + " minuti");
                 index++;
                 if (index == attractions.size()) {
-                    Log.d(TAG, "stopped");
                     launchEndNotification();
                     stopSelf();
                     return;

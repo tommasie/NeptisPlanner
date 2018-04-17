@@ -63,6 +63,21 @@
         android:background="@drawable/button_basic"
         android:text="@string/start_tour_btn"
         android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/tour_stop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/tour_stop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/button_stop_museum_tour"
+        android:text="@string/stop"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -59,8 +59,7 @@ import it.uniroma1.neptis.planner.model.city.CityAttraction;
 import it.uniroma1.neptis.planner.model.museum.MuseumAttraction;
 import it.uniroma1.neptis.planner.services.tracking.GeofencingService;
 
-public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = CurrentPlanFragment.class.getName();
     protected TextView title;
@@ -100,6 +99,9 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
                         return;
                     updateMap(index);
                     break;
+                case "end_tour":
+                    activity.popBackStack();
+                    break;
             }
         }
     };
@@ -115,7 +117,6 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
         }
 
         planFileName = getArguments().getString("computed_plan_file");
-        Log.d(TAG, planFileName);
         planString = readFile(planFileName);
         index = getArguments().getInt("index");
         plan = parsePlan(planString);
@@ -139,7 +140,6 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
         attractionName = view.findViewById(R.id.current_plan_name);
         tourButton = view.findViewById(R.id.current_plan_stop_button);
         tourButton.setOnClickListener(v -> {
-            Log.d("FAB", "stop tour");
             getActivity().stopService(new Intent(getContext(),GeofencingService.class));
             nextMarker.remove();
             activity.mainMenu();
@@ -190,44 +190,22 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
             String name = obj.getString("name");
             String type = obj.getString("type");
             Plan plan = new Plan(name, type);
-            if (type.equals("city")) {
-                JSONArray route = obj.getJSONArray("route");
-                for (int i = 0; i < route.length(); i++) {
-                    JSONObject attraction = route.getJSONObject(i);
-                    String attrName = attraction.getString("name");
-                    //String description =
-                    String id = attraction.getString("id");
-                    String lat = attraction.getJSONObject("coordinates").getString("latitude");
-                    String lng = attraction.getJSONObject("coordinates").getString("longitude");
-                    CityAttraction a = new CityAttraction(id, attrName, "", (byte) 50, 2,"", lat, lng, 10.0);
-                    plan.addAttraction(a);
-                }
-                attractions = plan.getAttractions();
-                return plan;
-            } else if (type.equals("museum")) {
-                JSONArray route = obj.getJSONArray("route");
-                for (int i = 0; i < route.length(); i++) {
-                    //Lista delle stanze
-                    JSONObject area = route.getJSONObject(i);
-                    String areaName = area.getString("name");
-                    String areaId = area.getString("id");
-                    //Lista delle attrazioni
-                    JSONArray attractions = area.getJSONArray("attractions");
-                    for (int j = 0; j < attractions.length(); j++) {
-                        JSONObject att = attractions.getJSONObject(j);
-                        String attractionName = att.getString("name");
-                        String attractionId = att.getString("id");
-                        byte attractionRating = (byte) att.getInt("rating");
-                        MuseumAttraction at = new MuseumAttraction(attractionId, attractionName, "", attractionRating, 2, "", areaName);
-                        plan.addAttraction(at);
-                    }
-                }
-                return plan;
+            JSONArray route = obj.getJSONArray("route");
+            for (int i = 0; i < route.length(); i++) {
+                JSONObject attraction = route.getJSONObject(i);
+                String attrName = attraction.getString("name");
+                String id = attraction.getString("id");
+                String lat = attraction.getJSONObject("coordinates").getString("latitude");
+                String lng = attraction.getJSONObject("coordinates").getString("longitude");
+                double radius = attraction.getDouble("radius");
+                CityAttraction a = new CityAttraction(id, attrName, "", (byte) 50, 2,"", lat, lng, radius);
+                plan.addAttraction(a);
             }
+            attractions = plan.getAttractions();
+            return plan;
         } catch (JSONException e) {
             return null;
         }
-        return null;
     }
 
 
@@ -262,7 +240,6 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap map) {
         this.map = map;
-        Log.d(TAG, "onMapReady");
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -298,20 +275,6 @@ public class CurrentPlanFragment extends Fragment implements OnMapReadyCallback,
         nextMarker = map.addMarker(new MarkerOptions().position(attractionCoord)
                 .title(cityAttraction.getName()));
         attractionName.setText(cityAttraction.getName());
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {

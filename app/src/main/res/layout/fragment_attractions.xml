@@ -46,14 +46,14 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:enabled="false"
         android:background="@drawable/button_basic"
+        android:enabled="false"
         android:text="@string/include"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/filter_attractions_include_label"
         app:layout_constraintEnd_toStartOf="@+id/filter_attractions_add_exclude"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filter_attractions_autocomplete" />
+        app:layout_constraintTop_toBottomOf="@+id/filter_attractions_autocomplete_cat" />
 
     <TextView
         android:id="@+id/filter_attractions_exclude_label"
@@ -76,20 +76,20 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:enabled="false"
         android:background="@drawable/button_basic"
+        android:enabled="false"
         android:text="@string/exclude"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/filter_attractions_include_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/filter_attractions_add_include"
-        app:layout_constraintTop_toBottomOf="@+id/filter_attractions_autocomplete" />
+        app:layout_constraintTop_toBottomOf="@+id/filter_attractions_autocomplete_cat" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/filter_attractions_exclude_recycler"
         android:layout_width="0dp"
         android:layout_height="97dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"
@@ -124,17 +124,32 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <AutoCompleteTextView
-        android:id="@+id/filter_attractions_autocomplete"
+    <it.uniroma1.neptis.planner.custom.InstantAutoComplete
+        android:id="@+id/filter_attractions_autocomplete_names"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:completionHint="Nome attrazione"
+        android:hint="Nome attrazione"
         android:drawableStart="@drawable/ic_search"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/filter_attractions_title"/>
+
+    <it.uniroma1.neptis.planner.custom.InstantAutoComplete
+        android:id="@+id/filter_attractions_autocomplete_cat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawableStart="@drawable/ic_search"
+        android:hint="Nome categoria"
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filter_attractions_autocomplete_names" />
 
 </android.support.constraint.ConstraintLayout>

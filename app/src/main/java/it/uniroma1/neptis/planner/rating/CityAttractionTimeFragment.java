@@ -7,7 +7,6 @@ package it.uniroma1.neptis.planner.rating;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -17,11 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,12 +31,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import it.uniroma1.neptis.planner.Home;
 import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
+import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
-import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
-import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 
 public class CityAttractionTimeFragment extends Fragment {
 
@@ -106,7 +100,6 @@ public class CityAttractionTimeFragment extends Fragment {
             InputStream in;
             int code;
             String urlString = params[0];
-            String token = params[1];
             // HTTP GET
             try {
 
@@ -150,7 +143,7 @@ public class CityAttractionTimeFragment extends Fragment {
             if (result == 200) {
                 adapter.notifyDataSetChanged();
             } else
-                Toast.makeText(getContext(), result + " There is an error", Toast.LENGTH_LONG).show();
+                activity.showSnackBar(" There is an error");
 
         }
     }

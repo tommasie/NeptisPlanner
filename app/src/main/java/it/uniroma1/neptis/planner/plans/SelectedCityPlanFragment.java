@@ -7,6 +7,7 @@ package it.uniroma1.neptis.planner.plans;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,11 @@ public class SelectedCityPlanFragment extends SelectedPlanFragment {
         activity.setCurrentPlan(fragmentBundle);
     }
 
+    @Override
+    protected void stopTour() {
+
+    }
+
     public class CityAttractionRecyclerAdapter extends SelectedPlanFragment.AttractionRecyclerAdapter {
 
         public CityAttractionRecyclerAdapter(List<Attraction> attractions) {
@@ -58,6 +64,12 @@ public class SelectedCityPlanFragment extends SelectedPlanFragment {
             CityAttractionHolder vh;
             vh = new CityAttractionHolder(v);
             return vh;
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            AttractionHolder attrHolder = (CityAttractionHolder)holder;
+            attrHolder.bind(mDataset.get(position));
         }
 
 
@@ -76,10 +88,14 @@ public class SelectedCityPlanFragment extends SelectedPlanFragment {
             }
 
             @Override
-            protected void setSpecificData(Attraction attraction) {
-                attractionDescription.setText(attraction.getDescription());
+            protected void startButtonClick() {
+
             }
 
+            @Override
+            protected void stopButtonClick() {
+
+            }
         }
 
     }

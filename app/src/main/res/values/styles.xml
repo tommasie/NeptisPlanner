@@ -30,6 +30,7 @@
     <style name="RatingBar" parent="AppTheme" >
         <item name="colorControlNormal">@color/lightGrey</item>
         <item name="colorControlActivated">@color/starYellow</item>
+        <item name="android:background">@drawable/basic_blue_background</item>
     </style>
 
 

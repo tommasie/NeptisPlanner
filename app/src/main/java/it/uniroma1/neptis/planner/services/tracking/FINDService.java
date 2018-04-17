@@ -90,7 +90,6 @@ public class FINDService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("FINDService","started");
         museum = intent.getStringExtra("museum_name");
         attractions = (ArrayList<MuseumAttraction>) intent.getSerializableExtra("attractions");
         user = intent.getStringExtra("user");
@@ -124,7 +123,6 @@ public class FINDService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("FINDService","stopped");
         unregisterReceiver(wifiReceiver);
         stopForeground(true);
         notificationManager.cancel(NOTIFICATION_ID);
@@ -155,7 +153,6 @@ public class FINDService extends Service {
         public void onReceive(Context context, Intent intent) {
             List<ScanResult> scanResults = wifiManager.getScanResults();
             for(ScanResult r : scanResults)
-                Log.d("scan", r.toString());
             new TrackTask(scanResults).execute(user, museum, currentAttraction.getName());
         }
     }
@@ -257,7 +254,6 @@ public class FINDService extends Service {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
-            Log.d("FINDservice", s);
         }
 
         private JSONObject readPropertiesFile() {

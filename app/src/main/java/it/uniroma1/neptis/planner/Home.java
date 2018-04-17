@@ -41,8 +41,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -79,7 +77,6 @@ public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         MainInterface {
 
-    private static final String TAG = Home.class.getName();
     private static final Logger logger = LoggerFactory.getLogger("logcat_logger");
     public static String apiURL;
 
@@ -171,10 +168,16 @@ public class Home extends AppCompatActivity
         locationRequest.setInterval(1000); // Update location every second
 
         //Mock Location for Bracciano
-        Location mock = new Location("test");
-        mock.setLatitude(42.1017979);
-        mock.setLongitude(12.176142199999958);
-        mock.setTime(System.currentTimeMillis());
+        Location bracciano = new Location("test");
+        bracciano.setLatitude(42.1017979);
+        bracciano.setLongitude(12.176142199999958);
+        bracciano.setTime(System.currentTimeMillis());
+
+        //Mock location for Roma
+        Location roma = new Location("test");
+        roma.setLatitude(41.891348);
+        roma.setLongitude(12.502954);
+        roma.setTime(System.currentTimeMillis());
 
         boolean checkFineLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
         boolean checkCoarseLocation = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
@@ -187,13 +190,14 @@ public class Home extends AppCompatActivity
             progressBar.setVisibility(View.VISIBLE);  //To show ProgressBar
             progressText.setText(R.string.loading_loc_data);
             progressLayout.setVisibility(View.VISIBLE);
-            if(BuildConfig.DEBUG) {
+            /*if(BuildConfig.DEBUG) {
+                logger.debug("DEBUG");
                 locationClient.setMockMode(true);
-                locationClient.setMockLocation(mock);
-                location = mock;
+                locationClient.setMockLocation(bracciano);
+                location = bracciano;
                 computeGeolocation(location);
             }
-            else {
+            else {*/
                 locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
                     @Override
                     public void onLocationResult(LocationResult locationResult) {
@@ -203,7 +207,7 @@ public class Home extends AppCompatActivity
                         computeGeolocation(location);
                     }
                 }, null);
-            }
+            //}
             /*locationClient.getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
@@ -256,8 +260,8 @@ public class Home extends AppCompatActivity
 
             //LocationCallback cb
             /*locationClient.setMockMode(true);
-            locationClient.setMockLocation(mock);
-            location = mock;
+            locationClient.setMockLocation(bracciano);
+            location = bracciano;
             computeGeolocation(location);*/
 
         }
@@ -500,6 +504,7 @@ public class Home extends AppCompatActivity
         transaction.replace(R.id.content_home, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+        getSupportActionBar().setTitle(getString(R.string.fragment_rating_title));
     }
 
     private void computeGeolocation(Location l) {
@@ -561,7 +566,6 @@ public class Home extends AppCompatActivity
 
     @Override
     public void showSnackBar(String msg) {
-        //snackbar.setText
         Snackbar.make(coordLayout, msg, Snackbar.LENGTH_SHORT).show();
     }
 

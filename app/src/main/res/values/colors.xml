@@ -7,11 +7,12 @@
     <color name="neptis_blue_d">#803F51B5</color>
     <color name="neptis_light">#2980B9</color>
     <color name="radius_fill">#50777777</color>
-
+    <color name="red">#F22C23</color>
     <color name="light_blue_button_enabled">#52AAFB</color>
     <color name="light_blue_button_disabled">#5052AAFB</color>
     <color name="starYellow">#ffc400</color>
     <color name="starYellowDisabled">#50ffc400</color>
     <color name="lightGrey">#bababa</color>
+    <color name="darkWhite">#eeeeee </color>
 
 </resources>
