@@ -6,7 +6,6 @@
 package it.uniroma1.neptis.planner.asynctasks;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -18,7 +17,6 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 import it.uniroma1.neptis.planner.util.ConfigReader;
 
 public class ReportAsyncTask extends JSONAsyncTask {

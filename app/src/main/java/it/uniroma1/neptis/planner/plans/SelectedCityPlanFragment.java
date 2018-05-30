@@ -51,6 +51,11 @@ public class SelectedCityPlanFragment extends SelectedPlanFragment {
 
     }
 
+    @Override
+    public void onRate(double value) {
+
+    }
+
     public class CityAttractionRecyclerAdapter extends SelectedPlanFragment.AttractionRecyclerAdapter {
 
         public CityAttractionRecyclerAdapter(List<Attraction> attractions) {

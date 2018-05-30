@@ -13,6 +13,7 @@ import android.widget.Button;
 
 import it.uniroma1.neptis.planner.services.tracking.FINDService;
 
+@Deprecated
 public class TrackingActivity extends AppCompatActivity implements View.OnClickListener{
 
     private Button tracking;

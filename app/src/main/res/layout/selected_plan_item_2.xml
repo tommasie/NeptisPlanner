@@ -11,8 +11,7 @@
     android:background="@drawable/plan_item_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:baselineAligned="false"
-    android:animateLayoutChanges="true">
+    android:baselineAligned="false">
 
     <ImageView
         android:id="@+id/museum_attraction_image"
@@ -92,7 +91,7 @@
     <Button
         android:id="@+id/museum_attraction_begin_timer"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
@@ -106,13 +105,13 @@
     <Button
         android:id="@+id/museum_attraction_end_timer"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/button_next"
-        android:text="@string/end"
         android:enabled="false"
+        android:text="@string/end"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/museum_attraction_rate"
         app:layout_constraintEnd_toEndOf="parent"
@@ -124,14 +123,15 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:background="@drawable/button_rate"
-        android:drawableStart="@drawable/ic_stars"
-        android:text="@string/rate_attr"
-        android:textColor="@android:color/white"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/button_attraction_info"
+        android:drawableStart="@drawable/ic_info"
+        android:paddingStart="20dp"
+        android:text="Dettagli"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/museum_attraction_image" />
 
 
 </android.support.constraint.ConstraintLayout>

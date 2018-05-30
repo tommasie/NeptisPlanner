@@ -26,6 +26,11 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="DialogButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/button_white</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
     <!-- Customize rating bar color -->
     <style name="RatingBar" parent="AppTheme" >
         <item name="colorControlNormal">@color/lightGrey</item>

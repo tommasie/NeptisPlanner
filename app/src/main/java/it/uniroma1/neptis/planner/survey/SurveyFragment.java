@@ -29,12 +29,13 @@ public class SurveyFragment extends Fragment {
 
     private MainInterface activity;
     private WebView webView;
-
+    private String url;
     public SurveyFragment() {}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        url = getArguments().getString("url");
         setHasOptionsMenu(true);
     }
 
@@ -53,7 +54,7 @@ public class SurveyFragment extends Fragment {
         if(Locale.getDefault().getLanguage().equals("it"))
             //TODO show the italian suvey
             ;
-        webView.loadUrl("https://docs.google.com/forms/u/0/d/e/1FAIpQLScngGutiZHLeSoX78iZrT6c546RBnIEEfJ5MGgA-7yeSjc0Pw/viewform?usp=sf_link");
+        webView.loadUrl(url);
 
     }
 

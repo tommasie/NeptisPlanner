@@ -12,9 +12,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,18 +24,19 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import it.uniroma1.neptis.planner.R;
-import it.uniroma1.neptis.planner.asynctasks.DownloadImageAsyncTask;
 import it.uniroma1.neptis.planner.asynctasks.JSONAsyncTask;
 import it.uniroma1.neptis.planner.asynctasks.ReportAsyncTask;
 import it.uniroma1.neptis.planner.firebase.FirebaseOnCompleteListener;
+import it.uniroma1.neptis.planner.rating.RateAttractionDialogFragment;
+import it.uniroma1.neptis.planner.R;
+import it.uniroma1.neptis.planner.asynctasks.DownloadImageAsyncTask;
 import it.uniroma1.neptis.planner.iface.MainInterface;
 import it.uniroma1.neptis.planner.model.Attraction;
 import it.uniroma1.neptis.planner.model.Plan;
-import it.uniroma1.neptis.planner.services.tracking.MuseumVisitService;
+import it.uniroma1.neptis.planner.rating.RateAttractionFragment;
 import it.uniroma1.neptis.planner.util.LocalStorage;
 
-public abstract class SelectedPlanFragment extends Fragment implements View.OnClickListener{
+public abstract class SelectedPlanFragment extends Fragment implements View.OnClickListener, RateAttractionDialogFragment.RatingListener{
 
     private static final String TAG = SelectedPlanFragment.class.getName();
 
@@ -152,6 +153,8 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
         activity = null;
     }
 
+
+
     public abstract class AttractionRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         protected List<Attraction> mDataset;
@@ -203,7 +206,7 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
                 this.attractionName.setText(attraction.getName());
                 this.attractionDescription.setText(attraction.getDescription());
                 this.attractionTime.setText(getString(R.string.attraction_minutes_shortened, attraction.getTime()));
-                new DownloadImageAsyncTask(this.attractionImage).execute(attraction.getImageURL());
+                new DownloadImageAsyncTask(this.attractionImage).execute(attraction.getImageURL() + "_thumb");
             }
 
             @Override
@@ -219,6 +222,11 @@ public abstract class SelectedPlanFragment extends Fragment implements View.OnCl
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("attraction",curr);
                         bundle.putString("type", category);
+                        /*FragmentManager fm = getFragmentManager();
+                        RateAttractionDialogFragment editNameDialogFragment = RateAttractionDialogFragment.newInstance("Some Title");
+                        // SETS the target fragment for use later when sending results
+                        editNameDialogFragment.setTargetFragment(SelectedPlanFragment.this, 300);
+                        editNameDialogFragment.show(fm, "fragment_edit_name");*/
                         activity.attractionDetail(bundle);
                         break;
                 }

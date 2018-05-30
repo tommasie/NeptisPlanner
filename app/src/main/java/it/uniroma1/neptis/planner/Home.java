@@ -41,6 +41,8 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -146,9 +148,6 @@ public class Home extends AppCompatActivity
         ImageView headerImg = header.findViewById(R.id.headerImageView);
         if(user.getPhotoUrl() != null)
             new GetFirebaseProfilePictureAsyncTask(headerImg).execute(user.getPhotoUrl().toString());
-        else {
-
-        }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -190,79 +189,16 @@ public class Home extends AppCompatActivity
             progressBar.setVisibility(View.VISIBLE);  //To show ProgressBar
             progressText.setText(R.string.loading_loc_data);
             progressLayout.setVisibility(View.VISIBLE);
-            /*if(BuildConfig.DEBUG) {
+            if(BuildConfig.DEBUG) {
                 logger.debug("DEBUG");
                 locationClient.setMockMode(true);
-                locationClient.setMockLocation(bracciano);
-                location = bracciano;
+                locationClient.setMockLocation(roma);
+                location = roma;
                 computeGeolocation(location);
             }
-            else {*/
-                locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                    @Override
-                    public void onLocationResult(LocationResult locationResult) {
-                        super.onLocationResult(locationResult);
-                        locationClient.removeLocationUpdates(this);
-                        location = locationResult.getLastLocation();
-                        computeGeolocation(location);
-                    }
-                }, null);
-            //}
-            /*locationClient.getLastLocation()
-                    .addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(@NonNull Location loc) {
-                            Log.d("onsuccesslistener", "success");
-                            location = loc;
-                            long currTime = System.currentTimeMillis();
-                            if(currTime <= location.getTime() + (10 * 60 * 1000)) {
-                                locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                                    @Override
-                                    public void onLocationResult(LocationResult locationResult) {
-                                        super.onLocationResult(locationResult);
-                                        location = locationResult.getLastLocation();
-                                        Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
-                                        try {
-                                            List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                            address = addresses.get(0);
-                                            Log.d("address", address.getLocality());
-                                            Log.d("address", address.getAddressLine(0));
-                                            progress.dismiss();
-                                            initFragment();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        locationClient.removeLocationUpdates(new LocationCallback());
-                                    }
-                                }, null);
-                            } else {
-                                Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
-                                try {
-                                    List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                    address = addresses.get(0);
-                                    Log.d("address", address.getLocality());
-                                    Log.d("address", address.getAddressLine(0));
-                                    progress.dismiss();
-                                    initFragment();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d("onfaillistener", "fail");
-                            e.printStackTrace();
-                        }
-                    });*/
-
-            //LocationCallback cb
-            /*locationClient.setMockMode(true);
-            locationClient.setMockLocation(bracciano);
-            location = bracciano;
-            computeGeolocation(location);*/
+            else {
+                getStartupLocation();
+            }
 
         }
     }
@@ -276,24 +212,7 @@ public class Home extends AppCompatActivity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            super.onLocationResult(locationResult);
-                            location = locationResult.getLastLocation();
-                            Geocoder g = new Geocoder(getApplicationContext(), Locale.ITALIAN);
-                            try {
-                                List<Address> addresses = g.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                address = addresses.get(0);
-                                Log.d("address", address.getLocality());
-                                Log.d("address", address.getAddressLine(0));
-                                initFragment();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            locationClient.removeLocationUpdates(new LocationCallback());
-                        }
-                    }, null);
+                    getStartupLocation();
 
                 } else {
                     finish();
@@ -354,31 +273,22 @@ public class Home extends AppCompatActivity
                 transaction.commit();
                 toolbar.setTitle("Piani salvati");
                 break;
-            case R.id.city_attractions_sensing:
-                transaction = fragmentManager.beginTransaction();
-                fragment = new CityAttractionTimeFragment();
-                bundle = new Bundle();
-                bundle.putString("city", address.getLocality());
-                bundle.putString("region", address.getAdminArea());
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.content_home, fragment);
-                transaction.commit();
-                toolbar.setTitle("Attrazioni");
-                break;
-            case R.id.museum_attractions_sensing:
-                transaction = fragmentManager.beginTransaction();
-                fragment = new MuseumAttractionTimeFragment();
-                bundle = new Bundle();
-                bundle.putString("city", address.getLocality());
-                bundle.putString("region", address.getAdminArea());
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.content_home, fragment);
-                transaction.commit();
-                toolbar.setTitle("Attrazioni");
-                break;
             case R.id.nav_survey:
+                bundle = new Bundle();
+                bundle.putString("url","https://docs.google.com/forms/d/108JOVaJksqZBZehPhp9OxXDYE4TtFu2aa8QmqN65nLA");
                 transaction = fragmentManager.beginTransaction();
                 fragment = new SurveyFragment();
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_home, fragment);
+                transaction.commit();
+                toolbar.setTitle("Questionario");
+                break;
+            case R.id.nav_survey_free:
+                bundle = new Bundle();
+                bundle.putString("url","https://docs.google.com/forms/d/1_yFzE775jfzeeWkInRJnoYnWlrkvnk88HMmUZqXaZ_U");
+                transaction = fragmentManager.beginTransaction();
+                fragment = new SurveyFragment();
+                fragment.setArguments(bundle);
                 transaction.replace(R.id.content_home, fragment);
                 transaction.commit();
                 toolbar.setTitle("Questionario");
@@ -395,6 +305,40 @@ public class Home extends AppCompatActivity
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getStartupLocation() {
+        locationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(@NonNull Location loc) {
+                        location = loc;
+                        long currTime = System.currentTimeMillis();
+                        //Request new location if last known location is > 5 mins
+                        if(currTime <= location.getTime() + (5 * 60 * 1000)) {
+                            locationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                                @Override
+                                public void onLocationResult(LocationResult locationResult) {
+                                    super.onLocationResult(locationResult);
+                                    locationClient.removeLocationUpdates(this);
+                                    location = locationResult.getLastLocation();
+                                    computeGeolocation(location);
+                                }
+                            }, null);
+                        } else {
+                            computeGeolocation(location);
+                        }
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("onfaillistener", "fail");
+                e.printStackTrace();
+            }
+        });
+
     }
 
     @Override

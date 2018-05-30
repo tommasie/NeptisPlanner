@@ -17,25 +17,15 @@
             android:icon="@drawable/ic_menu_plans"
             android:title="@string/drawer_plans" />
 
-        <item android:title="@string/drawer_rate">
-            <menu>
-                <group android:checkableBehavior="single">
-                    <item
-                        android:id="@+id/city_attractions_sensing"
-                        android:icon="@drawable/ic_menu_attraction"
-                        android:title="@string/drawer_city_attrs" />
-                    <item
-                        android:id="@+id/museum_attractions_sensing"
-                        android:icon="@drawable/ic_menu_attraction"
-                        android:title="@string/drawer_museum_attrs" />
-                </group>
-            </menu>
-        </item>
 
         <item android:title="Account">
             <menu>
                 <item
                     android:id="@+id/nav_survey"
+                    android:icon="@drawable/ic_menu_survey"
+                    android:title="@string/drawer_survey" />
+                <item
+                    android:id="@+id/nav_survey_free"
                     android:icon="@drawable/ic_menu_survey"
                     android:title="@string/drawer_survey" />
                 <item
